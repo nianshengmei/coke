@@ -17,18 +17,49 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+/**
+ * 包扫描工具
+ *
+ * @author warren
+ * @since 1.0.1
+ */
 @UtilityClass
 public class ScanUtil {
 
-    private Set<String> scannerPackagePaths = new HashSet<>();
+    /**
+     * 一共需要扫描哪些包路径
+     */
+    private final Set<String> scannerPackagePaths = new HashSet<>();
 
-    private Set<Class<?>> clzs = new LinkedHashSet<>();
+    /**
+     * 一共扫描出哪些类
+     */
+    private final Set<Class<?>> clzs = new LinkedHashSet<>();
 
-    public Set<Class<?>> scan(Class<?> mainClass){
+
+
+    public Set<Class<?>> scan(){
+        Class<?> mainClass = deduceMainApplicationClass(); //从堆栈信息推测主类
         String name = ClassUtil.getPackage(mainClass);
         scanPackageFor(name);
         scannerPackagePaths.clear();
         return clzs;
+    }
+
+    /* 从堆栈信息推测主类 */
+    private static Class<?> deduceMainApplicationClass() {
+        try {
+            StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();
+            for (StackTraceElement stackTraceElement : stackTrace) {
+                if ("main".equals(stackTraceElement.getMethodName())) {
+                    return Class.forName(stackTraceElement.getClassName());
+                }
+            }
+        }
+        catch (ClassNotFoundException ex) {
+            // Swallow and continue
+        }
+        return null;
     }
 
     /* 扫描包路径 */
