@@ -29,7 +29,7 @@ public class ScanUtil {
     /**
      * 一共需要扫描哪些包路径
      */
-    private final Set<String> scannerPackagePaths = new HashSet<>();
+    private Set<String> scannerPackagePaths = new HashSet<>();
 
     /**
      * 一共扫描出哪些类
@@ -42,7 +42,7 @@ public class ScanUtil {
         Class<?> mainClass = deduceMainApplicationClass(); //从堆栈信息推测主类
         String name = ClassUtil.getPackage(mainClass);
         scanPackageFor(name);
-        scannerPackagePaths.clear();
+        scannerPackagePaths = null;
         return clzs;
     }
 
