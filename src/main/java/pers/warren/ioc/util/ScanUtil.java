@@ -99,17 +99,11 @@ public class ScanUtil {
         if (!dir.exists() || !dir.isDirectory()) {
             return;
         }
-
-
         // 过滤获取目录，or class文件
         File[] dirfiles = dir.listFiles(pathname -> pathname.isDirectory() || pathname.getName().endsWith("class"));
-
-
         if (dirfiles == null || dirfiles.length == 0) {
             return;
         }
-
-
         String className;
         Class clz;
         for (File f : dirfiles) {
@@ -119,8 +113,6 @@ public class ScanUtil {
                         classes);
                 continue;
             }
-
-
             // 获取类名，干掉 ".class" 后缀
             className = f.getName();
             className = className.substring(0, className.length() - 6);
@@ -156,14 +148,10 @@ public class ScanUtil {
             if (name.charAt(0) == '/') {
                 name = name.substring(1);
             }
-
-
             if (jarEntry.isDirectory() || !name.startsWith(pkgDir) || !name.endsWith(".class")) {
                 // 非指定包路径， 非class文件
                 continue;
             }
-
-
             // 去掉后面的".class", 将路径转为package格式
             className = name.substring(0, name.length() - 6);
             claze = loadClass(className.replace("/", "."));
@@ -173,7 +161,6 @@ public class ScanUtil {
             }
         }
     }
-
 
     private static Class<?> loadClass(String fullClzName) {
         try {
