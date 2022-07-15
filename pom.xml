@@ -37,6 +37,12 @@
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>2.14.1</version>
         </dependency>
+        <dependency>
+            <groupId>cn.antcore</groupId>
+            <artifactId>AntResources</artifactId>
+            <version>1.2.0-RELEASE</version>
+        </dependency>
+
     </dependencies>
 
 </project>
