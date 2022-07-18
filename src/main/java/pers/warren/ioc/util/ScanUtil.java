@@ -80,7 +80,7 @@ public class ScanUtil {
     }
 
     /* 扫描path数组 */
-    private static void scanArray(String[] array) {
+    public static void scanArray(String[] array) {
         for (String scan : array) {
             scanPackageFor(scan);
             scannerPackagePaths.add(scan);
