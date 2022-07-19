@@ -2,7 +2,6 @@ package pers.warren.ioc;
 
 import cn.hutool.core.io.resource.ResourceUtil;
 import lombok.extern.slf4j.Slf4j;
-import pers.warren.ioc.core.Container;
 import pers.warren.ioc.handler.CokePropertiesHandler;
 import pers.warren.ioc.util.ScanUtil;
 

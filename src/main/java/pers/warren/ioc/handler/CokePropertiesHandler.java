@@ -4,7 +4,6 @@ import cn.antcore.resources.extend.PropertiesResources;
 import cn.antcore.resources.extend.YamlResources;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharUtil;
-import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.annotation.Configuration;
 import pers.warren.ioc.annotation.Scanner;
 import pers.warren.ioc.core.ApplicationContext;
@@ -13,7 +12,6 @@ import pers.warren.ioc.util.ScanUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.*;
 
 public class CokePropertiesHandler {
@@ -78,7 +76,7 @@ public class CokePropertiesHandler {
                             ScanUtil.scanPackageFor(clz.getPackage().getName());
                             ScanUtil.scanArray(configurationAnnotation.scanner());
 
-                            pers.warren.ioc.annotation.Scanner scannerAnnotation = clz.getAnnotation(Scanner.class);
+                            Scanner scannerAnnotation = clz.getAnnotation(Scanner.class);
                             if (scannerAnnotation != null) {
                                 ScanUtil.scanArray(scannerAnnotation.value());
                             }
