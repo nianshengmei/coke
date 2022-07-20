@@ -41,4 +41,6 @@ public interface BeanFactory {
      * @param beanName bean名称
      */
     boolean isSingleton(String beanName);
+
+    FactoryBean createBean(BeanDefinition beanDefinition);
 }

@@ -4,6 +4,7 @@ import cn.antcore.resources.extend.PropertiesResources;
 import cn.antcore.resources.extend.YamlResources;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharUtil;
+import lombok.experimental.UtilityClass;
 import pers.warren.ioc.annotation.Configuration;
 import pers.warren.ioc.annotation.Scanner;
 import pers.warren.ioc.core.ApplicationContext;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+@UtilityClass
 public class CokePropertiesHandler {
 
     private static final String YAML = "application.yaml";
@@ -38,7 +40,7 @@ public class CokePropertiesHandler {
         YamlResources resources = new YamlResources();
         resources.loadByClassPath(YML);
         Map<Object, Object> resourceMap = resources.getResources();
-        Map<String, Object> standardization = this.standardization(resourceMap);
+        Map<String, Object> standardization = standardization(resourceMap);
         ApplicationContext context = Container.getContainer().getBean(ApplicationContext.class.getSimpleName());
         context.addProperties(standardization);
         int a = 1;
@@ -48,7 +50,7 @@ public class CokePropertiesHandler {
         PropertiesResources resources = new PropertiesResources();
         resources.loadByClassPath(PROPERTIES);
         Map<Object, Object> resourceMap = resources.getResources();
-        Map<String, Object> standardization = this.standardization(resourceMap);
+        Map<String, Object> standardization = standardization(resourceMap);
         ApplicationContext context = Container.getContainer().getBean(ApplicationContext.class.getSimpleName());
         context.addProperties(standardization);
 

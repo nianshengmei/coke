@@ -2,9 +2,12 @@ package pers.warren.ioc;
 
 import cn.hutool.core.io.resource.ResourceUtil;
 import lombok.extern.slf4j.Slf4j;
+import pers.warren.ioc.core.*;
+import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.handler.CokePropertiesHandler;
 import pers.warren.ioc.util.ScanUtil;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -28,9 +31,24 @@ public class IocApplication {
         start();
         clzSet = ScanUtil.scan();   //扫描类
 
-        new CokePropertiesHandler().read();
+        CokePropertiesHandler.read();
+
+        loadConfiguration();
+
+
+        loadBean();
 
         end();
+    }
+
+    private static void loadBean() {
+        Container container = Container.getContainer();
+        List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(BeanType.CONFIGURATION);
+
+        for (BeanDefinition beanDefinition : beanDefinitions) {
+            BeanFactory factory = new DefaultBeanFactory();
+
+        }
     }
 
     /**
@@ -55,4 +73,18 @@ public class IocApplication {
         log.info("needcoke-ioc start ok! cost = {}ms", System.currentTimeMillis() - startTimeMills);
     }
 
+    /**
+     * 加载配置类
+     */
+    private static void loadConfiguration() {
+        Container container = Container.getContainer();
+        List<BeanRegister> beanRegisters = container.getBeans(BeanRegister.class);
+        for (Class<?> clz : clzSet) {
+            AnnotationMetadata metadata = AnnotationMetadata.metadata(clz);
+            for (BeanRegister beanRegister : beanRegisters) {
+                beanRegister.initialization(metadata, container);
+            }
+        }
+    }
 }
+
