@@ -35,6 +35,7 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
                 Value valueAnnotation = declaredField.getAnnotation(Value.class);
                 String value = valueAnnotation.value();
                 ValueField field = new ValueField();
+                field.setSourceBeanName(beanDefinition.getName());
                 field.setField(declaredField);
                 if (value.contains(":")) {
                     String[] vs = value.split(":");

@@ -17,4 +17,6 @@ public class ValueField {
 
     private Class<?> type;
 
+    private String sourceBeanName;
+
 }
