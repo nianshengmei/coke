@@ -38,6 +38,11 @@
             <version>2.14.1</version>
         </dependency>
         <dependency>
+            <groupId>asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+        <dependency>
             <groupId>cn.antcore</groupId>
             <artifactId>AntResources</artifactId>
             <version>1.2.0-RELEASE</version>

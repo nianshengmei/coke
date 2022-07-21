@@ -30,6 +30,16 @@ public class BeanDefinition {
     private BeanType beanType;
 
     /**
+     * 创建Bean方法
+     */
+    private Object invokeFunction;
+
+    /**
+     * 用于@Bean生成的bean源
+     */
+    private String invokeSource;
+
+    /**
      * 增强扩展预留
      */
     private List<PropertyValue> propertyValues;
@@ -48,6 +58,14 @@ public class BeanDefinition {
      * 标注了@Value的字段
      */
     private List<ValueField> valueFiledInject;
+
+    /**
+     * 用于创建的beanFactory类型
+     */
+    private Class<?>  beanFactoryClass;
+
+
+    private Class<?> factoryBeanClass;
 
     public BeanDefinition() {
         this.singleton = true;

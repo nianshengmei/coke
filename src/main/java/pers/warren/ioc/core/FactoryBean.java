@@ -1,10 +1,8 @@
 package pers.warren.ioc.core;
 
-import java.lang.reflect.InvocationTargetException;
-
 public interface FactoryBean<T> {
 
-    <T> T getObject() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException;
+    <T> T getObject();
 
     Class<T> getType();
 

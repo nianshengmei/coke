@@ -23,13 +23,16 @@ public class DefaultBeanRegister implements BeanRegister {
         BeanDefinition beanDefinition = null;
         BeanDefinitionBuilder builder = null;
         if (metadata.hasAnnotation(Configuration.class)) {
+            String name = getName(metadata, registry);
             builder = BeanDefinitionBuilder.genericBeanDefinition(metadata.getSourceClass(),
-                    getName(metadata, registry),
-                    BeanType.CONFIGURATION
+                    name,
+                    BeanType.CONFIGURATION,
+                    null,
+                    name
             );
             beanDefinition = builder.build();
         }
-        registerBeanDefinition(builder,registry);
+        registerBeanDefinition(builder, registry);
         return beanDefinition;
     }
 

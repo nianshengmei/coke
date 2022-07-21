@@ -36,11 +36,11 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
                 String value = valueAnnotation.value();
                 ValueField field = new ValueField();
                 field.setField(declaredField);
-                if(value.contains(":")){
+                if (value.contains(":")) {
                     String[] vs = value.split(":");
                     field.setKey(vs[0]);
                     field.setDefaultValue(vs[1]);
-                }else{
+                } else {
                     field.setKey(value);
                 }
                 field.setType(declaredField.getType());
@@ -70,7 +70,7 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
                 }
                 if (!method.getReturnType().equals(Void.class)) {
                     BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(method.getReturnType(),
-                            name, BeanType.SIMPLE_BEAN);
+                            name, BeanType.SIMPLE_BEAN, method, beanDefinition.getName()).setFactoryBeanType(SimpleFactoryBean.class);
                     register.registerBeanDefinition(builder, Container.getContainer());
                 }
             }

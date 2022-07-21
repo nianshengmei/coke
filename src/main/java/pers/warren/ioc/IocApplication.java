@@ -8,6 +8,7 @@ import pers.warren.ioc.handler.CokePropertiesHandler;
 import pers.warren.ioc.util.ScanUtil;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -44,12 +45,14 @@ public class IocApplication {
     private static void loadBean() {
         Container container = Container.getContainer();
         List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(BeanType.CONFIGURATION);
-
+        BeanFactory defaultBeanFactory = container.getBean("defaultBeanFactory");
         for (BeanDefinition beanDefinition : beanDefinitions) {
-            BeanFactory factory = new DefaultBeanFactory();
-
+            FactoryBean factoryBean = defaultBeanFactory.createBean(beanDefinition);
+            container.addFactoryBean(beanDefinition.getName(),factoryBean);
+            container.addComponent(beanDefinition.getName(),factoryBean.getObject());
         }
     }
+
 
     /**
      * 启动开始

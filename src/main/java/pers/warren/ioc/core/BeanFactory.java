@@ -42,5 +42,10 @@ public interface BeanFactory {
      */
     boolean isSingleton(String beanName);
 
+    /**
+     * 创建bean对象
+     * @param beanDefinition bean定义
+     * @return {@link FactoryBean}
+     */
     FactoryBean createBean(BeanDefinition beanDefinition);
 }

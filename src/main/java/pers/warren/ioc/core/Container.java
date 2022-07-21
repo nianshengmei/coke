@@ -13,11 +13,15 @@ public class Container implements BeanDefinitionRegistry {
 
     private Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
 
-    private Map<String ,FactoryBean> factoryBeanMap = new HashMap<>();
+    private Map<String, FactoryBean> factoryBeanMap = new HashMap<>();
 
 
-    public void addFactoryBean(String name,FactoryBean factoryBean){
-        factoryBeanMap.put(name,factoryBean);
+    public void addFactoryBean(String name, FactoryBean factoryBean) {
+        factoryBeanMap.put(name, factoryBean);
+    }
+
+    public void addComponent(String name, Object o) {
+        componentMap.put(name, o);
     }
 
     private static Container container;
@@ -37,9 +41,12 @@ public class Container implements BeanDefinitionRegistry {
 
         BeanPostProcessor beanPostProcessor = new DefaultBeanPostProcessor();
         componentMap.put("defaultBeanPostProcessor", beanPostProcessor);
+
+        BeanFactory beanFactory = new DefaultBeanFactory();
+        componentMap.put("defaultBeanFactory", beanFactory);
     }
 
-    public List<BeanDefinition> getBeanDefinitions(BeanType beanType){
+    public List<BeanDefinition> getBeanDefinitions(BeanType beanType) {
         return beanDefinitionMap.values().stream().filter(d -> beanType == d.getBeanType()).collect(Collectors.toList());
     }
 
@@ -50,8 +57,9 @@ public class Container implements BeanDefinitionRegistry {
 
     public <T> T getBean(Class<T> clz) {
         List<T> beans = getBeans(clz);
-        return CollUtil.isNotEmpty(beans)?beans.get(0):null;
+        return CollUtil.isNotEmpty(beans) ? beans.get(0) : null;
     }
+
     public <T> List<T> getBeans(Class<T> clz) {
         Collection<Object> values = componentMap.values();
         List<T> tList = new ArrayList<>();
@@ -80,6 +88,25 @@ public class Container implements BeanDefinitionRegistry {
         return tList;
     }
 
+    public boolean classAdapter(Class<?> pClz , Class<?> clz){
+        Class<?> superclass = clz.getSuperclass();
+        Class<?>[] interfaces = clz.getInterfaces();
+        if (clz.equals(pClz)) {
+            return true;
+        }
+
+        if (null != superclass && superclass.equals(pClz)) {
+            return true;
+        }
+
+        for (Class<?> anInterface : interfaces) {
+            if (anInterface.equals(pClz)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void registerBeanDefinition(String name, BeanDefinition beanDefinition) {
         if (StrUtil.isNotEmpty(name) && null != beanDefinition) {
@@ -95,6 +122,17 @@ public class Container implements BeanDefinitionRegistry {
     @Override
     public BeanDefinition getBeanDefinition(String name) {
         return this.beanDefinitionMap.get(name);
+    }
+
+    public BeanDefinition getBeanDefinition(Class<?> clz) {
+        Collection<BeanDefinition> values = beanDefinitionMap.values();
+        for (BeanDefinition value : values) {
+            Class<?> aClass = value.getClz();
+            if(classAdapter(clz,aClass)){
+                return value;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -115,6 +153,6 @@ public class Container implements BeanDefinitionRegistry {
 
     @Override
     public boolean isBeanNameInUse(String name) {
-        return beanDefinitionMap.containsKey(name);
+        return beanDefinitionMap.containsKey(name) || componentMap.containsKey(name);
     }
 }
