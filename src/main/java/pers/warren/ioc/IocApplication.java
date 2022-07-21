@@ -8,7 +8,6 @@ import pers.warren.ioc.handler.CokePropertiesHandler;
 import pers.warren.ioc.util.ScanUtil;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -45,9 +44,18 @@ public class IocApplication {
     private static void loadBean() {
         Container container = Container.getContainer();
         List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(BeanType.CONFIGURATION);
-        BeanFactory defaultBeanFactory = container.getBean("defaultBeanFactory");
+
         for (BeanDefinition beanDefinition : beanDefinitions) {
-            FactoryBean factoryBean = defaultBeanFactory.createBean(beanDefinition);
+            BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
+            FactoryBean factoryBean = beanFactory.createBean(beanDefinition);
+            container.addFactoryBean(beanDefinition.getName(),factoryBean);
+            container.addComponent(beanDefinition.getName(),factoryBean.getObject());
+        }
+
+        beanDefinitions = container.getBeanDefinitions(BeanType.COMPONENT);
+        for (BeanDefinition beanDefinition : beanDefinitions) {
+            BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
+            FactoryBean factoryBean = beanFactory.createBean(beanDefinition);
             container.addFactoryBean(beanDefinition.getName(),factoryBean);
             container.addComponent(beanDefinition.getName(),factoryBean.getObject());
         }

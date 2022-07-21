@@ -1,5 +1,7 @@
 package pers.warren.ioc.core;
 
+import java.lang.reflect.Constructor;
+
 public class DefaultBeanFactory implements BeanFactory {
 
     @Override
@@ -33,8 +35,14 @@ public class DefaultBeanFactory implements BeanFactory {
     }
 
     public FactoryBean createBean(BeanDefinition beanDefinition) {
-        if (beanDefinition.getFactoryBeanClass().equals(SimpleFactoryBean.class)) {
-            return new SimpleFactoryBean(beanDefinition, this);
+        if (null != beanDefinition.getFactoryBeanClass()) {
+            try {
+                Class<?> factoryBeanClass = beanDefinition.getFactoryBeanClass();
+                Constructor<?> constructor = factoryBeanClass.getConstructor(BeanDefinition.class, BeanFactory.class);
+                return (FactoryBean) constructor.newInstance(beanDefinition, this);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return new DefaultFactoryBean(beanDefinition, this);
     }

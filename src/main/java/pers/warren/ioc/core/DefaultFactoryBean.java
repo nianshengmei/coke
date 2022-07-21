@@ -15,13 +15,19 @@ public class DefaultFactoryBean implements FactoryBean {
 
     private BeanFactory currentBeanFactory;
 
-    public DefaultFactoryBean(BeanDefinition beanDefinition ,BeanFactory currentBeanFactory) {
+    public DefaultFactoryBean(BeanDefinition beanDefinition, BeanFactory currentBeanFactory) {
         this.beanDefinition = beanDefinition;
         this.currentBeanFactory = currentBeanFactory;
     }
 
     @Override
     public Object getObject() {
+        if (beanDefinition.isSingleton()) {
+            Object beanDef = Container.getContainer().getBean(beanDefinition.getName());
+            if (null != beanDef) {
+                return beanDef;
+            }
+        }
         Constructor constructor = null;
         Class<?> clz = beanDefinition.getClz();
         try {
@@ -55,14 +61,16 @@ public class DefaultFactoryBean implements FactoryBean {
                     BeanDefinition bdByName = Container.getContainer().getBeanDefinition(methodParamNames.get(i));
                     BeanDefinition bdByType = Container.getContainer().getBeanDefinition(parameterTypes[i]);
                     if (null == bdByName && null == bdByType) {
-                        throw new RuntimeException("can't find param in container named : "+methodParamNames.get(i));
+                        throw new RuntimeException("can't find param in container named : " + methodParamNames.get(i));
                     }
-                    if(null != bdByName){
+                    if (null != bdByName) {
                         FactoryBean factoryBean = currentBeanFactory.createBean(bdByName);
-                        Container.getContainer().addComponent(bdByName.getName(),factoryBean.getObject());
-                    }else{
+                        Container.getContainer().addComponent(bdByName.getName(), factoryBean.getObject());
+                        Container.getContainer().addFactoryBean(bdByName.getName(), factoryBean);
+                    } else {
                         FactoryBean factoryBean = currentBeanFactory.createBean(bdByType);
-                        Container.getContainer().addComponent(bdByType.getName(),factoryBean.getObject());
+                        Container.getContainer().addComponent(bdByType.getName(), factoryBean.getObject());
+                        Container.getContainer().addFactoryBean(bdByName.getName(), factoryBean);
                     }
                     bean = Container.getContainer().getBean(methodParamNames.get(i));
                     if (null == bean) {
