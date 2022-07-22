@@ -3,13 +3,16 @@ package pers.warren.ioc;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import pers.warren.ioc.annotation.Autowired;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.handler.CokePropertiesHandler;
 import pers.warren.ioc.util.InjectUtil;
 import pers.warren.ioc.util.ScanUtil;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
@@ -43,6 +46,9 @@ public class IocApplication {
         loadBean();
 
         injectProperties();
+
+        injectField();
+
         end();
     }
 
@@ -78,6 +84,7 @@ public class IocApplication {
     public static void injectProperties() {
         Container container = Container.getContainer();
         List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(BeanType.CONFIGURATION);
+        beanDefinitions.addAll(container.getBeanDefinitions(BeanType.COMPONENT));
         for (BeanDefinition beanDefinition : beanDefinitions) {
             List<ValueField> valueFiledInject = beanDefinition.getValueFiledInject();
             for (ValueField field : valueFiledInject) {
@@ -90,17 +97,86 @@ public class IocApplication {
                     f.set(bean, value);
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
-                } catch (Exception e){
-                    throw new RuntimeException("the value in the configuration file cannot be converted to the corresponding attribute , value field info : "+field );
+                } catch (Exception e) {
+                    throw new RuntimeException("the value in the configuration file cannot be converted to the corresponding attribute , value field info : " + field);
                 }
             }
         }
     }
 
-    public void injectField() {
+    public static void injectField() {
+        Container container = Container.getContainer();
+        List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(BeanType.CONFIGURATION);
+        beanDefinitions.addAll(container.getBeanDefinitions(BeanType.COMPONENT));
+        for (BeanDefinition beanDefinition : beanDefinitions) {
+            List<Field> autowiredFieldList = beanDefinition.getAutowiredFieldInject();
+            Object bean = container.getBean(beanDefinition.getName());
+            for (Field field : autowiredFieldList) {
+                String name = field.getName();
+                Autowired annotation = field.getAnnotation(Autowired.class);
+                Object b = null;
+                if (StrUtil.isNotEmpty(annotation.value())) {
+                    name = annotation.value();
+                    b = container.getBean(name);
+                    if (null == b) {
+                        throw new RuntimeException("without bean autowired named :" + name
+                                + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                        );
+                    }
 
+                } else {
+                    b = container.getBean(field.getType());
+                    if (null == b) {
+                        throw new RuntimeException("no bean type autowired :" + field.getType().getName()
+                                + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                        );
+                    }
+                }
+                try {
+                    field.setAccessible(true);
+                    field.set(bean, b);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException("no bean type autowired :" + field.getType().getName()
+                            + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                    );
+                }
+            }
+
+            List<Field> resourceFieldList = beanDefinition.getResourceFieldInject();
+            bean = container.getBean(beanDefinition.getName());
+            for (Field field : resourceFieldList) {
+                String name = field.getName();
+                Resource annotation = field.getAnnotation(Resource.class);
+                Object b = null;
+                if (StrUtil.isNotEmpty(annotation.name())) {
+                    name = annotation.name();
+                    b = container.getBean(name);
+                    if (null == b) {
+                        throw new RuntimeException("without bean autowired named :" + name
+                                + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                        );
+                    }
+
+                } else {
+                    b = container.getBean(field.getType());
+                    if (null == b) {
+                        throw new RuntimeException("no bean type autowired :" + field.getType().getName()
+                                + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                        );
+                    }
+                }
+                try {
+                    field.setAccessible(true);
+                    field.set(bean, b);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException("no bean type autowired :" + field.getType().getName()
+                            + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                    );
+                }
+            }
+
+        }
     }
-
 
 
     /**
