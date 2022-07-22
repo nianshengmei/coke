@@ -1,10 +1,13 @@
 package pers.warren.ioc.core;
 
 import lombok.Data;
+import lombok.ToString;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
 @Data
+@ToString
 public class ValueField {
 
     private Field field;
@@ -18,5 +21,7 @@ public class ValueField {
     private Class<?> type;
 
     private String sourceBeanName;
+
+    private Type genericType;
 
 }

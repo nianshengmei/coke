@@ -1,16 +1,18 @@
 package pers.warren.ioc;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.handler.CokePropertiesHandler;
+import pers.warren.ioc.util.InjectUtil;
 import pers.warren.ioc.util.ScanUtil;
 
 import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.ParameterizedType;
+import java.util.*;
 
 /**
  * 容器的启动辅助类
@@ -40,6 +42,7 @@ public class IocApplication {
 
         loadBean();
 
+        injectProperties();
         end();
     }
 
@@ -69,9 +72,10 @@ public class IocApplication {
             container.addFactoryBean(beanDefinition.getName(), factoryBean);
             container.addComponent(beanDefinition.getName(), factoryBean.getObject());
         }
+
     }
 
-    public void injectProperties() {
+    public static void injectProperties() {
         Container container = Container.getContainer();
         List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(BeanType.CONFIGURATION);
         for (BeanDefinition beanDefinition : beanDefinitions) {
@@ -79,88 +83,24 @@ public class IocApplication {
             for (ValueField field : valueFiledInject) {
                 Field f = field.getField();
                 Object bean = container.getBean(beanDefinition.getName());
-                Object value = getDstValue(field);
-                f.setAccessible(true);
+
                 try {
+                    Object value = InjectUtil.getDstValue(field);
+                    f.setAccessible(true);
                     f.set(bean, value);
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
+                } catch (Exception e){
+                    throw new RuntimeException("the value in the configuration file cannot be converted to the corresponding attribute , value field info : "+field );
                 }
             }
-        }
-    }
-
-    private Object getDstValue(ValueField field) {
-        String vs = "";
-        if (StrUtil.isNotEmpty((String) field.getConfigValue())) {
-            vs = (String) field.getConfigValue();
-        } else {
-            vs = field.getDefaultValue();
-        }
-        if (field.getType().getTypeName().equals(Integer.class.getTypeName())) {
-            return Integer.parseInt(vs));
-        } else if (field.getType().getTypeName().equals(Double.class.getTypeName())) {
-            field.set(component, Double.parseDouble(value));
-        } else if (field.getType().getTypeName().equals(Long.class.getTypeName()) ||
-                field.getType().getTypeName().equals(long.class.getTypeName())) {
-            if("[]".equals(value))continue;
-            field.set(component, Long.parseLong(value));
-        } else if (field.getType().getTypeName().equals(Boolean.class.getTypeName())) {
-            field.set(component, Boolean.parseBoolean(value));
-        } else if (field.getType().getTypeName().equals(Short.class.getTypeName())) {
-            field.set(component, Short.parseShort(value));
-        } else if (field.getType().getTypeName().equals(Byte.class.getTypeName())) {
-            field.set(component, Byte.parseByte(value));
-        } else if (field.getType().getTypeName().equals(Character.class.getTypeName())) {
-            field.set(component, value);
-        } else if (field.getType().getTypeName().equals(String.class.getTypeName())) {
-            field.set(component, value);
-        } else if (field.getType().getTypeName().equals("int")) {
-            ConfigBean finalConfigBean = configBean;
-            new ExceptionRunner(() -> {
-                field.set(component, Integer.parseInt(value));
-                return true;
-            }, (e) -> {
-                log.debug("配置文件中未找到该配置: " + finalConfigBean.getBeanKey());
-                return false;
-            }).run();
-        } else if (field.getType().getTypeName().equals("double")) {
-            field.set(component, Double.parseDouble(value));
-        } else if (field.getType().getTypeName().equals("boolean")) {
-            field.set(component, Boolean.parseBoolean(value));
-        } else if (field.getType().getTypeName().equals(ArrayList.class.getTypeName())) {
-            valueInjectList(field, configBean, component);
-        } else if (field.getType().getTypeName().equals(LinkedList.class.getTypeName())) {
-            valueInjectList(field, configBean, component);
-        } else if (field.getType().getTypeName().equals(List.class.getTypeName())) {
-            valueInjectList(field, configBean, component);
-        } else if (field.getType().getTypeName().equals(String[].class.getTypeName())) {
-            String[] array = new String[((List) configBean.getBeanValue()).size()];
-            field.set(component, ((List) configBean.getBeanValue()).toArray(array));
-        } else if (field.getType().getTypeName().equals(Integer[].class.getTypeName())) {
-            Integer[] array = new Integer[((List) configBean.getBeanValue()).size()];
-            List list = (List) configBean.getBeanValue();
-            for (int i = 0; i < array.length; i++) {
-                array[i] = Integer.parseInt(list.get(i).toString());
-            }
-            field.set(component, array);
-        } else if (field.getType().getTypeName().equals(Double[].class.getTypeName())) {
-            Double[] array = new Double[((List) configBean.getBeanValue()).size()];
-            List list = (List) configBean.getBeanValue();
-            for (int i = 0; i < array.length; i++) {
-                array[i] = Double.parseDouble(list.get(i).toString());
-            }
-            field.set(component, array);
-        } else if (field.getType().getClass().isAssignableFrom(Date.class)) {
-            long time = DateUtil.parse(value).getTime();
-            Object o = field.getType().getConstructor(long.class).newInstance(time);
-            field.set(component, o);
         }
     }
 
     public void injectField() {
 
     }
+
 
 
     /**

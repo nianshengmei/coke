@@ -3,6 +3,7 @@ package pers.warren.ioc.core;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.enums.BeanType;
+import pers.warren.ioc.util.ReflectUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -88,24 +89,7 @@ public class Container implements BeanDefinitionRegistry {
         return tList;
     }
 
-    public boolean classAdapter(Class<?> pClz , Class<?> clz){
-        Class<?> superclass = clz.getSuperclass();
-        Class<?>[] interfaces = clz.getInterfaces();
-        if (clz.equals(pClz)) {
-            return true;
-        }
 
-        if (null != superclass && superclass.equals(pClz)) {
-            return true;
-        }
-
-        for (Class<?> anInterface : interfaces) {
-            if (anInterface.equals(pClz)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     @Override
     public void registerBeanDefinition(String name, BeanDefinition beanDefinition) {
@@ -128,7 +112,7 @@ public class Container implements BeanDefinitionRegistry {
         Collection<BeanDefinition> values = beanDefinitionMap.values();
         for (BeanDefinition value : values) {
             Class<?> aClass = value.getClz();
-            if(classAdapter(clz,aClass)){
+            if(ReflectUtil.classAdapter(clz,aClass)){
                 return value;
             }
         }

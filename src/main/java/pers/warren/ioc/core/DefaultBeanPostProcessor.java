@@ -6,11 +6,16 @@ import pers.warren.ioc.annotation.Autowired;
 import pers.warren.ioc.annotation.Bean;
 import pers.warren.ioc.annotation.Value;
 import pers.warren.ioc.enums.BeanType;
+import pers.warren.ioc.util.ReflectUtil;
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class DefaultBeanPostProcessor implements BeanPostProcessor {
@@ -44,6 +49,8 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
                 } else {
                     field.setKey(value);
                 }
+                Type genericType = declaredField.getGenericType();
+                field.setGenericType(genericType);
                 field.setType(declaredField.getType());
                 ApplicationContext applicationContext = Container.getContainer().getBean(ApplicationContext.class.getSimpleName());
                 field.setConfigValue(applicationContext.getProperty(field.getKey()));

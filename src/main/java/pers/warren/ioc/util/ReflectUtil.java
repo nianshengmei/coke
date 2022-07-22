@@ -4,13 +4,16 @@ import jdk.internal.org.objectweb.asm.tree.ClassNode;
 import jdk.internal.org.objectweb.asm.tree.LocalVariableNode;
 import jdk.internal.org.objectweb.asm.tree.MethodNode;
 import lombok.experimental.UtilityClass;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
@@ -75,19 +78,19 @@ public class ReflectUtil {
         return true;
     }
 
-    public static List<String> getParameterNames(Constructor< ? > constructor) throws IOException {
-        Class< ? > declaringClass = constructor.getDeclaringClass();
+    public static List<String> getParameterNames(Constructor<?> constructor) throws IOException {
+        Class<?> declaringClass = constructor.getDeclaringClass();
         ClassLoader declaringClassLoader = declaringClass.getClassLoader();
 
         Type declaringType = Type.getType(declaringClass);
         String constructorDescriptor = Type.getConstructorDescriptor(constructor);
-        String url = declaringType.getInternalName() +".class";
-        if(null == declaringClassLoader){
+        String url = declaringType.getInternalName() + ".class";
+        if (null == declaringClassLoader) {
             declaringClassLoader = Thread.currentThread().getContextClassLoader();
         }
         InputStream classFileInputStream = declaringClassLoader.getResourceAsStream(url);
         if (classFileInputStream == null) {
-            throw new IllegalArgumentException("The constructor's class loader cannot find the bytecode that defined the constructor's class (URL:" + url +")");
+            throw new IllegalArgumentException("The constructor's class loader cannot find the bytecode that defined the constructor's class (URL:" + url + ")");
         }
 
         ClassNode classNode;
@@ -109,7 +112,6 @@ public class ReflectUtil {
                 @SuppressWarnings("unchecked")
                 List<LocalVariableNode> localVariables = method.localVariables;
                 for (int i = 0; i < argumentTypes.length; i++) {
-                    // The first local variable actually represents the"this" object
                     parameterNames.add(localVariables.get(i + 1).name);
                 }
 
@@ -118,5 +120,33 @@ public class ReflectUtil {
         }
 
         return null;
+    }
+
+    public boolean classAdapter(Class<?> pClz, Class<?> clz) {
+        Class<?> superclass = clz.getSuperclass();
+        Class<?>[] interfaces = clz.getInterfaces();
+        if (clz.equals(pClz)) {
+            return true;
+        }
+        Set<Class> superClassSet = new HashSet<>();
+        if (null != superclass ) {
+            if(superclass.equals(pClz)) {
+                return true;
+            }
+            superClassSet.add(superclass);
+        }
+
+        for (Class<?> anInterface : interfaces) {
+            if (anInterface.equals(pClz)) {
+                return true;
+            }
+            superClassSet.add(anInterface);
+        }
+
+        for (Class aClass : superClassSet) {
+            return classAdapter(aClass, clz);
+        }
+
+        return false;
     }
 }
