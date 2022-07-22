@@ -64,7 +64,9 @@ public class BeanDefinition {
      */
     private Class<?>  beanFactoryClass;
 
-
+    /**
+     * 使用那个factoryBean去getObject
+     */
     private Class<?> factoryBeanClass;
 
     public BeanDefinition() {

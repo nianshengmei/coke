@@ -2,6 +2,12 @@ package pers.warren.ioc.core;
 
 import pers.warren.ioc.enums.BeanType;
 
+/**
+ * beanDefinition创建工具
+ *
+ * @author warren
+ * @since jdk1.8
+ */
 public class BeanDefinitionBuilder {
 
     private BeanDefinition beanDefinition;

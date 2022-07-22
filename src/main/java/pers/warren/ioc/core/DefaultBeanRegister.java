@@ -4,8 +4,11 @@ import pers.warren.ioc.annotation.Component;
 import pers.warren.ioc.annotation.Configuration;
 import pers.warren.ioc.enums.BeanType;
 
+/**
+ * 默认的BeanRegister
+ * @author warren
+ */
 public class DefaultBeanRegister implements BeanRegister {
-
 
     @Override
     public String getName(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {

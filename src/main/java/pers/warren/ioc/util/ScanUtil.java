@@ -21,7 +21,7 @@ import java.util.jar.JarFile;
  * 包扫描工具
  *
  * @author warren
- * @since 1.0.1
+ * @since jdk1.8
  */
 @UtilityClass
 public class ScanUtil {
@@ -30,6 +30,7 @@ public class ScanUtil {
      * 一共需要扫描哪些包路径
      */
     private Set<String> scannerPackagePaths = new HashSet<>();
+
 
     /**
      * 一共扫描出哪些类
@@ -41,6 +42,7 @@ public class ScanUtil {
     public Set<Class<?>> scan(){
         Class<?> mainClass = deduceMainApplicationClass(); //从堆栈信息推测主类
         String name = ClassUtil.getPackage(mainClass);
+        scanPackageFor("pers.warren.ioc");
         scanPackageFor(name);
         scannerPackagePaths = null;
         return clzs;

@@ -6,16 +6,12 @@ import pers.warren.ioc.annotation.Autowired;
 import pers.warren.ioc.annotation.Bean;
 import pers.warren.ioc.annotation.Value;
 import pers.warren.ioc.enums.BeanType;
-import pers.warren.ioc.util.ReflectUtil;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class DefaultBeanPostProcessor implements BeanPostProcessor {
@@ -83,14 +79,14 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
                 }
             }
         }
-
-
         BeanPostProcessor.super.postProcessBeforeInitialization(beanDefinition, register);
     }
 
     @Override
     public void postProcessAfterInitialization(BeanDefinition beanDefinition, BeanRegister register) {
-        BeanPostProcessor.super.postProcessAfterInitialization(beanDefinition, register);
+        System.out.println(beanDefinition.getName()+" 创建成功!!!");
+        Object bean = Container.getContainer().getBean(beanDefinition.getName());
+        System.out.println(bean.toString());
     }
 
 

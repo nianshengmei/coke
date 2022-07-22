@@ -1,7 +1,5 @@
 package pers.warren.ioc;
 
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +11,8 @@ import pers.warren.ioc.util.InjectUtil;
 import pers.warren.ioc.util.ScanUtil;
 
 import javax.annotation.Resource;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.*;
 
 /**
@@ -34,14 +32,16 @@ public class IocApplication {
      */
     private static long startTimeMills;
 
-    public static void run(Class<?> clz, String[] args) {
+    public static ApplicationContext run(Class<?> clz, String[] args) {
         start();
+
         clzSet = ScanUtil.scan();   //扫描类
+
+        loadBasicComponent();
 
         CokePropertiesHandler.read();
 
         loadConfiguration();
-
 
         loadBean();
 
@@ -50,6 +50,58 @@ public class IocApplication {
         injectField();
 
         end();
+
+        return Container.getContainer().applicationContext();
+    }
+
+    private static void loadBasicComponent() {
+        Container container = Container.getContainer();
+        for (Class<?> aClass : clzSet) {
+            if (ApplicationContext.class.isAssignableFrom(aClass)) {
+                Object o = null;
+                try {
+                    Constructor<?> constructor = aClass.getConstructor();
+                    o = constructor.newInstance();
+                } catch (Exception e) {
+                    throw new RuntimeException("class ApplicationContext must have a constructor with no param , " + aClass.getName());
+                }
+                container.addComponent(aClass.getSimpleName(), o);
+            }
+
+            if (BeanPostProcessor.class.isAssignableFrom(aClass) && (!BeanPostProcessor.class.equals(aClass))) {
+                Object o = null;
+                try {
+                    Constructor<?> constructor = aClass.getConstructor();
+                    o = constructor.newInstance();
+                } catch (Exception e) {
+                    throw new RuntimeException("class BeanPostProcessor must have a constructor with no param , " + aClass.getName());
+                }
+                container.addComponent(aClass.getSimpleName(), o);
+            }
+
+            if (BeanFactory.class.isAssignableFrom(aClass) && (!BeanFactory.class.equals(aClass))) {
+                Object o = null;
+                try {
+                    Constructor<?> constructor = aClass.getConstructor();
+                    o = constructor.newInstance();
+                } catch (Exception e) {
+                    throw new RuntimeException("class BeanFactory must have a constructor with no param , " + aClass.getName());
+                }
+                container.addComponent(aClass.getSimpleName(), o);
+            }
+
+            if (BeanRegister.class.isAssignableFrom(aClass) && (!BeanRegister.class.equals(aClass))) {
+                Object o = null;
+                try {
+                    Constructor<?> constructor = aClass.getConstructor();
+                    o = constructor.newInstance();
+                } catch (Exception e) {
+                    throw new RuntimeException("class BeanRegister must have a constructor with no param , " + aClass.getName());
+                }
+                container.addComponent(aClass.getSimpleName(), o);
+            }
+        }
+
     }
 
     private static void loadBean() {
