@@ -2,6 +2,12 @@ package pers.warren.ioc.core;
 
 import java.lang.reflect.Constructor;
 
+/**
+ * 默认的Bean工厂
+ *
+ * @author warren
+ * @since jdk1.8
+ */
 public class DefaultBeanFactory implements BeanFactory {
 
     @Override

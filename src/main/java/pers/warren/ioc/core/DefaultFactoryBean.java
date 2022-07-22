@@ -9,10 +9,24 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+/**
+ * needcoke-ioc默认的FactoryBean
+ * <p>
+ * 用于Configuration 和Component的创建
+ *
+ * @author warren
+ * @since jdk1.8
+ */
 public class DefaultFactoryBean implements FactoryBean {
 
+    /**
+     * beanDefinition
+     */
     private BeanDefinition beanDefinition;
 
+    /**
+     * 创建该FactoryBean的工厂
+     */
     private BeanFactory currentBeanFactory;
 
     public DefaultFactoryBean(BeanDefinition beanDefinition, BeanFactory currentBeanFactory) {
@@ -20,6 +34,9 @@ public class DefaultFactoryBean implements FactoryBean {
         this.currentBeanFactory = currentBeanFactory;
     }
 
+    /**
+     * 获取bean的对象
+     */
     @Override
     public Object getObject() {
         if (beanDefinition.isSingleton()) {
@@ -91,11 +108,17 @@ public class DefaultFactoryBean implements FactoryBean {
         }
     }
 
+    /**
+     * bean的类型
+     */
     @Override
     public Class<?> getType() {
         return beanDefinition.getClz();
     }
 
+    /**
+     * 是否单例
+     */
     @Override
     public Boolean isSingleton() {
         return beanDefinition.isSingleton();

@@ -4,7 +4,7 @@ package pers.warren.ioc.core;
  * Bean工厂
  *
  * @author warren
- * @since 1.0.1
+ * @since jdk1.8
  */
 public interface BeanFactory {
 

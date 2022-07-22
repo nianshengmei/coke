@@ -10,9 +10,15 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * 属性注入工具
+ */
 public class InjectUtil {
 
 
+    /**
+     * 将@Value的属性 转成对应的类型并注入
+     */
     public static Object getDstValue(ValueField field) {
         Object v = null;
         if (null != field.getConfigValue()) {

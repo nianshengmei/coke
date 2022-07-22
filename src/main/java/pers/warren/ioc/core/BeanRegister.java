@@ -5,6 +5,14 @@ import cn.hutool.core.util.StrUtil;
 
 import java.util.List;
 
+/**
+ * Bean的创造器
+ * <p>
+ * 自定义注解必要实现
+ *
+ * @author warren
+ * @since jdk1.8
+ */
 public interface BeanRegister {
 
     String getName(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry);
@@ -39,10 +47,11 @@ public interface BeanRegister {
             return;
         }
         BeanDefinition beanDefinition = builder.build();
-        registry.registerBeanDefinition(beanDefinition.getName(),beanDefinition);
+        registry.registerBeanDefinition(beanDefinition.getName(), beanDefinition);
         List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);
         for (BeanPostProcessor postProcessor : postProcessors) {
             postProcessor.postProcessBeforeInitialization(builder.build(), this);
         }
+
     }
 }

@@ -121,32 +121,4 @@ public class ReflectUtil {
 
         return null;
     }
-
-    public boolean classAdapter(Class<?> pClz, Class<?> clz) {
-        Class<?> superclass = clz.getSuperclass();
-        Class<?>[] interfaces = clz.getInterfaces();
-        if (clz.equals(pClz)) {
-            return true;
-        }
-        Set<Class> superClassSet = new HashSet<>();
-        if (null != superclass ) {
-            if(superclass.equals(pClz)) {
-                return true;
-            }
-            superClassSet.add(superclass);
-        }
-
-        for (Class<?> anInterface : interfaces) {
-            if (anInterface.equals(pClz)) {
-                return true;
-            }
-            superClassSet.add(anInterface);
-        }
-
-        for (Class aClass : superClassSet) {
-            return classAdapter(aClass, clz);
-        }
-
-        return false;
-    }
 }

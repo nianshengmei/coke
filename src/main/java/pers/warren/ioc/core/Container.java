@@ -3,7 +3,6 @@ package pers.warren.ioc.core;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.enums.BeanType;
-import pers.warren.ioc.util.ReflectUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,17 +33,12 @@ public class Container implements BeanDefinitionRegistry {
         return container;
     }
 
+    public ApplicationContext applicationContext(){
+        return this.getBean(ApplicationContext.class);
+    }
+
     public Container() {
-        componentMap.put(ApplicationContext.class.getSimpleName(), new ApplicationContext());
 
-        BeanRegister beanRegister = new DefaultBeanRegister();
-        componentMap.put("defaultBeanRegister", beanRegister);
-
-        BeanPostProcessor beanPostProcessor = new DefaultBeanPostProcessor();
-        componentMap.put("defaultBeanPostProcessor", beanPostProcessor);
-
-        BeanFactory beanFactory = new DefaultBeanFactory();
-        componentMap.put("defaultBeanFactory", beanFactory);
     }
 
     public List<BeanDefinition> getBeanDefinitions(BeanType beanType) {
@@ -65,26 +59,9 @@ public class Container implements BeanDefinitionRegistry {
         Collection<Object> values = componentMap.values();
         List<T> tList = new ArrayList<>();
         for (Object bean : values) {
-            Class<?> clz1 = bean.getClass();
-            Class<?> superclass = clz1.getSuperclass();
-            Class<?>[] interfaces = clz1.getInterfaces();
-            if (clz1.equals(clz)) {
-                tList.add((T) bean);
-                continue;
+            if(clz.isAssignableFrom(bean.getClass())){
+                tList.add((T)bean);
             }
-
-            if (null != superclass && superclass.equals(clz)) {
-                tList.add((T) bean);
-                continue;
-            }
-
-            for (Class<?> anInterface : interfaces) {
-                if (anInterface.equals(clz)) {
-                    tList.add((T) bean);
-                    break;
-                }
-            }
-
         }
         return tList;
     }
@@ -112,7 +89,7 @@ public class Container implements BeanDefinitionRegistry {
         Collection<BeanDefinition> values = beanDefinitionMap.values();
         for (BeanDefinition value : values) {
             Class<?> aClass = value.getClz();
-            if(ReflectUtil.classAdapter(clz,aClass)){
+            if(clz.isAssignableFrom(aClass)){
                 return value;
             }
         }
