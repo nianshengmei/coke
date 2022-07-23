@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.enums.BeanType;
 
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,12 @@ public class Container implements BeanDefinitionRegistry {
 
     private static Container container;
 
+    private final Map<String,List<InputStream>> propertiesIsMap = new HashMap<>();
+
+    public Map<String,List<InputStream>> getPropertiesIsMap(){
+        return propertiesIsMap;
+    }
+
     public static Container getContainer() {
         if (null == container) {
             container = new Container();
@@ -37,7 +44,7 @@ public class Container implements BeanDefinitionRegistry {
         return this.getBean(ApplicationContext.class);
     }
 
-    public Container() {
+    private Container() {
 
     }
 
@@ -65,8 +72,6 @@ public class Container implements BeanDefinitionRegistry {
         }
         return tList;
     }
-
-
 
     @Override
     public void registerBeanDefinition(String name, BeanDefinition beanDefinition) {

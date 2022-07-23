@@ -11,6 +11,9 @@ import pers.warren.ioc.util.InjectUtil;
 import pers.warren.ioc.util.ScanUtil;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;

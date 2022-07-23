@@ -2,6 +2,7 @@ package pers.warren.ioc.handler;
 
 import cn.antcore.resources.extend.PropertiesResources;
 import cn.antcore.resources.extend.YamlResources;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharUtil;
 import lombok.experimental.UtilityClass;
@@ -11,8 +12,7 @@ import pers.warren.ioc.core.ApplicationContext;
 import pers.warren.ioc.core.Container;
 import pers.warren.ioc.util.ScanUtil;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 @UtilityClass
@@ -27,19 +27,116 @@ public class CokePropertiesHandler {
 
     public void read() {
         try {
+            beforeRead();
             readProperties();
+            readYml();
             readYaml();
             readCoke();
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
     }
 
+    private static void beforeRead() {
+        ScanUtil.localFilePath.addAll(ScanUtil.jarFilePath);
+        Set<String> localFilePath = ScanUtil.localFilePath;
+        List<File> ymlList = new ArrayList<>();
+        List<File> propertiesList = new ArrayList<>();
+        List<File> metaInfoFileList = new ArrayList<>();
+        for (String path : localFilePath) {
+            File f = new File(path);
+            if (f.isDirectory()) {
+                File[] files = f.listFiles(i -> i.isFile() && (i.getName().endsWith(".yml") || i.getName().endsWith(".yaml")));
+                ymlList.addAll(Arrays.asList(files));
+
+                File[] fs = f.listFiles(i -> i.isFile() && (i.getName().endsWith(".properties")));
+                propertiesList.addAll(Arrays.asList(fs));
+
+                File[] metaInfoFiles = f.listFiles(i -> i.getName().equals("META-INF"));
+
+                for (File metaInfoFile : metaInfoFiles) {
+                    if (metaInfoFile.isDirectory()) {
+
+                        metaInfoFileList.addAll(
+                                Arrays.asList(
+                                        metaInfoFile.listFiles(i -> i.isFile())
+                                ));
+                    }
+                }
+            }
+        }
+
+        Container container = Container.getContainer();
+        Map<String, List<InputStream>> propertiesIsMap = container.getPropertiesIsMap();
+        for (File file : ymlList) {
+            String name = file.getName();
+            if (!propertiesIsMap.containsKey(name)) {
+                propertiesIsMap.put(name, new ArrayList<>());
+            }
+            try {
+                propertiesIsMap.get(name).add(new FileInputStream(file));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        for (File file : propertiesList) {
+            String name = file.getName();
+            if (!propertiesIsMap.containsKey(name)) {
+                propertiesIsMap.put(name, new ArrayList<>());
+            }
+            try {
+                propertiesIsMap.get(name).add(new FileInputStream(file));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        for (File file : metaInfoFileList) {
+            String name = file.getName();
+            name = "META-INFO/" + name;
+            if (!propertiesIsMap.containsKey(name)) {
+                propertiesIsMap.put(name, new ArrayList<>());
+            }
+            try {
+                propertiesIsMap.get(name).add(new FileInputStream(file));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        int i = 0;
+    }
+
+    public void readYml() throws IOException {
+        YamlResources resources = new YamlResources();
+        Container container = Container.getContainer();
+        List<InputStream> inputStreams = container.getPropertiesIsMap().get(YML);
+        Map<Object, Object> resourceMap = new HashMap<>();
+        for (InputStream inputStream : inputStreams) {
+            resources.load(inputStream);
+        }
+        resourceMap.putAll(resources.getResources());
+        Map<String, Object> standardization = standardization(resourceMap);
+        ApplicationContext context = Container.getContainer().getBean(ApplicationContext.class.getSimpleName());
+        context.addProperties(standardization);
+    }
+
     public void readYaml() throws IOException {
         YamlResources resources = new YamlResources();
-        resources.loadByClassPath(YML);
-        Map<Object, Object> resourceMap = resources.getResources();
+        Container container = Container.getContainer();
+        List<InputStream> inputStreams = container.getPropertiesIsMap().get(YAML);
+        if(CollUtil.isEmpty(inputStreams)){
+            return;
+        }
+        if(CollUtil.isEmpty(inputStreams)){
+            return;
+        }
+        Map<Object, Object> resourceMap = new HashMap<>();
+        for (InputStream inputStream : inputStreams) {
+            resources.load(inputStream);
+        }
+        resourceMap.putAll(resources.getResources());
         Map<String, Object> standardization = standardization(resourceMap);
         ApplicationContext context = Container.getContainer().getBean(ApplicationContext.class.getSimpleName());
         context.addProperties(standardization);
@@ -48,12 +145,19 @@ public class CokePropertiesHandler {
 
     public void readProperties() throws IOException {
         PropertiesResources resources = new PropertiesResources();
-        resources.loadByClassPath(PROPERTIES);
-        Map<Object, Object> resourceMap = resources.getResources();
+        Container container = Container.getContainer();
+        List<InputStream> inputStreams = container.getPropertiesIsMap().get(PROPERTIES);
+        if(CollUtil.isEmpty(inputStreams)){
+            return;
+        }
+        Map<Object, Object> resourceMap = new HashMap<>();
+        for (InputStream inputStream : inputStreams) {
+            resources.load(inputStream);
+        }
+        resourceMap.putAll(resources.getResources());
         Map<String, Object> standardization = standardization(resourceMap);
         ApplicationContext context = Container.getContainer().getBean(ApplicationContext.class.getSimpleName());
         context.addProperties(standardization);
-
     }
 
     public void readCoke() {
