@@ -43,13 +43,12 @@ public class ScanUtil {
     public final Set<String> jarFilePath = new HashSet<>();
 
 
-
-
     public Set<Class<?>> scan() {
         Class<?> mainClass = deduceMainApplicationClass(); //从堆栈信息推测主类
         String name = ClassUtil.getPackage(mainClass);
         scanPackageFor("pers.warren.ioc");
         scanPackageFor(name);
+        scannerPackagePaths = null;
         return clzs;
     }
 
@@ -89,6 +88,9 @@ public class ScanUtil {
     public static void scanArray(String[] array) {
         for (String scan : array) {
             scanPackageFor(scan);
+            if (scannerPackagePaths == null) {
+                scannerPackagePaths = new HashSet<>();
+            }
             scannerPackagePaths.add(scan);
         }
     }
@@ -113,7 +115,7 @@ public class ScanUtil {
                     String filePath = URLDecoder.decode(url.getFile(), "UTF-8");// 获取包的物理路径
                     String reverse = StrUtil.reverse(filePath);
                     String reverse1 = StrUtil.reverse(pkgDirName);
-                    String reversePath = reverse.replaceFirst(reverse1,"");
+                    String reversePath = reverse.replaceFirst(reverse1, "");
                     String path = StrUtil.reverse(reversePath);
                     localFilePath.add(path);
                     findClassesByFile(pkg, filePath, classes);
@@ -140,7 +142,7 @@ public class ScanUtil {
         String pkgDirName = pkgName.replace('.', '/');
         String reverse = StrUtil.reverse(pkgPath);
         String reverse1 = StrUtil.reverse(pkgDirName);
-        String reversePath = reverse.replaceFirst(reverse1,"");
+        String reversePath = reverse.replaceFirst(reverse1, "");
         String path = StrUtil.reverse(reversePath);
         jarFilePath.add(path);
         File dir = new File(pkgPath);

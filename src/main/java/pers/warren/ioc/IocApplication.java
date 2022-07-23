@@ -11,9 +11,6 @@ import pers.warren.ioc.util.InjectUtil;
 import pers.warren.ioc.util.ScanUtil;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -40,9 +37,11 @@ public class IocApplication {
 
         clzSet = ScanUtil.scan();   //包扫描
 
-        loadBasicComponent();       //加载基础组件 、 包括ApplicationContext初始化，BeanRegister初始化，BeanFactory初始化，BeanPostProcessor初始化
+        loadContext();       //加载ApplicationContext
 
         CokePropertiesHandler.read();   //读取配置文件  ， 依赖于包扫描
+
+        loadBasicComponent();       //加载基础组件 、 包括BeanRegister初始化，BeanFactory初始化，BeanPostProcessor初始化
 
         loadConfiguration();         //扫描需要初始化的Bean生成BeanDefinition
 
@@ -57,7 +56,10 @@ public class IocApplication {
         return Container.getContainer().applicationContext();
     }
 
-    private static void loadBasicComponent() {
+    /**
+     * 加载上下文
+     */
+    private static void loadContext() {
         Container container = Container.getContainer();
         for (Class<?> aClass : clzSet) {
             if (ApplicationContext.class.isAssignableFrom(aClass)) {
@@ -70,7 +72,13 @@ public class IocApplication {
                 }
                 container.addComponent(aClass.getSimpleName(), o);
             }
+        }
 
+    }
+
+    private static void loadBasicComponent() {
+        Container container = Container.getContainer();
+        for (Class<?> aClass : clzSet) {
             if (BeanPostProcessor.class.isAssignableFrom(aClass) && (!BeanPostProcessor.class.equals(aClass))) {
                 Object o = null;
                 try {
