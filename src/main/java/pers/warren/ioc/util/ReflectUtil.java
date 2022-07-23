@@ -31,6 +31,9 @@ public class ReflectUtil {
         final int methodParameterCount = methodParameterTypes.length;
         final String className = method.getDeclaringClass().getName();
         final boolean isStatic = Modifier.isStatic(method.getModifiers());
+        if(methodParameterCount == 0){
+            return new String[0];
+        }
         final String[] methodParametersNames = new String[methodParameterCount];
 
         ClassReader cr = new ClassReader(className);

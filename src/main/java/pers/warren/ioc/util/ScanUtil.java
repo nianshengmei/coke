@@ -50,7 +50,6 @@ public class ScanUtil {
         String name = ClassUtil.getPackage(mainClass);
         scanPackageFor("pers.warren.ioc");
         scanPackageFor(name);
-        scannerPackagePaths = null;
         return clzs;
     }
 
