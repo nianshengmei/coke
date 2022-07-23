@@ -66,9 +66,14 @@ public class Container implements BeanDefinitionRegistry {
         Collection<Object> values = componentMap.values();
         List<T> tList = new ArrayList<>();
         for (Object bean : values) {
-            if(clz.isAssignableFrom(bean.getClass())){
-                tList.add((T)bean);
+            try {
+                if(clz.isAssignableFrom(bean.getClass())){
+                    tList.add((T)bean);
+                }
+            }catch (Exception e){
+                continue;
             }
+
         }
         return tList;
     }
