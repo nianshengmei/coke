@@ -36,23 +36,23 @@ public class IocApplication {
     private static long startTimeMills;
 
     public static ApplicationContext run(Class<?> clz, String[] args) {
-        start();
+        start();      //IOC启动前置方法,包括打印banner
 
-        clzSet = ScanUtil.scan();   //扫描类
+        clzSet = ScanUtil.scan();   //包扫描
 
-        loadBasicComponent();
+        loadBasicComponent();       //加载基础组件 、 包括ApplicationContext初始化，BeanRegister初始化，BeanFactory初始化，BeanPostProcessor初始化
 
-        CokePropertiesHandler.read();
+        CokePropertiesHandler.read();   //读取配置文件  ， 依赖于包扫描
 
-        loadConfiguration();
+        loadConfiguration();         //扫描需要初始化的Bean生成BeanDefinition
 
-        loadBean();
+        loadBean();                  //初始化Bean
 
-        injectProperties();
+        injectProperties();          //注入配置文件
 
-        injectField();
+        injectField();               //注入Bean
 
-        end();
+        end();                       //容器启动后置方法
 
         return Container.getContainer().applicationContext();
     }
