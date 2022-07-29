@@ -87,7 +87,7 @@ public class DefaultFactoryBean implements FactoryBean {
                     } else {
                         FactoryBean factoryBean = currentBeanFactory.createBean(bdByType);
                         Container.getContainer().addComponent(bdByType.getName(), factoryBean.getObject());
-                        Container.getContainer().addFactoryBean(bdByName.getName(), factoryBean);
+                        Container.getContainer().addFactoryBean(bdByType.getName(), factoryBean);
                     }
                     bean = Container.getContainer().getBean(methodParamNames.get(i));
                     if (null == bean) {
