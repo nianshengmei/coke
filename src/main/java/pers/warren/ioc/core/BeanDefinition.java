@@ -72,4 +72,9 @@ public class BeanDefinition {
     public BeanDefinition() {
         this.singleton = true;
     }
+
+    /**
+     * bean注册器
+     */
+    private BeanRegister register;
 }

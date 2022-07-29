@@ -4,10 +4,20 @@ import pers.warren.ioc.util.ReflectUtil;
 
 import java.lang.reflect.Method;
 
+/**
+ * 简单Bean的FactoryBean
+ * @author warren
+ */
 public class SimpleFactoryBean implements FactoryBean {
 
+    /**
+     * beanDefinition
+     */
     private BeanDefinition beanDefinition;
 
+    /**
+     * 创建FactoryBean的BeanFactory
+     */
     private BeanFactory currentBeanFactory;
 
     public SimpleFactoryBean(BeanDefinition beanDefinition, BeanFactory currentBeanFactory) {
@@ -19,6 +29,7 @@ public class SimpleFactoryBean implements FactoryBean {
     @Override
     public Object getObject() {
         Container container = Container.getContainer();
+        //如果bean的类型是单例，那么尝试从容器中获取bean
         if (beanDefinition.isSingleton()) {
             Object bean = container.getBean(beanDefinition.getName());
             if (null != bean) {

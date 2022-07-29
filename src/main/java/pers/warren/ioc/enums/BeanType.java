@@ -1,15 +1,28 @@
 package pers.warren.ioc.enums;
 
-
+/**
+ * Bean的类型
+ *
+ * @author warren
+ * @since jdk8
+ */
 public enum BeanType {
 
-    SIMPLE_BEAN,   //简单bean
+    /**
+     * 简单bean
+     * 一般是由函数声明的Bean,例如@Bean修饰的方法创建出的Bean
+     */
+    SIMPLE_BEAN,
 
-    COMPONENT,     //组件
+    /**
+     * 组件
+     * 一般是由类声明的Bean,例如@Component修饰的方法创建出的Bean
+     */
+    COMPONENT,
 
-    CONFIGURATION  //配置
-
-
-
-    ;
+    /**
+     * 配置
+     * 仅限于@Confguration,也可以扩展，但需要支持包扫描，一般不建议
+     */
+    CONFIGURATION;
 }

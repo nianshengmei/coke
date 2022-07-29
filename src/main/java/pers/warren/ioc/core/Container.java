@@ -23,6 +23,11 @@ public class Container implements BeanDefinitionRegistry {
 
     public void addComponent(String name, Object o) {
         componentMap.put(name, o);
+        BeanDefinition beanDefinition = beanDefinitionMap.get(name);
+        List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);
+        for (BeanPostProcessor postProcessor : postProcessors) {
+            postProcessor.postProcessBeforeInitialization(beanDefinition, beanDefinition.getRegister());
+        }
     }
 
     private static Container container;

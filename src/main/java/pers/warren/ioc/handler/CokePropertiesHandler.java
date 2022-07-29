@@ -126,10 +126,10 @@ public class CokePropertiesHandler {
         YamlResources resources = new YamlResources();
         Container container = Container.getContainer();
         List<InputStream> inputStreams = container.getPropertiesIsMap().get(YAML);
-        if(CollUtil.isEmpty(inputStreams)){
+        if (CollUtil.isEmpty(inputStreams)) {
             return;
         }
-        if(CollUtil.isEmpty(inputStreams)){
+        if (CollUtil.isEmpty(inputStreams)) {
             return;
         }
         Map<Object, Object> resourceMap = new HashMap<>();
@@ -147,7 +147,7 @@ public class CokePropertiesHandler {
         PropertiesResources resources = new PropertiesResources();
         Container container = Container.getContainer();
         List<InputStream> inputStreams = container.getPropertiesIsMap().get(PROPERTIES);
-        if(CollUtil.isEmpty(inputStreams)){
+        if (CollUtil.isEmpty(inputStreams)) {
             return;
         }
         Map<Object, Object> resourceMap = new HashMap<>();
@@ -200,8 +200,17 @@ public class CokePropertiesHandler {
      * 用于描述配置数组的内部类
      */
     private static class ConfigObject implements Comparable<ConfigObject> {
+
+        /**
+         * 用于配置文件数组字段的排序
+         * <p>
+         * 严格保证配置文件中是什么顺序,读出来就是什么顺序
+         */
         public int index;
 
+        /**
+         * 值对象，一般为String
+         */
         public Object v;
 
         @Override
