@@ -5,11 +5,16 @@ package pers.warren.ioc.core;
  */
 public interface BeanPostProcessor {
 
+    /**
+     * 前置拦截器
+     */
     default void postProcessBeforeInitialization(BeanDefinition beanDefinition ,BeanRegister register) {
 
     }
 
-
+    /**
+     * 后置拦截方法
+     */
     default void postProcessAfterInitialization(BeanDefinition beanDefinition , BeanRegister register) {
 
     }

@@ -75,6 +75,7 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
                 if (!method.getReturnType().equals(Void.class)) {
                     BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(method.getReturnType(),
                             name, BeanType.SIMPLE_BEAN, method, beanDefinition.getName()).setFactoryBeanType(SimpleFactoryBean.class);
+                    builder.setRegister(register);
                     register.registerBeanDefinition(builder, Container.getContainer());
                 }
             }
@@ -85,8 +86,6 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
     @Override
     public void postProcessAfterInitialization(BeanDefinition beanDefinition, BeanRegister register) {
         System.out.println(beanDefinition.getName()+" 创建成功!!!");
-        Object bean = Container.getContainer().getBean(beanDefinition.getName());
-        System.out.println(bean.toString());
     }
 
 

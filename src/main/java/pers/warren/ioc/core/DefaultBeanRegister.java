@@ -40,6 +40,7 @@ public class DefaultBeanRegister implements BeanRegister {
                     null,
                     name
             );
+            builder.setRegister(this);
             beanDefinition = builder.build();
         } else if (metadata.hasAnnotation(Component.class)) {
             String name = getName(metadata, registry);
@@ -49,6 +50,7 @@ public class DefaultBeanRegister implements BeanRegister {
                     null,
                     name
             );
+            builder.setRegister(this);
             beanDefinition = builder.build();
         }
         registerBeanDefinition(builder, registry);

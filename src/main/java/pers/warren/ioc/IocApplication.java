@@ -118,8 +118,10 @@ public class IocApplication {
     private static void loadBean() {
         Container container = Container.getContainer();
         List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(BeanType.CONFIGURATION);
-
         for (BeanDefinition beanDefinition : beanDefinitions) {
+            if(null != container.getBean(beanDefinition.getName())){
+                continue;
+            }
             BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
             FactoryBean factoryBean = beanFactory.createBean(beanDefinition);
             container.addFactoryBean(beanDefinition.getName(), factoryBean);
@@ -128,6 +130,9 @@ public class IocApplication {
 
         beanDefinitions = container.getBeanDefinitions(BeanType.COMPONENT);
         for (BeanDefinition beanDefinition : beanDefinitions) {
+            if(null != container.getBean(beanDefinition.getName())){
+                continue;
+            }
             BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
             FactoryBean factoryBean = beanFactory.createBean(beanDefinition);
             container.addFactoryBean(beanDefinition.getName(), factoryBean);
@@ -136,6 +141,9 @@ public class IocApplication {
 
         beanDefinitions = container.getBeanDefinitions(BeanType.SIMPLE_BEAN);
         for (BeanDefinition beanDefinition : beanDefinitions) {
+            if(null != container.getBean(beanDefinition.getName())){
+                continue;
+            }
             BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
             FactoryBean factoryBean = beanFactory.createBean(beanDefinition);
             container.addFactoryBean(beanDefinition.getName(), factoryBean);

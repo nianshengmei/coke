@@ -23,18 +23,22 @@ public class Container implements BeanDefinitionRegistry {
 
     public void addComponent(String name, Object o) {
         componentMap.put(name, o);
+        /* 后面的是对后置拦截的补偿 */
         BeanDefinition beanDefinition = beanDefinitionMap.get(name);
+        if (null == beanDefinition) {
+            return;
+        }
         List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);
         for (BeanPostProcessor postProcessor : postProcessors) {
-            postProcessor.postProcessBeforeInitialization(beanDefinition, beanDefinition.getRegister());
+            postProcessor.postProcessAfterInitialization(beanDefinition, beanDefinition.getRegister());
         }
     }
 
     private static Container container;
 
-    private final Map<String,List<InputStream>> propertiesIsMap = new HashMap<>();
+    private final Map<String, List<InputStream>> propertiesIsMap = new HashMap<>();
 
-    public Map<String,List<InputStream>> getPropertiesIsMap(){
+    public Map<String, List<InputStream>> getPropertiesIsMap() {
         return propertiesIsMap;
     }
 
@@ -45,7 +49,7 @@ public class Container implements BeanDefinitionRegistry {
         return container;
     }
 
-    public ApplicationContext applicationContext(){
+    public ApplicationContext applicationContext() {
         return this.getBean(ApplicationContext.class);
     }
 
@@ -72,10 +76,10 @@ public class Container implements BeanDefinitionRegistry {
         List<T> tList = new ArrayList<>();
         for (Object bean : values) {
             try {
-                if(clz.isAssignableFrom(bean.getClass())){
-                    tList.add((T)bean);
+                if (clz.isAssignableFrom(bean.getClass())) {
+                    tList.add((T) bean);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 continue;
             }
 
@@ -104,7 +108,7 @@ public class Container implements BeanDefinitionRegistry {
         Collection<BeanDefinition> values = beanDefinitionMap.values();
         for (BeanDefinition value : values) {
             Class<?> aClass = value.getClz();
-            if(clz.isAssignableFrom(aClass)){
+            if (clz.isAssignableFrom(aClass)) {
                 return value;
             }
         }

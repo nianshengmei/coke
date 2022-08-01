@@ -50,6 +50,11 @@ public class BeanDefinitionBuilder {
         return this;
     }
 
+    public BeanDefinitionBuilder setRegister(BeanRegister register){
+        this.beanDefinition.setRegister(register);
+        return this;
+    }
+
     public BeanDefinition build() {
         return beanDefinition;
     }
