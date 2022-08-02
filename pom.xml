@@ -9,8 +9,9 @@
     <packaging>jar</packaging>
     <version>1.0.1</version>
     <properties>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <jv>1.8</jv>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -68,8 +69,8 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>${jv}</source>
+                    <target>${jv}</target>
                     <encoding>UTF-8</encoding>
                     <compilerArguments>
                         <verbose />

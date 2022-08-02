@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.enums.BeanType;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,9 +37,9 @@ public class Container implements BeanDefinitionRegistry {
 
     private static Container container;
 
-    private final Map<String, List<InputStream>> propertiesIsMap = new HashMap<>();
+    private final Map<String, List<File>> propertiesIsMap = new HashMap<>();
 
-    public Map<String, List<InputStream>> getPropertiesIsMap() {
+    public Map<String, List<File>> getPropertiesIsMap() {
         return propertiesIsMap;
     }
 
