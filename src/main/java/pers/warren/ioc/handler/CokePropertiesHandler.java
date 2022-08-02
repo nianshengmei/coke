@@ -36,7 +36,7 @@ public class CokePropertiesHandler {
         if (StrUtil.isNotEmpty(property)) {
             String[] paths = property.split(";");
             fileScanPath = Arrays.stream(paths).filter(
-                    i -> new File(i).isDirectory()
+                    i -> new File(i).isDirectory() || i.endsWith(".jar")
             ).collect(Collectors.toList());
 
         }
@@ -71,14 +71,15 @@ public class CokePropertiesHandler {
                 propertiesList.addAll(Arrays.asList(fs));
             }
             File[] metaInfoFiles = f.listFiles(i -> i.getName().equals("META-INF"));
+            if(null != metaInfoFiles) {
+                for (File metaInfoFile : metaInfoFiles) {
+                    if (metaInfoFile.isDirectory()) {
 
-            for (File metaInfoFile : metaInfoFiles) {
-                if (metaInfoFile.isDirectory()) {
-
-                    metaInfoFileList.addAll(
-                            Arrays.asList(
-                                    metaInfoFile.listFiles(i -> i.isFile())
-                            ));
+                        metaInfoFileList.addAll(
+                                Arrays.asList(
+                                        metaInfoFile.listFiles(i -> i.isFile())
+                                ));
+                    }
                 }
             }
         }
