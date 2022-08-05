@@ -37,10 +37,17 @@ public class Container implements BeanDefinitionRegistry {
 
     private static Container container;
 
-    private final Map<String, List<File>> propertiesIsMap = new HashMap<>();
+    private final Map<String, List<InputStream>> propertiesIsMap = new HashMap<>();
 
-    public Map<String, List<File>> getPropertiesIsMap() {
+    public Map<String, List<InputStream>> getPropertiesIsMap() {
         return propertiesIsMap;
+    }
+
+    public void addPropertiesIs(String name, InputStream is) {
+        if (!propertiesIsMap.containsKey(name)) {
+            propertiesIsMap.put(name, new ArrayList<>());
+        }
+        propertiesIsMap.get(name).add(is);
     }
 
     public static Container getContainer() {
