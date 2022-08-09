@@ -5,6 +5,7 @@ import pers.warren.ioc.enums.BeanType;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class BeanDefinition {
@@ -12,69 +13,74 @@ public class BeanDefinition {
     /**
      * bean名称
      */
-    private String name;
+    protected String name;
 
     /**
      * bean的类型
      */
-    private Class<?> clz;
+    protected Class<?> clz;
 
     /**
      * 是否单例
      */
-    private boolean singleton;
+    protected boolean singleton;
 
     /**
      * bean类型
      */
-    private BeanType beanType;
+    protected BeanType beanType;
 
     /**
      * 创建Bean方法
      */
-    private Object invokeFunction;
+    protected Object invokeFunction;
 
     /**
      * 用于@Bean生成的bean源
      */
-    private String invokeSource;
+    protected String invokeSource;
 
     /**
      * 增强扩展预留
      */
-    private List<PropertyValue> propertyValues;
+    protected List<PropertyValue> propertyValues;
 
     /**
      * 标注了@Autowired的字段
      */
-    private List<Field> autowiredFieldInject;
+    protected List<Field> autowiredFieldInject;
 
     /**
      * 标注了@Resource的字段
      */
-    private List<Field> resourceFieldInject;
+    protected List<Field> resourceFieldInject;
 
     /**
      * 标注了@Value的字段
      */
-    private List<ValueField> valueFiledInject;
+    protected List<ValueField> valueFiledInject;
 
     /**
      * 用于创建的beanFactory类型
      */
-    private Class<?>  beanFactoryClass;
+    protected Class<?>  beanFactoryClass;
 
     /**
      * 使用那个factoryBean去getObject
      */
-    private Class<?> factoryBeanClass;
+    protected Class<?> factoryBeanClass;
 
-    public BeanDefinition() {
+    protected BeanDefinition() {
         this.singleton = true;
     }
 
     /**
      * bean注册器
      */
-    private BeanRegister register;
+    protected BeanRegister register;
+
+    /**
+     * 扩展字段
+     */
+    protected Map<String,BeanDefinitionExtendedField> extendedFields;
 }
