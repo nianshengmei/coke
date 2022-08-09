@@ -2,6 +2,8 @@ package pers.warren.ioc.core;
 
 import pers.warren.ioc.enums.BeanType;
 
+import java.lang.annotation.Annotation;
+
 /**
  * beanDefinition创建工具
  *
@@ -52,6 +54,11 @@ public class BeanDefinitionBuilder {
 
     public BeanDefinitionBuilder setRegister(BeanRegister register){
         this.beanDefinition.setRegister(register);
+        return this;
+    }
+
+    public BeanDefinitionBuilder setScanByAnnotation(Class<?> annotation){
+        this.beanDefinition.setScanByAnnotation(annotation);
         return this;
     }
 

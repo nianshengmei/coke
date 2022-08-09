@@ -3,6 +3,7 @@ package pers.warren.ioc.core;
 import lombok.Data;
 import pers.warren.ioc.enums.BeanType;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,11 @@ public class BeanDefinition {
      * 是否单例
      */
     protected boolean singleton;
+
+    /**
+     * 因为什么注解被扫描为BeanDefinition
+     */
+    protected Class<?> scanByAnnotation;
 
     /**
      * bean类型
