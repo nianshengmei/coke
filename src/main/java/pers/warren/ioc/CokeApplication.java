@@ -20,7 +20,7 @@ import java.util.*;
  */
 
 @Slf4j
-public class IocApplication {
+public class CokeApplication {
 
     /**
      * 所有符合扫描规则下的类的集合
@@ -117,39 +117,19 @@ public class IocApplication {
 
     private static void loadBean() {
         Container container = Container.getContainer();
-        List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(BeanType.CONFIGURATION);
-        for (BeanDefinition beanDefinition : beanDefinitions) {
-            if(null != container.getBean(beanDefinition.getName())){
-                continue;
+        BeanType[] beanTypes = new BeanType[]{BeanType.CONFIGURATION,BeanType.COMPONENT,BeanType.SIMPLE_BEAN};
+        for (BeanType beanType : beanTypes) {
+            List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(beanType);
+            for (BeanDefinition beanDefinition : beanDefinitions) {
+                if(null != container.getBean(beanDefinition.getName())){
+                    continue;
+                }
+                BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
+                FactoryBean factoryBean = beanFactory.createBean(beanDefinition);
+                container.addFactoryBean(beanDefinition.getName(), factoryBean);
+                container.addComponent(beanDefinition.getName(), factoryBean.getObject());
             }
-            BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
-            FactoryBean factoryBean = beanFactory.createBean(beanDefinition);
-            container.addFactoryBean(beanDefinition.getName(), factoryBean);
-            container.addComponent(beanDefinition.getName(), factoryBean.getObject());
         }
-
-        beanDefinitions = container.getBeanDefinitions(BeanType.COMPONENT);
-        for (BeanDefinition beanDefinition : beanDefinitions) {
-            if(null != container.getBean(beanDefinition.getName())){
-                continue;
-            }
-            BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
-            FactoryBean factoryBean = beanFactory.createBean(beanDefinition);
-            container.addFactoryBean(beanDefinition.getName(), factoryBean);
-            container.addComponent(beanDefinition.getName(), factoryBean.getObject());
-        }
-
-        beanDefinitions = container.getBeanDefinitions(BeanType.SIMPLE_BEAN);
-        for (BeanDefinition beanDefinition : beanDefinitions) {
-            if(null != container.getBean(beanDefinition.getName())){
-                continue;
-            }
-            BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
-            FactoryBean factoryBean = beanFactory.createBean(beanDefinition);
-            container.addFactoryBean(beanDefinition.getName(), factoryBean);
-            container.addComponent(beanDefinition.getName(), factoryBean.getObject());
-        }
-
     }
 
     public static void injectProperties() {

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.needcoke</groupId>
-    <artifactId>ioc</artifactId>
+    <artifactId>coke</artifactId>
     <packaging>jar</packaging>
     <version>1.0.1</version>
     <properties>
