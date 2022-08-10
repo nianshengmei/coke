@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import pers.warren.ioc.annotation.Autowired;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
+import pers.warren.ioc.handler.CokePostHandler;
 import pers.warren.ioc.handler.CokePropertiesHandler;
 import pers.warren.ioc.util.InjectUtil;
 import pers.warren.ioc.util.ScanUtil;
@@ -14,6 +15,7 @@ import javax.annotation.Resource;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 容器的启动辅助类
@@ -117,11 +119,11 @@ public class CokeApplication {
 
     private static void loadBean() {
         Container container = Container.getContainer();
-        BeanType[] beanTypes = new BeanType[]{BeanType.CONFIGURATION,BeanType.COMPONENT,BeanType.SIMPLE_BEAN};
+        BeanType[] beanTypes = new BeanType[]{BeanType.CONFIGURATION, BeanType.COMPONENT, BeanType.SIMPLE_BEAN};
         for (BeanType beanType : beanTypes) {
             List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(beanType);
             for (BeanDefinition beanDefinition : beanDefinitions) {
-                if(null != container.getBean(beanDefinition.getName())){
+                if (null != container.getBean(beanDefinition.getName())) {
                     continue;
                 }
                 BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
@@ -249,7 +251,8 @@ public class CokeApplication {
      * 启动完成的后置操作
      */
     private static void end() {
-        log.info("needcoke-ioc start ok! cost = {}ms", System.currentTimeMillis() - startTimeMills);
+        postHandlerRun();
+        log.info("coke start ok! cost = {}ms", System.currentTimeMillis() - startTimeMills);
     }
 
     /**
@@ -263,6 +266,14 @@ public class CokeApplication {
             for (BeanRegister beanRegister : beanRegisters) {
                 beanRegister.initialization(metadata, container);
             }
+        }
+    }
+
+    private static void postHandlerRun() {
+        Container container = Container.getContainer();
+        List<CokePostHandler> postHandlers = container.getBeans(CokePostHandler.class);
+        for (CokePostHandler postHandler : postHandlers) {
+            postHandler.run();
         }
     }
 }
