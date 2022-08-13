@@ -103,8 +103,6 @@ public class DefaultFactoryBean implements FactoryBean {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

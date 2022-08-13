@@ -57,7 +57,12 @@ public class BeanDefinitionBuilder {
         return this;
     }
 
-    public BeanDefinitionBuilder setScanByAnnotation(Class<?> annotation){
+    public BeanDefinitionBuilder setScanByAnnotationClass(Class<?> annotationClass){
+        this.beanDefinition.setScanByAnnotationClass(annotationClass);
+        return this;
+    }
+
+    public BeanDefinitionBuilder setScanByAnnotation(Annotation annotation){
         this.beanDefinition.setScanByAnnotation(annotation);
         return this;
     }

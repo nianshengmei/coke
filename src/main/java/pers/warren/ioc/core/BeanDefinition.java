@@ -29,7 +29,12 @@ public class BeanDefinition {
     /**
      * 因为什么注解被扫描为BeanDefinition
      */
-    protected Class<?> scanByAnnotation;
+    protected Class<?> scanByAnnotationClass;
+
+    /**
+     * 因为什么注解被扫描为BeanDefinition
+     */
+    protected Annotation scanByAnnotation;
 
     /**
      * bean类型
