@@ -35,6 +35,16 @@ public class Container implements BeanDefinitionRegistry {
         }
     }
 
+    public boolean hasEqualComponent(Class<?> clz){
+        Collection<Object> values = componentMap.values();
+        for (Object value : values) {
+            if(value.getClass().equals(clz)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static Container container;
 
     private final Map<String, List<InputStream>> propertiesIsMap = new HashMap<>();

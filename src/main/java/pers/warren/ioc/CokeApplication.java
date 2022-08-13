@@ -61,10 +61,10 @@ public class CokeApplication {
     /**
      * 加载上下文
      */
-    private static void loadContext() {
+    protected static void loadContext() {
         Container container = Container.getContainer();
         for (Class<?> aClass : clzSet) {
-            if (ApplicationContext.class.isAssignableFrom(aClass)) {
+            if (ApplicationContext.class.isAssignableFrom(aClass) && (!container.hasEqualComponent(aClass))) {
                 Object o = null;
                 try {
                     Constructor<?> constructor = aClass.getConstructor();
@@ -78,7 +78,7 @@ public class CokeApplication {
 
     }
 
-    private static void loadBasicComponent() {
+    protected static void loadBasicComponent() {
         Container container = Container.getContainer();
         for (Class<?> aClass : clzSet) {
             if (BeanPostProcessor.class.isAssignableFrom(aClass) && (!BeanPostProcessor.class.equals(aClass))) {
@@ -141,6 +141,9 @@ public class CokeApplication {
         for (BeanDefinition beanDefinition : beanDefinitions) {
             List<ValueField> valueFiledInject = beanDefinition.getValueFiledInject();
             for (ValueField field : valueFiledInject) {
+                if (null == field.getConfigValue() && null == field.getDefaultValue()) {
+                    continue;
+                }
                 Field f = field.getField();
                 Object bean = container.getBean(beanDefinition.getName());
 
