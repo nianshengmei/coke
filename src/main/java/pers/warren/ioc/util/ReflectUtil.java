@@ -6,6 +6,7 @@ import javassist.bytecode.LocalVariableAttribute;
 import lombok.experimental.UtilityClass;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -16,7 +17,7 @@ import java.util.List;
 public class ReflectUtil {
 
 
-    public String[] getParameterNames(final Method method) throws IOException {
+    public String[] getParameterNames(final Method method) {
         List<String> paramNames = new ArrayList<>();
         ClassPool pool = ClassPool.getDefault();
         try {
@@ -57,11 +58,11 @@ public class ReflectUtil {
                     if (null != parameterTypes && pts.length == parameterTypes.length) {
                         boolean match = true;
                         for (int i = 0; i < parameterTypes.length; i++) {
-                            if(!parameterTypes[i].getName().equals(pts[i].getName())){
+                            if (!parameterTypes[i].getName().equals(pts[i].getName())) {
                                 match = false;
                             }
                         }
-                        if(match){
+                        if (match) {
                             ctc = ctConstructor;
                             break;
                         }
@@ -87,6 +88,13 @@ public class ReflectUtil {
             String msg = constructor.getDeclaringClass().getName() + "#" + constructor.getName();
             throw new RuntimeException("get constructor param error method = " + msg, e);
         }
+    }
+
+    public boolean containsAnnotation(Method method, Class annotationClz) {
+        if (null != method.getAnnotation(annotationClz)) {
+            return true;
+        }
+        return false;
     }
 
 }

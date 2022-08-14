@@ -47,6 +47,7 @@ public class ScanUtil {
         Class<?> mainClass = deduceMainApplicationClass(); //从堆栈信息推测主类
         String name = ClassUtil.getPackage(mainClass);
         scanPackageFor("pers.warren.ioc");
+        scanPackageFor("org.needcoke");
         scanPackageFor(name);
         scannerPackagePaths = null;
         return clzs;
