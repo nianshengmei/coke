@@ -85,7 +85,6 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public void postProcessAfterInitialization(BeanDefinition beanDefinition, BeanRegister register) {
-        System.out.println(beanDefinition.getName()+" 创建成功!!!");
     }
 
 
