@@ -31,6 +31,10 @@ public class InjectUtil {
             return Integer.parseInt(vs);
         } else if (field.getType().getTypeName().equals(Double.class.getTypeName())) {
             return Double.parseDouble(vs);
+        } else if (field.getType().getTypeName().equals(Float.class.getTypeName())) {
+            return Double.parseDouble(vs);
+        } else if (field.getType().getTypeName().equals(float.class.getTypeName())) {
+            return Double.parseDouble(vs);
         } else if (field.getType().getTypeName().equals(Long.class.getTypeName()) ||
                 field.getType().getTypeName().equals(long.class.getTypeName())) {
             return Long.parseLong(vs);
@@ -143,7 +147,6 @@ public class InjectUtil {
             throw new RuntimeException("不支持该类型转换，请使用String转换");
         }
     }
-
 
     public static void fun(ValueField field, List list) {
         ParameterizedType genericType = (ParameterizedType) field.getGenericType();
