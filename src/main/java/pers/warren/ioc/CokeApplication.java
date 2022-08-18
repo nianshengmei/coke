@@ -43,6 +43,8 @@ public class CokeApplication {
 
         CokePropertiesHandler.read();   //读取配置文件  ， 依赖于包扫描
 
+        log.info("scan java and resource files ok, cost {} ms ",System.currentTimeMillis()-startTimeMills);
+
         loadBasicComponent();       //加载基础组件 、 包括BeanRegister初始化，BeanFactory初始化，BeanPostProcessor初始化
 
         loadConfiguration();         //扫描需要初始化的Bean生成BeanDefinition
