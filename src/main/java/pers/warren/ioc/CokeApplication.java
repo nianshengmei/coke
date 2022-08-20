@@ -1,5 +1,6 @@
 package pers.warren.ioc;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import javax.annotation.Resource;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 容器的启动辅助类
@@ -43,7 +43,7 @@ public class CokeApplication {
 
         CokePropertiesHandler.read();   //读取配置文件  ， 依赖于包扫描
 
-        log.info("scan java and resource files ok, cost {} ms ",System.currentTimeMillis()-startTimeMills);
+        log.info("scan java and resource files ok, cost {} ms !",System.currentTimeMillis()-startTimeMills);
 
         loadBasicComponent();       //加载基础组件 、 包括BeanRegister初始化，BeanFactory初始化，BeanPostProcessor初始化
 
@@ -257,7 +257,7 @@ public class CokeApplication {
      */
     private static void end() {
         postHandlerRun();
-        log.info("coke start ok! cost = {}ms", System.currentTimeMillis() - startTimeMills);
+        log.info("coke start ok! cost = {} ms !", System.currentTimeMillis() - startTimeMills);
     }
 
     /**
@@ -277,6 +277,9 @@ public class CokeApplication {
     private static void postHandlerRun() {
         Container container = Container.getContainer();
         List<CokePostHandler> postHandlers = container.getBeans(CokePostHandler.class);
+        if(CollUtil.isNotEmpty(postHandlers)){
+            log.info("coke start cost {} ms before post handler run !",System.currentTimeMillis() - startTimeMills);
+        }
         for (CokePostHandler postHandler : postHandlers) {
             postHandler.run();
         }
