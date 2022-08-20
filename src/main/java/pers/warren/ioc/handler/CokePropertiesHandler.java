@@ -67,6 +67,9 @@ public class CokePropertiesHandler {
         YamlResources resources = new YamlResources();
         Container container = Container.getContainer();
         List<InputStream> inputStreams = container.getPropertiesIsMap().get(YML);
+        if(CollUtil.isEmpty(inputStreams)){
+            return;
+        }
         Map<Object, Object> resourceMap = new HashMap<>();
         for (InputStream inputStream : inputStreams) {
             resources.load(inputStream);
@@ -118,6 +121,9 @@ public class CokePropertiesHandler {
     public void readCoke() {
         Container container = Container.getContainer();
         List<InputStream> inputStreams = container.getPropertiesIsMap().get(COKE);
+        if(CollUtil.isEmpty(inputStreams)){
+            return;
+        }
         for (InputStream in : inputStreams) {
             String content = null;
             try {
