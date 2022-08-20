@@ -3,7 +3,6 @@ package pers.warren.ioc.handler;
 import cn.antcore.resources.extend.PropertiesResources;
 import cn.antcore.resources.extend.YamlResources;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.experimental.UtilityClass;
