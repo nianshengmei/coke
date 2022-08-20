@@ -41,7 +41,7 @@ public class CokeApplication {
 
         loadContext();       //加载ApplicationContext
 
-        CokePropertiesHandler.read();   //读取配置文件  ， 依赖于包扫描
+        CokePropertiesHandler.read();   //读取配置文件
 
         log.info("scan java and resource files ok, cost {} ms ",System.currentTimeMillis()-startTimeMills);
 
