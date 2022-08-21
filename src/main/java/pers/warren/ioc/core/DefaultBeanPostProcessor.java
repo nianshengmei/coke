@@ -7,10 +7,9 @@ import pers.warren.ioc.annotation.Bean;
 import pers.warren.ioc.annotation.Value;
 import pers.warren.ioc.enums.BeanType;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,6 +84,26 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public void postProcessAfterInitialization(BeanDefinition beanDefinition, BeanRegister register) {
+        Class<?> clz = beanDefinition.getClz();
+        Method[] declaredMethods  = clz.getDeclaredMethods();
+        for (Method declaredMethod : declaredMethods) {
+            PostConstruct annotation = declaredMethod.getAnnotation(PostConstruct.class);
+            if (null != annotation) {
+                Object bean = Container.getContainer().getBean(beanDefinition.getName());
+                Parameter[] parameters = declaredMethod.getParameters();
+                Object[] paramArr = null;
+                if (null != parameters && parameters.length > 0) {
+                    //TODO 容器中寻找一波参数
+                } else {
+                    paramArr = new Object[0];
+                }
+                try {
+                    declaredMethod.invoke(bean, paramArr);
+                } catch (Exception e) {
+                    throw new RuntimeException("@PostConstruct error see class " + clz.getName() + " method = " + declaredMethod.getName(), e);
+                }
+            }
+        }
     }
 
 
