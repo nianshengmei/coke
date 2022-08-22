@@ -3,8 +3,6 @@ package pers.warren.ioc.core;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.enums.BeanType;
-
-import java.io.File;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -131,6 +129,18 @@ public class Container implements BeanDefinitionRegistry {
             }
         }
         return null;
+    }
+
+    public List<BeanDefinition> getBeanDefinitions(Class<?> clz) {
+        List<BeanDefinition> dfs = new ArrayList<>();
+        Collection<BeanDefinition> values = beanDefinitionMap.values();
+        for (BeanDefinition value : values) {
+            Class<?> aClass = value.getClz();
+            if (clz.isAssignableFrom(aClass)) {
+                dfs.add(value);
+            }
+        }
+        return dfs;
     }
 
     @Override
