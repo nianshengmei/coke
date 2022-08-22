@@ -27,6 +27,11 @@ public class BeanDefinition {
     protected boolean singleton;
 
     /**
+     * 是否代理
+     */
+    private boolean proxy;
+
+    /**
      * 因为什么注解被扫描为BeanDefinition
      */
     protected Class<?> scanByAnnotationClass;
