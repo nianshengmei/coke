@@ -22,7 +22,8 @@ public class ReflectUtil {
         ClassPool pool = ClassPool.getDefault();
         try {
             CtClass ctClass = pool.getCtClass(method.getDeclaringClass().getName());
-            CtMethod ctMethod = ctClass.getDeclaredMethod(method.getName());
+            CtClass[] ctClasses = changeArray(method.getParameterTypes());
+            CtMethod ctMethod = ctClass.getDeclaredMethod(method.getName(),ctClasses);
             // 使用javassist的反射方法的参数名
             javassist.bytecode.MethodInfo methodInfo = ctMethod.getMethodInfo();
             CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
@@ -95,6 +96,15 @@ public class ReflectUtil {
             return true;
         }
         return false;
+    }
+
+    private CtClass[] changeArray(Class [] array) throws NotFoundException {
+        ClassPool pool = ClassPool.getDefault();
+        CtClass[] clzArr = new CtClass[array.length];
+        for (int i = 0; i < array.length; i++) {
+            clzArr[i] = pool.get(array[i].getName());
+        }
+        return clzArr;
     }
 
 }
