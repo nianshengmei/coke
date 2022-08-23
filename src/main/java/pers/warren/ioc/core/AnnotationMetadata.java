@@ -15,7 +15,7 @@ public class AnnotationMetadata {
     /**
      * 注解信息
      */
-    private Map<Class<?>, Annotation> annotationSet;
+    private final Map<Class<?>, Annotation> annotationSet;
 
     /**
      * 注解信息源类
