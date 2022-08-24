@@ -30,6 +30,9 @@ public class DefaultBeanRegister implements BeanRegister {
 
     @Override
     public BeanDefinition initialization(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+        if(metadata.isAnnotation()){
+            return null;
+        }
         BeanDefinition beanDefinition = null;
         BeanDefinitionBuilder builder = null;
         if (metadata.hasAnnotation(Configuration.class)) {

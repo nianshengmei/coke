@@ -22,6 +22,10 @@ public class AnnotationMetadata {
      */
     private Class<?> clz;
 
+    public boolean isAnnotation(){
+        return clz.isAnnotation();
+    }
+
     public AnnotationMetadata(Class<?> clz) {
         this.annotationSet = new HashMap<>();
         this.clz = clz;
@@ -49,6 +53,11 @@ public class AnnotationMetadata {
         AnnotationMetadata annotationMetadata = new AnnotationMetadata(clz);
         for (Annotation annotation : annotations) {
             annotationMetadata.annotationSet.put(annotation.annotationType(), annotation);
+            Class<? extends Annotation> annotationType = annotation.annotationType();
+            Annotation[] typeAnnotations = annotationType.getAnnotations();
+            for (Annotation typeAnnotation : typeAnnotations) {
+                annotationMetadata.annotationSet.put(typeAnnotation.annotationType(), typeAnnotation);
+            }
         }
         return annotationMetadata;
     }
