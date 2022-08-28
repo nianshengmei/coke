@@ -4,7 +4,6 @@ import javassist.*;
 import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.LocalVariableAttribute;
 import lombok.experimental.UtilityClass;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -47,7 +46,8 @@ public class ReflectUtil {
         List<String> paramNames = new ArrayList<>();
         ClassPool pool = ClassPool.getDefault();
         try {
-            CtClass ctClass = pool.getCtClass(constructor.getDeclaringClass().getName());
+            Class<?> declaringClass = constructor.getDeclaringClass();
+            CtClass ctClass = pool.getCtClass(declaringClass.getName());
             CtConstructor[] constructors = ctClass.getConstructors();
             Class<?>[] pts = constructor.getParameterTypes();
             CtConstructor ctc = null;

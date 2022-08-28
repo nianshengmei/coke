@@ -65,6 +65,9 @@ public class DefaultFactoryBean implements FactoryBean {
                 constructor = c;
             }
         }
+        if(null == constructor){
+            throw new RuntimeException("class "+ clz.getName() +" have no constructor !");
+        }
         try {
             List<String> methodParamNames = ReflectUtil.getParameterNames(constructor);
             Class[] parameterTypes = constructor.getParameterTypes();
