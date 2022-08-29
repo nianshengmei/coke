@@ -134,6 +134,10 @@ public class CokeApplication {
                 container.addComponent(beanDefinition.getName(), factoryBean.getObject());
             }
         }
+        List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);
+        for (BeanPostProcessor postProcessor : postProcessors) {
+            postProcessor.postProcessAfterBeanLoad(container);
+        }
     }
 
     public static void injectProperties() {
