@@ -131,4 +131,9 @@ public class ApplicationContext implements BeanDefinitionRegistry {
     public <T> List<T> getBeans(Class<T> clz) {
         return Container.getContainer().getBeans(clz);
     }
+
+    @Override
+    public Collection<BeanWrapper> getBeans() {
+        return Container.getContainer().getBeans();
+    }
 }

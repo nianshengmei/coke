@@ -82,6 +82,16 @@ public class Container implements BeanDefinitionRegistry {
         return (T) componentMap.get(name);
     }
 
+    @Override
+    public Collection<BeanWrapper> getBeans() {
+        Collection<BeanWrapper> wrappers = new ArrayList<>();
+        Set<String> keySet = componentMap.keySet();
+        for (String key : keySet) {
+            wrappers.add(new BeanWrapper().setName(key).setBean(componentMap.get(key)));
+        }
+        return wrappers;
+    }
+
     public <T> T getBean(Class<T> clz) {
         List<T> beans = getBeans(clz);
         return CollUtil.isNotEmpty(beans) ? beans.get(0) : null;
