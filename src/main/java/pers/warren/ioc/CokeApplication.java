@@ -123,7 +123,7 @@ public class CokeApplication {
 
             List<ApplicationContext> contexts = container.getBeans(ApplicationContext.class);
             for (ApplicationContext context : contexts) {
-                Class<?>[] classes = context.preloadBasicComponent();
+                Class<?>[] classes = context.preloadBasicComponentClass();
                 for (Class<?> clz : classes) {
                     if (clz.isAssignableFrom(aClass) && (!clz.equals(aClass))) {
                         Object o = null;
