@@ -9,5 +9,8 @@ public class BeanWrapper {
 
     private String name;
 
-    private Object bean;
+    private Class<?> clz;
+
+    private BeanDefinition beanDefinition;
+
 }

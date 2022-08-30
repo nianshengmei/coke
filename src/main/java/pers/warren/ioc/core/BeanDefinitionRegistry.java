@@ -23,5 +23,5 @@ public interface BeanDefinitionRegistry {
 
     <T> T getBean(String name);
 
-    Collection<BeanWrapper> getBeans();
+    Collection<BeanWrapper> getBeanWrappers();
 }

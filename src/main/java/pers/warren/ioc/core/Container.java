@@ -3,6 +3,7 @@ package pers.warren.ioc.core;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.enums.BeanType;
+
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,10 +34,10 @@ public class Container implements BeanDefinitionRegistry {
         }
     }
 
-    public boolean hasEqualComponent(Class<?> clz){
+    public boolean hasEqualComponent(Class<?> clz) {
         Collection<Object> values = componentMap.values();
         for (Object value : values) {
-            if(value.getClass().equals(clz)){
+            if (value.getClass().equals(clz)) {
                 return true;
             }
         }
@@ -83,11 +84,12 @@ public class Container implements BeanDefinitionRegistry {
     }
 
     @Override
-    public Collection<BeanWrapper> getBeans() {
+    public Collection<BeanWrapper> getBeanWrappers() {
         Collection<BeanWrapper> wrappers = new ArrayList<>();
-        Set<String> keySet = componentMap.keySet();
-        for (String key : keySet) {
-            wrappers.add(new BeanWrapper().setName(key).setBean(componentMap.get(key)));
+        Collection<BeanDefinition> values = beanDefinitionMap.values();
+        for (BeanDefinition key : values) {
+            wrappers.add(new BeanWrapper().setName(key.getName()).setBeanDefinition(key)
+                    .setClz(key.clz));
         }
         return wrappers;
     }
@@ -172,5 +174,9 @@ public class Container implements BeanDefinitionRegistry {
     @Override
     public boolean isBeanNameInUse(String name) {
         return beanDefinitionMap.containsKey(name) || componentMap.containsKey(name);
+    }
+
+    public void addBeanDefinition(BeanDefinition beanDefinition) {
+        beanDefinitionMap.put(beanDefinition.name, beanDefinition);
     }
 }
