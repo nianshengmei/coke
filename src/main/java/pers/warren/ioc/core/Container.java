@@ -3,12 +3,20 @@ package pers.warren.ioc.core;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.enums.BeanType;
+import pers.warren.ioc.handler.CokePropertiesHandler;
 
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Container implements BeanDefinitionRegistry {
+public class Container implements BeanDefinitionRegistry , CokeEnvironment{
+
+    /**
+     * 从 application.yml,application.properties中读取的配置文件信息
+     * <p>
+     * application.properties优先级 > application.yml
+     */
+    private Map<String, Object> propertiesMap = new HashMap<>();
 
     private Map<String, Object> componentMap = new HashMap<>();
 
@@ -16,6 +24,42 @@ public class Container implements BeanDefinitionRegistry {
 
     private Map<String, FactoryBean> factoryBeanMap = new HashMap<>();
 
+    /**
+     * 获取特定配置属性
+     */
+    @Override
+    public Object getProperty(String k) {
+        return this.propertiesMap.get(k);
+    }
+
+    /**
+     * 添加单个属性
+     */
+    @Override
+    public void addProperty(String k, Object v) {
+        this.propertiesMap.put(k, v);
+    }
+
+    /**
+     * 添加多个属性
+     */
+    @Override
+    public void addProperties(Map<String, Object> source) {
+        this.propertiesMap.putAll(source);
+    }
+
+    /**
+     * 清空配置文件
+     */
+    @Override
+    public void clearProperties() {
+        this.propertiesMap = null;
+    }
+
+    @Override
+    public void refreshProperties() {
+        CokePropertiesHandler.read();
+    }
 
     public void addFactoryBean(String name, FactoryBean factoryBean) {
         factoryBeanMap.put(name, factoryBean);
@@ -37,7 +81,7 @@ public class Container implements BeanDefinitionRegistry {
     public boolean hasEqualComponent(Class<?> clz) {
         Collection<Object> values = componentMap.values();
         for (Object value : values) {
-            if (value.getClass().equals(clz)) {
+            if (value.getClass().getTypeName().equals(clz.getTypeName())) {
                 return true;
             }
         }
@@ -153,6 +197,10 @@ public class Container implements BeanDefinitionRegistry {
             }
         }
         return dfs;
+    }
+
+    public Collection<BeanDefinition> getBeanDefinitions() {
+        return beanDefinitionMap.values();
     }
 
     @Override

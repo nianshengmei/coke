@@ -75,7 +75,7 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
                     BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(method.getReturnType(),
                             name, BeanType.SIMPLE_BEAN, method, beanDefinition.getName()).setFactoryBeanType(SimpleFactoryBean.class);
                     builder.setRegister(register);
-                    register.registerBeanDefinition(builder, Container.getContainer());
+                    register.registerBeanDefinition(builder.build(), Container.getContainer());
                 }
             }
         }

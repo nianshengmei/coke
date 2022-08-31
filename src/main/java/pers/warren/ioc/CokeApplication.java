@@ -8,7 +8,7 @@ import pers.warren.ioc.annotation.Autowired;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.handler.CokePostHandler;
-import pers.warren.ioc.handler.CokePropertiesHandler;
+import pers.warren.ioc.loader.Loader;
 import pers.warren.ioc.util.InjectUtil;
 import pers.warren.ioc.util.ScanUtil;
 
@@ -39,15 +39,15 @@ public class CokeApplication {
 
         clzSet = ScanUtil.scan();   //包扫描
 
-        loadContext();       //加载ApplicationContext
-
-        CokePropertiesHandler.read();   //读取配置文件
+        Loader.loadConfigEnvironment();   //读取配置文件
 
         log.info("scan java and resource files ok, cost {} ms !", System.currentTimeMillis() - startTimeMills);
 
-        loadBasicComponent();       //加载基础组件 、 包括BeanRegister初始化，BeanFactory初始化，BeanPostProcessor初始化
+        Loader.preload(clzSet);   //预加载
 
-        loadConfiguration();         //扫描需要初始化的Bean生成BeanDefinition
+        initBeanDefinition();         //扫描需要初始化的Bean生成BeanDefinition
+
+        componentPostProcessorBefore();
 
         loadBean();                  //初始化Bean
 
@@ -60,102 +60,13 @@ public class CokeApplication {
         return Container.getContainer().applicationContext();
     }
 
-    /**
-     * 加载上下文
-     */
-    protected static void loadContext() {
+    private static void componentPostProcessorBefore() {
         Container container = Container.getContainer();
-        for (Class<?> aClass : clzSet) {
-            if (ApplicationContext.class.isAssignableFrom(aClass) && (!container.hasEqualComponent(aClass))) {
-                Object o = null;
-                try {
-                    Constructor<?> constructor = aClass.getConstructor();
-                    o = constructor.newInstance();
-                    container.addBeanDefinition(BeanDefinitionBuilder.genericBeanDefinition(aClass, aClass.getSimpleName(), BeanType.CONTEXT, null, null).build());
-                } catch (Exception e) {
-                    throw new RuntimeException("class ApplicationContext must have a constructor with no param , " + aClass.getName());
-                }
-                container.addComponent(aClass.getSimpleName(), o);
-            }
-        }
-
-    }
-
-    protected static void loadBasicComponent() {
-        Container container = Container.getContainer();
-        for (Class<?> aClass : clzSet) {
-            boolean flag = false;
-            if (BeanPostProcessor.class.isAssignableFrom(aClass) && (!BeanPostProcessor.class.equals(aClass))) {
-                Object o = null;
-                try {
-                    Constructor<?> constructor = aClass.getConstructor();
-                    o = constructor.newInstance();
-                    flag = true;
-                } catch (Exception e) {
-                    throw new RuntimeException("class BeanPostProcessor must have a constructor with no param , " + aClass.getName());
-                }
-                container.addComponent(aClass.getSimpleName(), o);
-            }
-
-            if (BeanFactory.class.isAssignableFrom(aClass) && (!BeanFactory.class.equals(aClass))) {
-                Object o = null;
-                try {
-                    Constructor<?> constructor = aClass.getConstructor();
-                    o = constructor.newInstance();
-                    flag = true;
-                } catch (Exception e) {
-                    throw new RuntimeException("class BeanFactory must have a constructor with no param , " + aClass.getName());
-                }
-                container.addComponent(aClass.getSimpleName(), o);
-            }
-
-            if (BeanRegister.class.isAssignableFrom(aClass) && (!BeanRegister.class.equals(aClass))) {
-                Object o = null;
-                try {
-                    Constructor<?> constructor = aClass.getConstructor();
-                    o = constructor.newInstance();
-                    flag = true;
-                } catch (Exception e) {
-                    throw new RuntimeException("class BeanRegister must have a constructor with no param , " + aClass.getName());
-                }
-                container.addComponent(aClass.getSimpleName(), o);
-            }
-
-            List<ApplicationContext> contexts = container.getBeans(ApplicationContext.class);
-            for (ApplicationContext context : contexts) {
-                Class<?>[] classes = context.preloadBasicComponentClass();
-                for (Class<?> clz : classes) {
-                    if (clz.isAssignableFrom(aClass) && (!clz.equals(aClass))) {
-                        Object o = null;
-                        try {
-                            Constructor<?> constructor = null;
-                            try {
-                                constructor = aClass.getConstructor();
-                            } catch (Exception e) {
-                                Constructor<?>[] constructors = aClass.getConstructors();
-                                constructor = constructors[0];
-                            }
-                            Class<?>[] parameterTypes = constructor.getParameterTypes();
-                            Object[] paramArr = new Object[0];
-                            if (null != parameterTypes && parameterTypes.length > 0) {
-                                paramArr = new Object[parameterTypes.length];
-                                for (int i = 0; i < parameterTypes.length; i++) {
-                                    Object obj = context.getBean(parameterTypes[i]);
-                                    paramArr[i] = obj;
-                                }
-                            }
-                            o = constructor.newInstance(paramArr);
-                            flag = true;
-                        } catch (Exception e) {
-                            throw new RuntimeException("preload component class " + clz.getTypeName() + " must have a constructor with no param , " + aClass.getName(), e);
-                        }
-                        container.addComponent(aClass.getSimpleName(), o);
-                    }
-                }
-            }
-
-            if (flag) {
-                container.addBeanDefinition(BeanDefinitionBuilder.genericBeanDefinition(aClass, aClass.getSimpleName(), BeanType.BASE_COMPONENT, null, null).build());
+        Collection<BeanDefinition> beanDefinitions = container.getBeanDefinitions();
+        List<BeanPostProcessor> beanPostProcessors = container.getBeans(BeanPostProcessor.class);
+        for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
+            for (BeanDefinition beanDefinition : beanDefinitions) {
+                beanPostProcessor.postProcessBeforeInitialization(beanDefinition,beanDefinition.getRegister());
             }
         }
 
@@ -316,7 +227,7 @@ public class CokeApplication {
     /**
      * 加载配置类
      */
-    private static void loadConfiguration() {
+    private static void initBeanDefinition() {
         Container container = Container.getContainer();
         List<BeanRegister> beanRegisters = container.getBeans(BeanRegister.class);
         for (Class<?> clz : clzSet) {

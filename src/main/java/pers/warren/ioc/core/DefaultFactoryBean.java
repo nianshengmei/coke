@@ -4,7 +4,6 @@ import pers.warren.ioc.annotation.Autowired;
 import pers.warren.ioc.util.ReflectUtil;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -128,7 +127,7 @@ public class DefaultFactoryBean implements FactoryBean {
     private static Object getBean(String name) {
         Container container = Container.getContainer();
         BeanDefinition bdf = container.getBeanDefinition(name);
-        return getBean(name, bdf.isProxy());
+        return getBean(name,  bdf.isProxy());
     }
 
     private static Object getBean(String name, boolean proxy) {

@@ -6,6 +6,13 @@ package pers.warren.ioc.core;
 public interface BeanPostProcessor {
 
     /**
+     * 在所有postProcessor方法运行前执行
+     */
+    default void runBeforePostProcessor(){
+
+    }
+
+    /**
      * 前置拦截器
      */
     default void postProcessBeforeInitialization(BeanDefinition beanDefinition ,BeanRegister register) {
