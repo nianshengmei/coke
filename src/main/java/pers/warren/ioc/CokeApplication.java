@@ -13,7 +13,6 @@ import pers.warren.ioc.util.InjectUtil;
 import pers.warren.ioc.util.ScanUtil;
 
 import javax.annotation.Resource;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -69,7 +68,6 @@ public class CokeApplication {
                 beanPostProcessor.postProcessBeforeInitialization(beanDefinition,beanDefinition.getRegister());
             }
         }
-
     }
 
     private static void loadBean() {
@@ -86,10 +84,6 @@ public class CokeApplication {
                 container.addFactoryBean(beanDefinition.getName(), factoryBean);
                 container.addComponent(beanDefinition.getName(), factoryBean.getObject());
             }
-        }
-        List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);
-        for (BeanPostProcessor postProcessor : postProcessors) {
-            postProcessor.postProcessAfterBeanLoad(container);
         }
     }
 

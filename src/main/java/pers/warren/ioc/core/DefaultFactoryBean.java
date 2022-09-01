@@ -72,7 +72,7 @@ public class DefaultFactoryBean implements FactoryBean {
             Class[] parameterTypes = constructor.getParameterTypes();
             Object[] params = new Object[methodParamNames.size()];
             for (int i = 0; i < methodParamNames.size(); i++) {
-                Object bean = getBean(methodParamNames.get(i));
+                Object bean = Container.getContainer().getBean(methodParamNames.get(i));
                 if (null == bean) {
                     bean = getBean(parameterTypes[i]);
                 }
