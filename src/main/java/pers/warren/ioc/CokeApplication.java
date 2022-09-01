@@ -43,7 +43,7 @@ public class CokeApplication {
 
         CokePropertiesHandler.read();   //读取配置文件
 
-        log.info("scan java and resource files ok, cost {} ms !",System.currentTimeMillis()-startTimeMills);
+        log.info("scan java and resource files ok, cost {} ms !", System.currentTimeMillis() - startTimeMills);
 
         loadBasicComponent();       //加载基础组件 、 包括BeanRegister初始化，BeanFactory初始化，BeanPostProcessor初始化
 
@@ -71,6 +71,7 @@ public class CokeApplication {
                 try {
                     Constructor<?> constructor = aClass.getConstructor();
                     o = constructor.newInstance();
+                    container.addBeanDefinition(BeanDefinitionBuilder.genericBeanDefinition(aClass, aClass.getSimpleName(), BeanType.CONTEXT, null, null).build());
                 } catch (Exception e) {
                     throw new RuntimeException("class ApplicationContext must have a constructor with no param , " + aClass.getName());
                 }
@@ -83,11 +84,13 @@ public class CokeApplication {
     protected static void loadBasicComponent() {
         Container container = Container.getContainer();
         for (Class<?> aClass : clzSet) {
+            boolean flag = false;
             if (BeanPostProcessor.class.isAssignableFrom(aClass) && (!BeanPostProcessor.class.equals(aClass))) {
                 Object o = null;
                 try {
                     Constructor<?> constructor = aClass.getConstructor();
                     o = constructor.newInstance();
+                    flag = true;
                 } catch (Exception e) {
                     throw new RuntimeException("class BeanPostProcessor must have a constructor with no param , " + aClass.getName());
                 }
@@ -99,6 +102,7 @@ public class CokeApplication {
                 try {
                     Constructor<?> constructor = aClass.getConstructor();
                     o = constructor.newInstance();
+                    flag = true;
                 } catch (Exception e) {
                     throw new RuntimeException("class BeanFactory must have a constructor with no param , " + aClass.getName());
                 }
@@ -110,10 +114,48 @@ public class CokeApplication {
                 try {
                     Constructor<?> constructor = aClass.getConstructor();
                     o = constructor.newInstance();
+                    flag = true;
                 } catch (Exception e) {
                     throw new RuntimeException("class BeanRegister must have a constructor with no param , " + aClass.getName());
                 }
                 container.addComponent(aClass.getSimpleName(), o);
+            }
+
+            List<ApplicationContext> contexts = container.getBeans(ApplicationContext.class);
+            for (ApplicationContext context : contexts) {
+                Class<?>[] classes = context.preloadBasicComponentClass();
+                for (Class<?> clz : classes) {
+                    if (clz.isAssignableFrom(aClass) && (!clz.equals(aClass))) {
+                        Object o = null;
+                        try {
+                            Constructor<?> constructor = null;
+                            try {
+                                constructor = aClass.getConstructor();
+                            } catch (Exception e) {
+                                Constructor<?>[] constructors = aClass.getConstructors();
+                                constructor = constructors[0];
+                            }
+                            Class<?>[] parameterTypes = constructor.getParameterTypes();
+                            Object[] paramArr = new Object[0];
+                            if (null != parameterTypes && parameterTypes.length > 0) {
+                                paramArr = new Object[parameterTypes.length];
+                                for (int i = 0; i < parameterTypes.length; i++) {
+                                    Object obj = context.getBean(parameterTypes[i]);
+                                    paramArr[i] = obj;
+                                }
+                            }
+                            o = constructor.newInstance(paramArr);
+                            flag = true;
+                        } catch (Exception e) {
+                            throw new RuntimeException("preload component class " + clz.getTypeName() + " must have a constructor with no param , " + aClass.getName(), e);
+                        }
+                        container.addComponent(aClass.getSimpleName(), o);
+                    }
+                }
+            }
+
+            if (flag) {
+                container.addBeanDefinition(BeanDefinitionBuilder.genericBeanDefinition(aClass, aClass.getSimpleName(), BeanType.BASE_COMPONENT, null, null).build());
             }
         }
 
@@ -133,6 +175,10 @@ public class CokeApplication {
                 container.addFactoryBean(beanDefinition.getName(), factoryBean);
                 container.addComponent(beanDefinition.getName(), factoryBean.getObject());
             }
+        }
+        List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);
+        for (BeanPostProcessor postProcessor : postProcessors) {
+            postProcessor.postProcessAfterBeanLoad(container);
         }
     }
 
@@ -168,68 +214,75 @@ public class CokeApplication {
         beanDefinitions.addAll(container.getBeanDefinitions(BeanType.COMPONENT));
         for (BeanDefinition beanDefinition : beanDefinitions) {
             List<Field> autowiredFieldList = beanDefinition.getAutowiredFieldInject();
-            Object bean = container.getBean(beanDefinition.getName());
-            for (Field field : autowiredFieldList) {
-                String name = field.getName();
-                Autowired annotation = field.getAnnotation(Autowired.class);
-                Object b = null;
-                if (StrUtil.isNotEmpty(annotation.value())) {
-                    name = annotation.value();
-                    b = container.getBean(name);
-                    if (null == b) {
-                        throw new RuntimeException("without bean autowired named :" + name
-                                + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
-                        );
-                    }
-
-                } else {
-                    b = container.getBean(field.getType());
-                    if (null == b) {
-                        throw new RuntimeException("no bean type autowired :" + field.getType().getName()
-                                + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
-                        );
-                    }
-                }
-                try {
-                    field.setAccessible(true);
-                    field.set(bean, b);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("no bean type autowired :" + field.getType().getName()
-                            + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
-                    );
-                }
+            Object be = container.getBean(beanDefinition.getName());
+            Object[] beans = new Object[]{be};
+            if (beanDefinition.isProxy()) {
+                beans = new Object[]{be, getBean(beanDefinition.getName(), true)};
             }
+            for (Object bean : beans) {
 
-            List<Field> resourceFieldList = beanDefinition.getResourceFieldInject();
-            bean = container.getBean(beanDefinition.getName());
-            for (Field field : resourceFieldList) {
-                String name = field.getName();
-                Resource annotation = field.getAnnotation(Resource.class);
-                Object b = null;
-                if (StrUtil.isNotEmpty(annotation.name())) {
-                    name = annotation.name();
-                    b = container.getBean(name);
-                    if (null == b) {
-                        throw new RuntimeException("without bean autowired named :" + name
-                                + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
-                        );
+                for (Field field : autowiredFieldList) {
+                    String name = field.getName();
+                    Autowired annotation = field.getAnnotation(Autowired.class);
+                    Object b = null;
+                    if (StrUtil.isNotEmpty(annotation.value())) {
+                        name = annotation.value();
+                        b = getBean(name, beanDefinition.isProxy());
+                        if (null == b) {
+                            throw new RuntimeException("without bean autowired named :" + name
+                                    + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                            );
+                        }
+
+                    } else {
+                        b = getBean(field.getType(), beanDefinition.isProxy());
+                        if (null == b) {
+                            throw new RuntimeException("no bean type autowired :" + field.getType().getName()
+                                    + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                            );
+                        }
                     }
-
-                } else {
-                    b = container.getBean(field.getType());
-                    if (null == b) {
+                    try {
+                        field.setAccessible(true);
+                        field.set(bean, b);
+                    } catch (IllegalAccessException e) {
                         throw new RuntimeException("no bean type autowired :" + field.getType().getName()
                                 + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
                         );
                     }
                 }
-                try {
-                    field.setAccessible(true);
-                    field.set(bean, b);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("no bean type autowired :" + field.getType().getName()
-                            + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
-                    );
+
+                List<Field> resourceFieldList = beanDefinition.getResourceFieldInject();
+                bean = container.getBean(beanDefinition.getName());
+                for (Field field : resourceFieldList) {
+                    String name = field.getName();
+                    Resource annotation = field.getAnnotation(Resource.class);
+                    Object b = null;
+                    if (StrUtil.isNotEmpty(annotation.name())) {
+                        name = annotation.name();
+                        b = getBean(name, beanDefinition.isProxy());
+                        if (null == b) {
+                            throw new RuntimeException("without bean autowired named :" + name
+                                    + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                            );
+                        }
+
+                    } else {
+                        b = getBean(field.getType(), beanDefinition.isProxy());
+                        if (null == b) {
+                            throw new RuntimeException("no bean type autowired :" + field.getType().getName()
+                                    + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                            );
+                        }
+                    }
+                    try {
+                        field.setAccessible(true);
+                        field.set(bean, b);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException("no bean type autowired :" + field.getType().getName()
+                                + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                        );
+                    }
                 }
             }
 
@@ -277,12 +330,30 @@ public class CokeApplication {
     private static void postHandlerRun() {
         Container container = Container.getContainer();
         List<CokePostHandler> postHandlers = container.getBeans(CokePostHandler.class);
-        if(CollUtil.isNotEmpty(postHandlers)){
-            log.info("coke start cost {} ms before post handler run !",System.currentTimeMillis() - startTimeMills);
+        if (CollUtil.isNotEmpty(postHandlers)) {
+            log.info("coke start cost {} ms before post handler run !", System.currentTimeMillis() - startTimeMills);
         }
         for (CokePostHandler postHandler : postHandlers) {
             postHandler.run();
         }
+    }
+
+    private static Object getBean(String name, boolean proxy) {
+        Container container = Container.getContainer();
+        ApplicationContext proxyApplicationContext = container.getBean("ProxyApplicationContext");
+        if (!proxy) {
+            return container.getBean(name);
+        }
+        return proxyApplicationContext.getProxyBean(name);
+    }
+
+    private static Object getBean(Class<?> clz, boolean proxy) {
+        Container container = Container.getContainer();
+        ApplicationContext proxyApplicationContext = container.getBean("ProxyApplicationContext");
+        if (!proxy) {
+            return container.getBean(clz);
+        }
+        return proxyApplicationContext.getProxyBean(clz);
     }
 }
 

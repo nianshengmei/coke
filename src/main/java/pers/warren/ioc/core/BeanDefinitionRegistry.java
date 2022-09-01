@@ -1,5 +1,8 @@
 package pers.warren.ioc.core;
 
+import java.util.Collection;
+import java.util.List;
+
 public interface BeanDefinitionRegistry {
 
     void registerBeanDefinition(String name, BeanDefinition beanDefinition) ;
@@ -15,4 +18,10 @@ public interface BeanDefinitionRegistry {
     int getBeanDefinitionCount();
 
     boolean isBeanNameInUse(String name);
+
+    <T> T getBean(Class<T> clz);
+
+    <T> T getBean(String name);
+
+    Collection<BeanWrapper> getBeanWrappers();
 }

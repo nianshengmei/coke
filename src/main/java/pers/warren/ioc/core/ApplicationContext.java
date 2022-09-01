@@ -79,6 +79,10 @@ public class ApplicationContext implements BeanDefinitionRegistry {
         return Container.getContainer().getBeanDefinition(name);
     }
 
+    public BeanDefinition getBeanDefinition(Class<?> clz){
+        return Container.getContainer().getBeanDefinition(clz);
+    }
+
     /**
      * 包含bean定义
      */
@@ -119,6 +123,13 @@ public class ApplicationContext implements BeanDefinitionRegistry {
     }
 
     /**
+     * 获取代理bean
+     */
+    public <T> T getProxyBean(String name) {
+        return null;
+    }
+
+    /**
      * 获取bean
      */
     public <T> T getBean(Class<T> clz) {
@@ -126,9 +137,28 @@ public class ApplicationContext implements BeanDefinitionRegistry {
     }
 
     /**
+     * 获取代理bean
+     */
+    public <T> T getProxyBean(Class<T> clz) {
+        return null;
+    }
+    /**
      * 获取bean
      */
     public <T> List<T> getBeans(Class<T> clz) {
         return Container.getContainer().getBeans(clz);
+    }
+
+    @Override
+    public Collection<BeanWrapper> getBeanWrappers() {
+        return Container.getContainer().getBeanWrappers();
+    }
+
+    public Class<?>[] preloadBasicComponentClass(){
+        return new Class[0];
+    }
+
+    public Class<?>[] preloadBasicComponentAnnotationClass() {
+        return new Class[0];
     }
 }

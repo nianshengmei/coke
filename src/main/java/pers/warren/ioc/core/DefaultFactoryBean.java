@@ -65,17 +65,17 @@ public class DefaultFactoryBean implements FactoryBean {
                 constructor = c;
             }
         }
-        if(null == constructor){
-            throw new RuntimeException("class "+ clz.getName() +" have no constructor !");
+        if (null == constructor) {
+            throw new RuntimeException("class " + clz.getName() + " have no constructor !");
         }
         try {
             List<String> methodParamNames = ReflectUtil.getParameterNames(constructor);
             Class[] parameterTypes = constructor.getParameterTypes();
             Object[] params = new Object[methodParamNames.size()];
             for (int i = 0; i < methodParamNames.size(); i++) {
-                Object bean = Container.getContainer().getBean(methodParamNames.get(i));
+                Object bean = getBean(methodParamNames.get(i));
                 if (null == bean) {
-                    bean = Container.getContainer().getBean(parameterTypes[i]);
+                    bean = getBean(parameterTypes[i]);
                 }
                 if (null == bean) {
                     BeanDefinition bdByName = Container.getContainer().getBeanDefinition(methodParamNames.get(i));
@@ -124,4 +124,35 @@ public class DefaultFactoryBean implements FactoryBean {
     public Boolean isSingleton() {
         return beanDefinition.isSingleton();
     }
+
+    private static Object getBean(String name) {
+        Container container = Container.getContainer();
+        BeanDefinition bdf = container.getBeanDefinition(name);
+        return getBean(name, bdf.isProxy());
+    }
+
+    private static Object getBean(String name, boolean proxy) {
+        Container container = Container.getContainer();
+        ApplicationContext proxyApplicationContext = container.getBean("ProxyApplicationContext");
+        if (!proxy) {
+            return container.getBean(name);
+        }
+        return proxyApplicationContext.getProxyBean(name);
+    }
+
+    private static Object getBean(Class<?> clz) {
+        Container container = Container.getContainer();
+        BeanDefinition bdf = container.getBeanDefinition(clz);
+        return getBean(clz, bdf.isProxy());
+    }
+
+    private static Object getBean(Class<?> clz, boolean proxy) {
+        Container container = Container.getContainer();
+        ApplicationContext proxyApplicationContext = container.getBean("ProxyApplicationContext");
+        if (!proxy) {
+            return container.getBean(clz);
+        }
+        return proxyApplicationContext.getProxyBean(clz);
+    }
+
 }

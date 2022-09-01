@@ -18,4 +18,11 @@ public interface BeanPostProcessor {
     default void postProcessAfterInitialization(BeanDefinition beanDefinition , BeanRegister register) {
 
     }
+
+    /**
+     * bean加载后置拦截
+     */
+    default void postProcessAfterBeanLoad(BeanDefinitionRegistry register){
+
+    }
 }
