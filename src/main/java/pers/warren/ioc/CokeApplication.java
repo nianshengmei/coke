@@ -86,7 +86,12 @@ public class CokeApplication {
                     continue;
                 }
                 BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
-                FactoryBean factoryBean = beanFactory.createBean(beanDefinition);
+                FactoryBean factoryBean = null;
+                try {
+                    factoryBean = beanFactory.createBean(beanDefinition);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
 //                container.addFactoryBean(beanDefinition.getName(), factoryBean);
                 container.addComponent(beanDefinition.getName(), factoryBean.getObject());
             }

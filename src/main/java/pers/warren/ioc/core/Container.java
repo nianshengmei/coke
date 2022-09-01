@@ -171,6 +171,10 @@ public class Container implements BeanDefinitionRegistry , CokeEnvironment{
         return this.beanDefinitionMap.get(name);
     }
 
+    public BeanDefinition getProxyBeanDefinition(String name) {
+        return this.beanDefinitionMap.get(name+"#proxy");
+    }
+
     public BeanDefinition getBeanDefinition(Class<?> clz) {
         Collection<BeanDefinition> values = beanDefinitionMap.values();
         for (BeanDefinition value : values) {
