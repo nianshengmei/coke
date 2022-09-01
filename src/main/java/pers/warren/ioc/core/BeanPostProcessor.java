@@ -13,16 +13,16 @@ public interface BeanPostProcessor {
     }
 
     /**
-     * 后置拦截方法
+     * 该拦截器会在所有的前置拦截处理完毕后调用
      */
-    default void postProcessAfterInitialization(BeanDefinition beanDefinition , BeanRegister register) {
+    default void postProcessAfterBeforeProcessor(BeanDefinition beanDefinition , BeanRegister register){
 
     }
 
     /**
-     * bean加载后置拦截
+     * 后置拦截方法
      */
-    default void postProcessAfterBeanLoad(BeanDefinitionRegistry register){
+    default void postProcessAfterInitialization(BeanDefinition beanDefinition , BeanRegister register) {
 
     }
 }

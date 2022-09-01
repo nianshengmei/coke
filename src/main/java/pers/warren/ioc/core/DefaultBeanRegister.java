@@ -56,7 +56,10 @@ public class DefaultBeanRegister implements BeanRegister {
             builder.setRegister(this);
             beanDefinition = builder.build();
         }
-        registerBeanDefinition(builder, registry);
+        if (null == beanDefinition) {
+            return null;
+        }
+        registry.registerBeanDefinition(beanDefinition.getName(), beanDefinition);
         return beanDefinition;
     }
 
