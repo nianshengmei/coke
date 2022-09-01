@@ -78,25 +78,12 @@ public class ApplicationContext implements BeanDefinitionRegistry ,CokeEnvironme
     }
 
     /**
-     * 获取代理bean
-     */
-    public <T> T getProxyBean(String name) {
-        return null;
-    }
-
-    /**
      * 获取bean
      */
     public <T> T getBean(Class<T> clz) {
         return Container.getContainer().getBean(clz);
     }
 
-    /**
-     * 获取代理bean
-     */
-    public <T> T getProxyBean(Class<T> clz) {
-        return null;
-    }
     /**
      * 获取bean
      */

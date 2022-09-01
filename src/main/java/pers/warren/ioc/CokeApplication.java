@@ -65,7 +65,13 @@ public class CokeApplication {
         List<BeanPostProcessor> beanPostProcessors = container.getBeans(BeanPostProcessor.class);
         for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
             for (BeanDefinition beanDefinition : beanDefinitions) {
-                beanPostProcessor.postProcessBeforeInitialization(beanDefinition,beanDefinition.getRegister());
+                beanPostProcessor.postProcessBeforeInitialization(beanDefinition, beanDefinition.getRegister());
+            }
+        }
+
+        for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
+            for (BeanDefinition beanDefinition : beanDefinitions) {
+                beanPostProcessor.postProcessAfterBeforeProcessor(beanDefinition, beanDefinition.getRegister());
             }
         }
     }
@@ -81,7 +87,7 @@ public class CokeApplication {
                 }
                 BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
                 FactoryBean factoryBean = beanFactory.createBean(beanDefinition);
-                container.addFactoryBean(beanDefinition.getName(), factoryBean);
+//                container.addFactoryBean(beanDefinition.getName(), factoryBean);
                 container.addComponent(beanDefinition.getName(), factoryBean.getObject());
             }
         }
@@ -122,7 +128,7 @@ public class CokeApplication {
             Object be = container.getBean(beanDefinition.getName());
             Object[] beans = new Object[]{be};
             if (beanDefinition.isProxy()) {
-                beans = new Object[]{be, getBean(beanDefinition.getName(), true)};
+                beans = new Object[]{be, Container.getContainer().getBean(beanDefinition.getName())};
             }
             for (Object bean : beans) {
 
@@ -132,7 +138,7 @@ public class CokeApplication {
                     Object b = null;
                     if (StrUtil.isNotEmpty(annotation.value())) {
                         name = annotation.value();
-                        b = getBean(name, beanDefinition.isProxy());
+                        b = Container.getContainer().getBean(name);
                         if (null == b) {
                             throw new RuntimeException("without bean autowired named :" + name
                                     + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
@@ -140,7 +146,7 @@ public class CokeApplication {
                         }
 
                     } else {
-                        b = getBean(field.getType(), beanDefinition.isProxy());
+                        b = Container.getContainer().getBean(field.getType());
                         if (null == b) {
                             throw new RuntimeException("no bean type autowired :" + field.getType().getName()
                                     + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
@@ -165,7 +171,7 @@ public class CokeApplication {
                     Object b = null;
                     if (StrUtil.isNotEmpty(annotation.name())) {
                         name = annotation.name();
-                        b = getBean(name, beanDefinition.isProxy());
+                        b = Container.getContainer().getBean(name);
                         if (null == b) {
                             throw new RuntimeException("without bean autowired named :" + name
                                     + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
@@ -173,7 +179,7 @@ public class CokeApplication {
                         }
 
                     } else {
-                        b = getBean(field.getType(), beanDefinition.isProxy());
+                        b = Container.getContainer().getBean(field.getType());
                         if (null == b) {
                             throw new RuntimeException("no bean type autowired :" + field.getType().getName()
                                     + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
@@ -243,22 +249,6 @@ public class CokeApplication {
         }
     }
 
-    private static Object getBean(String name, boolean proxy) {
-        Container container = Container.getContainer();
-        ApplicationContext proxyApplicationContext = container.getBean("ProxyApplicationContext");
-        if (!proxy) {
-            return container.getBean(name);
-        }
-        return proxyApplicationContext.getProxyBean(name);
-    }
 
-    private static Object getBean(Class<?> clz, boolean proxy) {
-        Container container = Container.getContainer();
-        ApplicationContext proxyApplicationContext = container.getBean("ProxyApplicationContext");
-        if (!proxy) {
-            return container.getBean(clz);
-        }
-        return proxyApplicationContext.getProxyBean(clz);
-    }
 }
 

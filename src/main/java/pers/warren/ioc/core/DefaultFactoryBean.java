@@ -74,7 +74,7 @@ public class DefaultFactoryBean implements FactoryBean {
             for (int i = 0; i < methodParamNames.size(); i++) {
                 Object bean = Container.getContainer().getBean(methodParamNames.get(i));
                 if (null == bean) {
-                    bean = getBean(parameterTypes[i]);
+                    bean =  Container.getContainer().getBean(parameterTypes[i]);
                 }
                 if (null == bean) {
                     BeanDefinition bdByName = Container.getContainer().getBeanDefinition(methodParamNames.get(i));
@@ -85,11 +85,11 @@ public class DefaultFactoryBean implements FactoryBean {
                     if (null != bdByName) {
                         FactoryBean factoryBean = currentBeanFactory.createBean(bdByName);
                         Container.getContainer().addComponent(bdByName.getName(), factoryBean.getObject());
-                        Container.getContainer().addFactoryBean(bdByName.getName(), factoryBean);
+//                        Container.getContainer().addFactoryBean(bdByName.getName(), factoryBean);
                     } else {
                         FactoryBean factoryBean = currentBeanFactory.createBean(bdByType);
                         Container.getContainer().addComponent(bdByType.getName(), factoryBean.getObject());
-                        Container.getContainer().addFactoryBean(bdByType.getName(), factoryBean);
+//                        Container.getContainer().addFactoryBean(bdByType.getName(), factoryBean);
                     }
                     bean = Container.getContainer().getBean(methodParamNames.get(i));
                     if (null == bean) {
@@ -124,34 +124,5 @@ public class DefaultFactoryBean implements FactoryBean {
         return beanDefinition.isSingleton();
     }
 
-    private static Object getBean(String name) {
-        Container container = Container.getContainer();
-        BeanDefinition bdf = container.getBeanDefinition(name);
-        return getBean(name,  bdf.isProxy());
-    }
-
-    private static Object getBean(String name, boolean proxy) {
-        Container container = Container.getContainer();
-        ApplicationContext proxyApplicationContext = container.getBean("ProxyApplicationContext");
-        if (!proxy) {
-            return container.getBean(name);
-        }
-        return proxyApplicationContext.getProxyBean(name);
-    }
-
-    private static Object getBean(Class<?> clz) {
-        Container container = Container.getContainer();
-        BeanDefinition bdf = container.getBeanDefinition(clz);
-        return getBean(clz, bdf.isProxy());
-    }
-
-    private static Object getBean(Class<?> clz, boolean proxy) {
-        Container container = Container.getContainer();
-        ApplicationContext proxyApplicationContext = container.getBean("ProxyApplicationContext");
-        if (!proxy) {
-            return container.getBean(clz);
-        }
-        return proxyApplicationContext.getProxyBean(clz);
-    }
 
 }

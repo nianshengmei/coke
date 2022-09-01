@@ -18,11 +18,9 @@ public class Container implements BeanDefinitionRegistry , CokeEnvironment{
      */
     private Map<String, Object> propertiesMap = new HashMap<>();
 
-    private Map<String, Object> componentMap = new HashMap<>();
+    private final Map<String, Object> componentMap = new HashMap<>();
 
-    private Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
-
-    private Map<String, FactoryBean> factoryBeanMap = new HashMap<>();
+    private final Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
 
     /**
      * 获取特定配置属性
@@ -61,9 +59,6 @@ public class Container implements BeanDefinitionRegistry , CokeEnvironment{
         CokePropertiesHandler.read();
     }
 
-    public void addFactoryBean(String name, FactoryBean factoryBean) {
-        factoryBeanMap.put(name, factoryBean);
-    }
 
     public void addComponent(String name, Object o) {
         componentMap.put(name, o);
