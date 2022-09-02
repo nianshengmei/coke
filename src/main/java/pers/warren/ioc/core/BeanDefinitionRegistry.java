@@ -1,7 +1,6 @@
 package pers.warren.ioc.core;
 
 import java.util.Collection;
-import java.util.List;
 
 public interface BeanDefinitionRegistry {
 

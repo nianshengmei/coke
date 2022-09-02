@@ -9,7 +9,6 @@ import lombok.experimental.UtilityClass;
 import pers.warren.ioc.annotation.Configuration;
 import pers.warren.ioc.annotation.Scanner;
 import pers.warren.ioc.config.ConfigReaderFactory;
-import pers.warren.ioc.core.ApplicationContext;
 import pers.warren.ioc.core.Container;
 import pers.warren.ioc.util.ScanUtil;
 
@@ -66,7 +65,7 @@ public class CokePropertiesHandler {
         YamlResources resources = new YamlResources();
         Container container = Container.getContainer();
         List<InputStream> inputStreams = container.getPropertiesIsMap().get(YML);
-        if(CollUtil.isEmpty(inputStreams)){
+        if (CollUtil.isEmpty(inputStreams)) {
             return;
         }
         Map<Object, Object> resourceMap = new HashMap<>();
@@ -75,8 +74,7 @@ public class CokePropertiesHandler {
         }
         resourceMap.putAll(resources.getResources());
         Map<String, Object> standardization = standardization(resourceMap);
-        ApplicationContext context = Container.getContainer().getBean(ApplicationContext.class.getSimpleName());
-        context.addProperties(standardization);
+        Container.getContainer().addProperties(standardization);
     }
 
     public void readYaml() throws IOException {
@@ -95,8 +93,7 @@ public class CokePropertiesHandler {
         }
         resourceMap.putAll(resources.getResources());
         Map<String, Object> standardization = standardization(resourceMap);
-        ApplicationContext context = Container.getContainer().getBean(ApplicationContext.class.getSimpleName());
-        context.addProperties(standardization);
+        Container.getContainer().addProperties(standardization);
         int a = 1;
     }
 
@@ -113,14 +110,13 @@ public class CokePropertiesHandler {
         }
         resourceMap.putAll(resources.getResources());
         Map<String, Object> standardization = standardization(resourceMap);
-        ApplicationContext context = Container.getContainer().getBean(ApplicationContext.class.getSimpleName());
-        context.addProperties(standardization);
+        Container.getContainer().addProperties(standardization);
     }
 
     public void readCoke() {
         Container container = Container.getContainer();
         List<InputStream> inputStreams = container.getPropertiesIsMap().get(COKE);
-        if(CollUtil.isEmpty(inputStreams)){
+        if (CollUtil.isEmpty(inputStreams)) {
             return;
         }
         for (InputStream in : inputStreams) {

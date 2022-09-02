@@ -1,7 +1,5 @@
 package pers.warren.ioc.core;
 
-import pers.warren.ioc.handler.CokePropertiesHandler;
-
 import java.util.*;
 
 /**
@@ -10,50 +8,7 @@ import java.util.*;
  * @author warren
  * @since jdk1.8
  */
-public class ApplicationContext implements BeanDefinitionRegistry {
-
-    /**
-     * 从 application.yml,application.properties中读取的配置文件信息
-     * <p>
-     * application.properties优先级 > application.yml
-     */
-    private Map<String, Object> propertiesMap;
-
-    public ApplicationContext() {
-        this.propertiesMap = new HashMap<>();
-    }
-
-    /**
-     * 获取特定配置属性
-     */
-    public Object getProperty(String k) {
-        return this.propertiesMap.get(k);
-    }
-
-    /**
-     * 添加单个属性
-     */
-    public void addProperty(String k, Object v) {
-        this.propertiesMap.put(k, v);
-    }
-
-    /**
-     * 添加多个属性
-     */
-    public void addProperties(Map<String, Object> source) {
-        this.propertiesMap.putAll(source);
-    }
-
-    /**
-     * 清空配置文件
-     */
-    public void clearProperties() {
-        this.propertiesMap = null;
-    }
-
-    public void refreshProperties() {
-        CokePropertiesHandler.read();
-    }
+public class ApplicationContext implements BeanDefinitionRegistry ,CokeEnvironment{
 
     /**
      * 注册bean定义
@@ -123,25 +78,12 @@ public class ApplicationContext implements BeanDefinitionRegistry {
     }
 
     /**
-     * 获取代理bean
-     */
-    public <T> T getProxyBean(String name) {
-        return null;
-    }
-
-    /**
      * 获取bean
      */
     public <T> T getBean(Class<T> clz) {
         return Container.getContainer().getBean(clz);
     }
 
-    /**
-     * 获取代理bean
-     */
-    public <T> T getProxyBean(Class<T> clz) {
-        return null;
-    }
     /**
      * 获取bean
      */
@@ -152,13 +94,5 @@ public class ApplicationContext implements BeanDefinitionRegistry {
     @Override
     public Collection<BeanWrapper> getBeanWrappers() {
         return Container.getContainer().getBeanWrappers();
-    }
-
-    public Class<?>[] preloadBasicComponentClass(){
-        return new Class[0];
-    }
-
-    public Class<?>[] preloadBasicComponentAnnotationClass() {
-        return new Class[0];
     }
 }
