@@ -19,16 +19,16 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
     public void postProcessBeforeInitialization(BeanDefinition beanDefinition, BeanRegister register) {
         Class<?> clz = beanDefinition.getClz();
         Field[] declaredFields = clz.getDeclaredFields();
-        List<Field> autowiredFields = new ArrayList<>();
-        List<Field> resourceFields = new ArrayList<>();
+        List<InjectField> autowiredFields = new ArrayList<>();
+        List<InjectField> resourceFields = new ArrayList<>();
         List<ValueField> valueFields = new ArrayList<>();
         for (Field declaredField : declaredFields) {
             if (null != declaredField.getAnnotation(Autowired.class)) {
-                autowiredFields.add(declaredField);
+                autowiredFields.add(new InjectField(beanDefinition.name, declaredField));
             }
 
             if (null != declaredField.getAnnotation(Resource.class)) {
-                resourceFields.add(declaredField);
+                resourceFields.add(new InjectField(beanDefinition.name, declaredField));
             }
 
             if (null != declaredField.getAnnotation(Value.class)) {
@@ -85,7 +85,7 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
     @Override
     public void postProcessAfterInitialization(BeanDefinition beanDefinition, BeanRegister register) {
         Class<?> clz = beanDefinition.getClz();
-        Method[] declaredMethods  = clz.getDeclaredMethods();
+        Method[] declaredMethods = clz.getDeclaredMethods();
         for (Method declaredMethod : declaredMethods) {
             PostConstruct annotation = declaredMethod.getAnnotation(PostConstruct.class);
             if (null != annotation) {

@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Container implements BeanDefinitionRegistry , CokeEnvironment{
+public class Container implements BeanDefinitionRegistry, CokeEnvironment {
 
     /**
      * 从 application.yml,application.properties中读取的配置文件信息
@@ -122,6 +122,34 @@ public class Container implements BeanDefinitionRegistry , CokeEnvironment{
         return (T) componentMap.get(name);
     }
 
+    /**
+     * 判断当前运行时是否支持AOP
+     */
+    public boolean isAopEnvironment() {
+        Object proxyApplicationContext = this.getBean("ProxyApplicationContext");
+        String typeName = proxyApplicationContext.getClass().getTypeName();
+        if (null != proxyApplicationContext
+                && typeName.equals("org.needcoke.coke.aop.core.ProxyApplicationContext")
+                && proxyApplicationContext instanceof ApplicationContext) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断当前运行时是否web环境
+     */
+    public boolean isWebEnvironment() {
+        Object webApplicationContext = this.getBean("WebApplicationContext");
+        String typeName = webApplicationContext.getClass().getTypeName();
+        if (null != webApplicationContext
+                && typeName.equals("org.needcoke.coke.web.core.WebApplicationContext")
+                && webApplicationContext instanceof ApplicationContext) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public Collection<BeanWrapper> getBeanWrappers() {
         Collection<BeanWrapper> wrappers = new ArrayList<>();
@@ -172,8 +200,27 @@ public class Container implements BeanDefinitionRegistry , CokeEnvironment{
     }
 
     public BeanDefinition getProxyBeanDefinition(String name) {
-        return this.beanDefinitionMap.get(name+"#proxy");
+        return this.beanDefinitionMap.get(getProxyBeanName(name));
     }
+
+    private String getProxyBeanName(String name) {
+        return name + "#proxy";
+    }
+
+    public boolean containsProxyBean(String name) {
+        return this.componentMap.containsKey(getProxyBeanName(name));
+    }
+
+    public boolean containsProxyBean(Class<?> clz) {
+        List<BeanDefinition> beanDefinitions = getBeanDefinitions(clz);
+        for (BeanDefinition beanDefinition : beanDefinitions) {
+            if (beanDefinition.getClass().getTypeName().equals(clz.getTypeName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     public BeanDefinition getBeanDefinition(Class<?> clz) {
         Collection<BeanDefinition> values = beanDefinitionMap.values();
@@ -225,5 +272,19 @@ public class Container implements BeanDefinitionRegistry , CokeEnvironment{
 
     public void addBeanDefinition(BeanDefinition beanDefinition) {
         beanDefinitionMap.put(beanDefinition.name, beanDefinition);
+    }
+
+    public <T> T getProxyBean(String name) {
+        return (T) componentMap.get(getProxyBeanName(name));
+    }
+
+    public <T> T getProxyBean(Class<T> clz) {
+        Collection<BeanDefinition> beanDefinitions = getBeanDefinitions();
+        for (BeanDefinition beanDefinition : beanDefinitions) {
+            if (beanDefinition.getClass().getTypeName().equals("org.needcoke.coke.aop.core.ProxyBeanDefinition")) {
+                return getBean(beanDefinition.getName());
+            }
+        }
+        return null;
     }
 }

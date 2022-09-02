@@ -25,4 +25,5 @@ public interface BeanPostProcessor {
     default void postProcessAfterInitialization(BeanDefinition beanDefinition , BeanRegister register) {
 
     }
+
 }

@@ -64,12 +64,12 @@ public class BeanDefinition {
     /**
      * 标注了@Autowired的字段
      */
-    protected List<Field> autowiredFieldInject;
+    protected List<InjectField> autowiredFieldInject;
 
     /**
      * 标注了@Resource的字段
      */
-    protected List<Field> resourceFieldInject;
+    protected List<InjectField> resourceFieldInject;
 
     /**
      * 标注了@Value的字段
