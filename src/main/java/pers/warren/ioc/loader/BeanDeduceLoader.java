@@ -3,7 +3,6 @@ package pers.warren.ioc.loader;
 import lombok.extern.slf4j.Slf4j;
 import pers.warren.ioc.core.BeanDeduce;
 import pers.warren.ioc.core.BeanDefinitionBuilder;
-import pers.warren.ioc.core.BeanPostProcessor;
 import pers.warren.ioc.core.Container;
 import pers.warren.ioc.enums.BeanType;
 

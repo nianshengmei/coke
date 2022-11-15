@@ -2,13 +2,24 @@ package pers.warren.ioc.core;
 
 import java.util.Map;
 
-public interface CokeEnvironment {
+public interface Environment {
 
     /**
      * 获取特定配置属性
      */
-    default Object getProperty(String k) {
-        return Container.getContainer().getProperty(k);
+    default <T> T getProperty(String k) {
+        return (T)Container.getContainer().getProperty(k);
+    }
+
+    /**
+     * 获取特定配置属性
+     */
+    default <T> T getProperty(String k,T defaultValue) {
+        Container container = Container.getContainer();
+        if (container.containsProperties(k)) {
+            return (T)container.getProperty(k);
+        }
+        return defaultValue;
     }
 
     /**

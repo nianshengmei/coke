@@ -21,31 +21,34 @@ public interface Loader {
      *
      */
     static void preload(Set<Class<?>> clzSet) {
+        ContextLoader contextLoader = new ContextLoader();
+        BeanPostProcessorLoader beanPostProcessorLoader = new BeanPostProcessorLoader();
+        BeanRegisterLoader beanRegisterLoader = new BeanRegisterLoader();
+        BeanFactoryLoader beanFactoryLoader = new BeanFactoryLoader();
+        PreLoadLoader preLoadLoader = new PreLoadLoader();
         for (Class<?> clz : clzSet) {
 
             new PreLoadLoader().load(clz);
 
-            if (new ContextLoader().load(clz)) {
+            if (contextLoader.load(clz)) {
                 Loader.alreadyLoadClzNames.add(clz.getTypeName());
                 continue;
             }
 
-            if (new BeanPostProcessorLoader().load(clz)) {
+            if (beanPostProcessorLoader.load(clz)) {
                 Loader.alreadyLoadClzNames.add(clz.getTypeName());
                 continue;
             }
 
-            if (new BeanRegisterLoader().load(clz)) {
+            if (beanRegisterLoader.load(clz)) {
                 Loader.alreadyLoadClzNames.add(clz.getTypeName());
                 continue;
             }
-
-            new BeanFactoryLoader().load(clz);
-
+            beanFactoryLoader.load(clz);
         }
 
         for (Class<?> clz : clzSet) {
-            new PreLoadLoader().preLoad(clz);
+            preLoadLoader.preLoad(clz);
         }
     }
 

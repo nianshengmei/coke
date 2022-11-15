@@ -99,4 +99,6 @@ public class BeanDefinition {
      * 扩展字段
      */
     protected Map<String,BeanDefinitionExtendedField> extendedFields;
+
+    protected AnnotationMetadata annotationMetadata;
 }

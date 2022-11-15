@@ -84,6 +84,11 @@ public class SimpleFactoryBean implements FactoryBean {
     }
 
     @Override
+    public String getName() {
+        return beanDefinition.getName();
+    }
+
+    @Override
     public Class<?> getType() {
         return beanDefinition.getClz();
     }

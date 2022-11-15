@@ -1,5 +1,6 @@
 package pers.warren.ioc.inject;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -19,6 +20,9 @@ public class ResourceInject implements Inject {
     @Override
     public void inject(BeanDefinition beanDefinition) {
         Object bean = container.getBean(beanDefinition.getName());
+        if (CollUtil.isEmpty(beanDefinition.getResourceFieldInject()) || beanDefinition.isProxy()) {
+            return;
+        }
         for (InjectField injectField : beanDefinition.getResourceFieldInject()) {
             Field field = injectField.getField();
             String name = field.getName();
@@ -44,9 +48,9 @@ public class ResourceInject implements Inject {
             try {
                 field.setAccessible(true);
                 field.set(bean, b);
-            } catch (IllegalAccessException e) {
+            } catch (Exception e) {
                 throw new RuntimeException("no bean type autowired :" + field.getType().getName()
-                        + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                        + "  , source bean " + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
                 );
             }
         }

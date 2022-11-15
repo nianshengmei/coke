@@ -1,5 +1,6 @@
 package pers.warren.ioc.core;
 
+import cn.hutool.core.util.ClassLoaderUtil;
 import pers.warren.ioc.annotation.Component;
 import pers.warren.ioc.annotation.Configuration;
 import pers.warren.ioc.enums.BeanType;
@@ -30,7 +31,7 @@ public class DefaultBeanRegister implements BeanRegister {
 
     @Override
     public BeanDefinition initialization(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
-        if(metadata.isAnnotation()){
+        if(metadata.isAnnotation() || metadata.hasAnnotation(ClassLoaderUtil.loadClass("org.aspectj.lang.annotation.Aspect"))){
             return null;
         }
         BeanDefinition beanDefinition = null;

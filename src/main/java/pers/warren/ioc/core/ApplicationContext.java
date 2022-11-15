@@ -8,7 +8,7 @@ import java.util.*;
  * @author warren
  * @since jdk1.8
  */
-public class ApplicationContext implements BeanDefinitionRegistry ,CokeEnvironment{
+public class ApplicationContext implements BeanDefinitionRegistry ,Environment{
 
     /**
      * 注册bean定义
