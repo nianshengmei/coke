@@ -95,4 +95,11 @@ public class ApplicationContext implements BeanDefinitionRegistry ,Environment{
     public Collection<BeanWrapper> getBeanWrappers() {
         return Container.getContainer().getBeanWrappers();
     }
+
+    /**
+     * 判断当前运行时是否web环境
+     */
+    public boolean isWebEnvironment(){
+        return Container.getContainer().isWebEnvironment();
+    }
 }

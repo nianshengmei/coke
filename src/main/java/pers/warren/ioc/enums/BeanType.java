@@ -34,5 +34,7 @@ public enum BeanType {
      * 配置
      * 仅限于@Confguration,也可以扩展，但需要支持包扫描，一般不建议
      */
-    CONFIGURATION;
+    CONFIGURATION,
+
+    PROXY;
 }

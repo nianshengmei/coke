@@ -14,6 +14,9 @@ import java.util.List;
 public class ValueInject implements Inject {
     @Override
     public void inject(BeanDefinition beanDefinition) {
+        if(beanDefinition.isProxy()){
+            return;
+        }
         List<ValueField> valueFiledInject = beanDefinition.getValueFiledInject();
         if (CollUtil.isEmpty(valueFiledInject)) {
             return;

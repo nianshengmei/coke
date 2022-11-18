@@ -82,14 +82,12 @@ public class CokeApplication {
 
     private static void loadBean() {
         Container container = Container.getContainer();
-        BeanType[] beanTypes = new BeanType[]{BeanType.CONFIGURATION, BeanType.COMPONENT, BeanType.SIMPLE_BEAN};
         LinkedList<BeanDefinition> bdfDQueue = new LinkedList<>(container.getBeanDefinitions(BeanType.CONFIGURATION));
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.COMPONENT));
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.SIMPLE_BEAN));
+        bdfDQueue.addAll(container.getBeanDefinitions(BeanType.PROXY));
         while (bdfDQueue.size() != 0) {
             BeanDefinition bdf = bdfDQueue.poll();
-            Class<?> clz = bdf.getClz();
-            AnnotationMetadata metadata = AnnotationMetadata.metadata(clz);
             createBean(bdf);
         }
     }

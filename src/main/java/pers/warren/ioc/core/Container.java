@@ -7,6 +7,7 @@ import pers.warren.ioc.handler.CokePropertiesHandler;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class Container implements BeanDefinitionRegistry, Environment {
@@ -147,7 +148,7 @@ public class Container implements BeanDefinitionRegistry, Environment {
      * 判断当前运行时是否web环境
      */
     public boolean isWebEnvironment() {
-        Object webApplicationContext = this.getBean("WebApplicationContext");
+        Object webApplicationContext = this.getBean("webApplicationContext");
         String typeName = webApplicationContext.getClass().getTypeName();
         if (null != webApplicationContext
                 && typeName.equals("org.needcoke.coke.web.core.WebApplicationContext")
@@ -155,6 +156,13 @@ public class Container implements BeanDefinitionRegistry, Environment {
             return true;
         }
         return false;
+    }
+
+    public Object getSimpleBean(String name){
+        if(name.endsWith("#proxy")){
+            name = StrUtil.removeSuffix(name,"#proxy");
+        }
+        return getBean(name);
     }
 
     @Override
@@ -180,7 +188,7 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     public <T> List<T> getBeans(Class<T> clz) {
         Collection<Object> values = componentMap.values();
-        List<T> tList = new ArrayList<>();
+        List<T> tList = new CopyOnWriteArrayList<>();
         for (Object bean : values) {
             try {
                 if (clz.isAssignableFrom(bean.getClass()) || clz.getTypeName().equals(bean.getClass().getTypeName())) {
@@ -213,6 +221,9 @@ public class Container implements BeanDefinitionRegistry, Environment {
     }
 
     public BeanDefinition getProxyBeanDefinition(String name) {
+        if(name.endsWith("#proxy")){
+            name = StrUtil.removeSuffix(name,"#proxy");
+        }
         return this.beanDefinitionMap.get(getProxyBeanName(name));
     }
 
@@ -274,7 +285,10 @@ public class Container implements BeanDefinitionRegistry, Environment {
     }
 
     public Collection<BeanDefinition> getBeanDefinitions() {
-        return beanDefinitionMap.values();
+        Collection<BeanDefinition> values = beanDefinitionMap.values();
+        List<BeanDefinition> beanDefinitionCopyOnWriteArrayList = new ArrayList<>();
+        beanDefinitionCopyOnWriteArrayList.addAll(values);
+        return beanDefinitionCopyOnWriteArrayList;
     }
 
     @Override
