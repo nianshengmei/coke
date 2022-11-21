@@ -8,7 +8,7 @@ import java.util.*;
  * @author warren
  * @since jdk1.8
  */
-public class ApplicationContext implements BeanDefinitionRegistry ,CokeEnvironment{
+public class ApplicationContext implements BeanDefinitionRegistry ,Environment{
 
     /**
      * 注册bean定义
@@ -94,5 +94,12 @@ public class ApplicationContext implements BeanDefinitionRegistry ,CokeEnvironme
     @Override
     public Collection<BeanWrapper> getBeanWrappers() {
         return Container.getContainer().getBeanWrappers();
+    }
+
+    /**
+     * 判断当前运行时是否web环境
+     */
+    public boolean isWebEnvironment(){
+        return Container.getContainer().isWebEnvironment();
     }
 }

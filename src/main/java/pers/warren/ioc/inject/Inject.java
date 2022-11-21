@@ -6,6 +6,7 @@ import pers.warren.ioc.ec.WarnEnum;
 import pers.warren.ioc.log.CokeLogger;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * bean注入接口
@@ -75,6 +76,12 @@ public interface Inject extends CokeLogger {
                 warn(WarnEnum.NOT_AOP_ENVIRONMENT);
             }
         }
-        return Container.getContainer().getBean(clz);
+        List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(clz);
+        for (BeanDefinition beanDefinition : beanDefinitions){
+            if (!container.isProxyBeanDefinition(beanDefinition)) {
+                return container.getBean(beanDefinition.getName());
+            }
+        }
+        return container.getBean(clz);
     }
 }

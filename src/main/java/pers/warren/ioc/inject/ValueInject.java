@@ -1,5 +1,6 @@
 package pers.warren.ioc.inject;
 
+import cn.hutool.core.collection.CollUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import pers.warren.ioc.core.BeanDefinition;
@@ -10,10 +11,16 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 @Slf4j
-public class ValueInject implements Inject{
+public class ValueInject implements Inject {
     @Override
     public void inject(BeanDefinition beanDefinition) {
+        if(beanDefinition.isProxy()){
+            return;
+        }
         List<ValueField> valueFiledInject = beanDefinition.getValueFiledInject();
+        if (CollUtil.isEmpty(valueFiledInject)) {
+            return;
+        }
         for (ValueField field : valueFiledInject) {
             if (null == field.getConfigValue() && null == field.getDefaultValue()) {
                 continue;
@@ -27,6 +34,10 @@ public class ValueInject implements Inject{
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             } catch (Exception e) {
+                if(beanDefinition.getName().endsWith("#proxy")){
+                    log.error("the value in the configuration file cannot be converted to the corresponding attribute , value field info : {}",field);
+                    continue;
+                }
                 throw new RuntimeException("the value in the configuration file cannot be converted to the corresponding attribute , value field info : " + field);
             }
         }

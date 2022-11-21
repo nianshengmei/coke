@@ -1,8 +1,7 @@
 package pers.warren.ioc.util;
 
 import javassist.*;
-import javassist.bytecode.CodeAttribute;
-import javassist.bytecode.LocalVariableAttribute;
+import javassist.bytecode.*;
 import lombok.experimental.UtilityClass;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -15,12 +14,15 @@ public class ReflectUtil {
 
 
     public String[] getParameterNames(final Method method) {
+        if (Modifier.isInterface(method.getDeclaringClass().getModifiers())) {
+            return getInterfaceParamterNames(method);
+        }
         List<String> paramNames = new ArrayList<>();
         ClassPool pool = ClassPool.getDefault();
         try {
             CtClass ctClass = pool.getCtClass(method.getDeclaringClass().getName());
             CtClass[] ctClasses = changeArray(method.getParameterTypes());
-            CtMethod ctMethod = ctClass.getDeclaredMethod(method.getName(),ctClasses);
+            CtMethod ctMethod = ctClass.getDeclaredMethod(method.getName(), ctClasses);
             // 使用javassist的反射方法的参数名
             javassist.bytecode.MethodInfo methodInfo = ctMethod.getMethodInfo();
             CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
@@ -36,6 +38,32 @@ public class ReflectUtil {
             }
             String[] arr = new String[paramNames.size()];
             return paramNames.toArray(arr);
+        } catch (NotFoundException e) {
+            String msg = method.getDeclaringClass().getName() + "#" + method.getName();
+            throw new RuntimeException("get method param error method = " + msg, e);
+        }
+    }
+
+    public static String[] getInterfaceParamterNames(final Method method) {
+        ClassPool pool = ClassPool.getDefault();
+        try {
+            CtClass ctClass = pool.get(method.getDeclaringClass().getName());
+            CtMethod ctMethod = ctClass.getDeclaredMethod(method.getName());
+            // 使用javassist的反射方法的参数名
+            MethodInfo methodInfo = ctMethod.getMethodInfo();
+
+            MethodParametersAttribute methodParameters = (MethodParametersAttribute) methodInfo.getAttribute("MethodParameters");
+            //获取参数的个数
+            int count = ctMethod.getParameterTypes().length;
+
+            CtClass[] pCtClass = ctMethod.getParameterTypes();
+            String[] rets = new String[pCtClass.length];
+            for (int i = 0; i < count; i++) {
+                String str = methodParameters.getConstPool().getUtf8Info(ByteArray.readU16bit(methodParameters.get(), i * 4 + 1));
+                rets[i] = str;
+            }
+
+            return rets;
         } catch (NotFoundException e) {
             String msg = method.getDeclaringClass().getName() + "#" + method.getName();
             throw new RuntimeException("get method param error method = " + msg, e);
@@ -96,7 +124,7 @@ public class ReflectUtil {
         return false;
     }
 
-    private CtClass[] changeArray(Class [] array) throws NotFoundException {
+    private CtClass[] changeArray(Class[] array) throws NotFoundException {
         ClassPool pool = ClassPool.getDefault();
         CtClass[] clzArr = new CtClass[array.length];
         for (int i = 0; i < array.length; i++) {

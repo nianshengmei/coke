@@ -51,6 +51,6 @@ public interface BeanRegister {
         for (BeanPostProcessor postProcessor : postProcessors) {
             postProcessor.postProcessBeforeInitialization(beanDefinition, this);
         }
-
     }
+
 }

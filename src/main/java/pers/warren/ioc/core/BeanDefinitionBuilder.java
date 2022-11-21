@@ -68,6 +68,11 @@ public class BeanDefinitionBuilder {
         return this;
     }
 
+    public BeanDefinitionBuilder setAnnotationMetadata(AnnotationMetadata metadata){
+        this.beanDefinition.setAnnotationMetadata(metadata);
+        return this;
+    }
+
     public BeanDefinition build() {
         return beanDefinition;
     }

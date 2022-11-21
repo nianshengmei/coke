@@ -9,6 +9,7 @@ import pers.warren.ioc.handler.CokePostHandler;
 import pers.warren.ioc.inject.Inject;
 import pers.warren.ioc.loader.Loader;
 import pers.warren.ioc.util.ScanUtil;
+
 import java.util.*;
 
 /**
@@ -81,23 +82,29 @@ public class CokeApplication {
 
     private static void loadBean() {
         Container container = Container.getContainer();
-        BeanType[] beanTypes = new BeanType[]{BeanType.CONFIGURATION, BeanType.COMPONENT, BeanType.SIMPLE_BEAN};
-        for (BeanType beanType : beanTypes) {
-            List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(beanType);
-            for (BeanDefinition beanDefinition : beanDefinitions) {
-                if (null != container.getBean(beanDefinition.getName())) {
-                    continue;
-                }
-                BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
-                FactoryBean factoryBean = null;
-                try {
-                    factoryBean = beanFactory.createBean(beanDefinition);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-                container.addComponent(beanDefinition.getName(), factoryBean.getObject());
-            }
+        LinkedList<BeanDefinition> bdfDQueue = new LinkedList<>(container.getBeanDefinitions(BeanType.CONFIGURATION));
+        bdfDQueue.addAll(container.getBeanDefinitions(BeanType.COMPONENT));
+        bdfDQueue.addAll(container.getBeanDefinitions(BeanType.SIMPLE_BEAN));
+        bdfDQueue.addAll(container.getBeanDefinitions(BeanType.PROXY));
+        while (bdfDQueue.size() != 0) {
+            BeanDefinition bdf = bdfDQueue.poll();
+            createBean(bdf);
         }
+    }
+
+    private static void createBean(BeanDefinition beanDefinition) {
+        Container container = Container.getContainer();
+        if (null != container.getBean(beanDefinition.getName())) {
+            return;
+        }
+        BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
+        FactoryBean factoryBean = null;
+        try {
+            factoryBean = beanFactory.createBean(beanDefinition);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        container.addComponent(beanDefinition.getName(), factoryBean.getObject());
     }
 
 
