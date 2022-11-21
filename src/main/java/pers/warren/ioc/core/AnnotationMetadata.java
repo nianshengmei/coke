@@ -3,6 +3,7 @@ package pers.warren.ioc.core;
 import pers.warren.ioc.condition.Conditional;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +39,19 @@ public class AnnotationMetadata {
      */
     public boolean hasAnnotation(Class<?> annotation) {
         return annotationSet.containsKey(annotation);
+    }
+
+    /**
+     * 判断特定注解是否存在
+     */
+    public boolean hasAnnotation(String annotationName) {
+        Collection<Annotation> values = annotationSet.values();
+        for (Annotation value : values) {
+            if(value.annotationType().getName().equals(annotationName)){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
