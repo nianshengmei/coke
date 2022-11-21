@@ -7,7 +7,7 @@
     <groupId>org.needcoke</groupId>
     <artifactId>coke</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <properties>
         <jv>1.8</jv>
         <maven.compiler.source>1.8</maven.compiler.source>
