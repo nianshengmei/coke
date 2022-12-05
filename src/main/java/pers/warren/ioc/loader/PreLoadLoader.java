@@ -20,6 +20,7 @@ import java.util.List;
  * @author warren
  */
 @Slf4j
+@SuppressWarnings("unchecked")
 public class PreLoadLoader implements Loader {
 
     private final Container container;
@@ -31,6 +32,8 @@ public class PreLoadLoader implements Loader {
     private static final List<Class<?>> preLoadClasses = new ArrayList<>();
 
     private static final List<Class<Annotation>> preLoadAnnotationClasses = new ArrayList<>();
+
+    private static final List<Class<?>> findClassList= new ArrayList<>();
 
     @Override
     public boolean load(Class<?> clz) {
@@ -47,6 +50,11 @@ public class PreLoadLoader implements Loader {
                 Method m2 = clz.getMethod("preloadBasicComponentAnnotationClass");
                 Class<Annotation>[] preAnnotationClzArray = (Class<Annotation>[]) m2.invoke(preLoad);
                 preLoadAnnotationClasses.addAll(Arrays.asList(preAnnotationClzArray));
+
+                Method m3 = clz.getMethod("findClasses");
+                Class<Class<?>>[] findClasses = (Class<Class<?>>[]) m3.invoke(preLoad);
+                findClassList.addAll(Arrays.asList(findClasses));
+
             } catch (Exception e) {
                 log.error("coke 's PreLoad must use constructor with no parameter !  error init class {}", clz.getTypeName());
             }
@@ -67,6 +75,13 @@ public class PreLoadLoader implements Loader {
                 loadClz(clz);
             }
         }
+
+        for (Class<?> fClz : findClassList) {
+            if (fClz.isAssignableFrom(clz)) {
+                Container.getContainer().addFindClass(fClz,clz);
+            }
+        }
+
         return true;
     }
 

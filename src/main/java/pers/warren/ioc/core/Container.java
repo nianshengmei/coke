@@ -23,6 +23,19 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     private final Map<String, BeanDefinition> beanDefinitionMap = new TreeMap<>();
 
+    private final Map<String, List<Class<?>>> findClassMap = new HashMap<>();
+
+    public <R> List<R> findClass(Class<?> clz) {
+        return (List<R>)findClassMap.get(clz.getTypeName());
+    }
+
+    public void addFindClass(Class<?> clz,Class<?> c){
+        findClassMap.putIfAbsent(clz.getTypeName(),new ArrayList<>());
+        findClassMap.get(clz.getTypeName()).add(c);
+    }
+
+
+
     /**
      * 获取特定配置属性
      */
@@ -158,9 +171,9 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return false;
     }
 
-    public Object getSimpleBean(String name){
-        if(name.endsWith("#proxy")){
-            name = StrUtil.removeSuffix(name,"#proxy");
+    public Object getSimpleBean(String name) {
+        if (name.endsWith("#proxy")) {
+            name = StrUtil.removeSuffix(name, "#proxy");
         }
         return getBean(name);
     }
@@ -170,7 +183,7 @@ public class Container implements BeanDefinitionRegistry, Environment {
         Collection<BeanWrapper> wrappers = new ArrayList<>();
         Collection<BeanDefinition> values = beanDefinitionMap.values();
         for (BeanDefinition key : values) {
-            if(!key.isProxy()) {
+            if (!key.isProxy()) {
                 wrappers.add(
                         new BeanWrapper()
                                 .setName(StrUtil.lowerFirst(key.getName()))
@@ -191,7 +204,7 @@ public class Container implements BeanDefinitionRegistry, Environment {
         List<T> tList = new CopyOnWriteArrayList<>();
         for (Object bean : values) {
             try {
-                if(null == bean){
+                if (null == bean) {
                     continue;
                 }
                 if (clz.isAssignableFrom(bean.getClass()) || clz.getTypeName().equals(bean.getClass().getTypeName())) {
@@ -224,8 +237,8 @@ public class Container implements BeanDefinitionRegistry, Environment {
     }
 
     public BeanDefinition getProxyBeanDefinition(String name) {
-        if(name.endsWith("#proxy")){
-            name = StrUtil.removeSuffix(name,"#proxy");
+        if (name.endsWith("#proxy")) {
+            name = StrUtil.removeSuffix(name, "#proxy");
         }
         return this.beanDefinitionMap.get(getProxyBeanName(name));
     }
