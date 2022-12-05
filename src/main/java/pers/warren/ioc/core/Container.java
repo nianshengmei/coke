@@ -19,9 +19,9 @@ public class Container implements BeanDefinitionRegistry, Environment {
      */
     private Map<String, Object> propertiesMap = new HashMap<>();
 
-    private final Map<String, Object> componentMap = new HashMap<>();
+    private final Map<String, Object> componentMap = new TreeMap<>();
 
-    private final Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
+    private final Map<String, BeanDefinition> beanDefinitionMap = new TreeMap<>();
 
     /**
      * 获取特定配置属性
@@ -191,6 +191,9 @@ public class Container implements BeanDefinitionRegistry, Environment {
         List<T> tList = new CopyOnWriteArrayList<>();
         for (Object bean : values) {
             try {
+                if(null == bean){
+                    continue;
+                }
                 if (clz.isAssignableFrom(bean.getClass()) || clz.getTypeName().equals(bean.getClass().getTypeName())) {
                     tList.add((T) bean);
                 }

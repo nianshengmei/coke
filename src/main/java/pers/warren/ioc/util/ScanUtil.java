@@ -75,13 +75,11 @@ public class ScanUtil {
             Configuration configurationAnnotation = aClass.getAnnotation(Configuration.class);
             if (configurationAnnotation != null) {
                 scanArray(configurationAnnotation.scanner());
-
                 Scanner scannerAnnotation = aClass.getAnnotation(Scanner.class);
                 if (scannerAnnotation != null) {
                     scanArray(scannerAnnotation.value());
                 }
             }
-            //TODO component初始化
         }
     }
 
