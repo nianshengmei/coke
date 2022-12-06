@@ -86,6 +86,7 @@ public class CokeApplication {
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.COMPONENT));
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.SIMPLE_BEAN));
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.PROXY));
+        bdfDQueue.addAll(container.getBeanDefinitions(BeanType.OTHER));
         while (bdfDQueue.size() != 0) {
             BeanDefinition bdf = bdfDQueue.poll();
             createBean(bdf);
