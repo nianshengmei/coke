@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.handler.CokePostHandler;
+import pers.warren.ioc.handler.CokePostService;
 import pers.warren.ioc.inject.Inject;
 import pers.warren.ioc.loader.Loader;
 import pers.warren.ioc.util.ScanUtil;
@@ -129,6 +130,22 @@ public class CokeApplication {
     private static void end() {
         postHandlerRun();
         log.info("coke start ok! cost = {} ms !", System.currentTimeMillis() - startTimeMills);
+        postServiceRun();
+    }
+
+    private static void postServiceRun() {
+        Container container = Container.getContainer();
+        List<CokePostService> postHandlers = container.getBeans(CokePostService.class);
+        if (CollUtil.isNotEmpty(postHandlers)) {
+            log.info("coke start cost {} ms before post handler run !", System.currentTimeMillis() - startTimeMills);
+        }
+        for (CokePostService postHandler : postHandlers) {
+            try {
+                postHandler.run();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     /**
