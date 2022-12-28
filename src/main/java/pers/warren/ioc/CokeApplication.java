@@ -152,7 +152,11 @@ public class CokeApplication {
             log.info("coke start cost {} ms before post handler run !", System.currentTimeMillis() - startTimeMills);
         }
         for (CokePostHandler postHandler : postHandlers) {
-            postHandler.run();
+            try {
+                postHandler.run();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
