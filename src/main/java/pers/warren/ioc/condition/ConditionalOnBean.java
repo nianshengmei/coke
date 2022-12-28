@@ -11,7 +11,7 @@ public @interface ConditionalOnBean {
     Class<?>[] value() default {};
 
     // 需要作为条件的类的Name,Class.getName()
-    String[] type() default {};
+    String[] typeName() default {};
 
     // (用指定注解修饰的bean)条件所需的注解类
     Class<? extends Annotation>[] annotation() default {};
