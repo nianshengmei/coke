@@ -83,11 +83,4 @@ public class AnnotationMetadata {
         return clz;
     }
 
-    /**
-     * 包含conditional注解
-     */
-    public boolean hasConditional(){
-        return annotationSet.containsKey(Conditional.class);
-    }
-
 }
