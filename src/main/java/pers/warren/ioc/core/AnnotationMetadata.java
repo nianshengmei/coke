@@ -1,9 +1,5 @@
 package pers.warren.ioc.core;
 
-import lombok.Getter;
-import lombok.Setter;
-import pers.warren.ioc.condition.Conditional;
-
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashMap;

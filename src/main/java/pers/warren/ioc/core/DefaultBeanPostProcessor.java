@@ -8,8 +8,7 @@ import pers.warren.ioc.annotation.Value;
 import pers.warren.ioc.condition.ConditionContext;
 import pers.warren.ioc.condition.DefaultConditionContext;
 import pers.warren.ioc.enums.BeanType;
-import pers.warren.ioc.util.ConditionUtil;
-
+import pers.warren.ioc.kit.ConditionKit;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.lang.reflect.*;
@@ -62,9 +61,9 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
         Method[] methods = clz.getMethods();
         for (Method method : methods) {
             if (method.getAnnotation(Bean.class) != null) {
-                int conditionModify = ConditionUtil.hasCondition(method);
+                int conditionModify = ConditionKit.hasCondition(method);
                 ConditionContext conditionContext = new DefaultConditionContext();
-                if(ConditionUtil.conditionMatch(conditionModify,method,conditionContext)) {
+                if(ConditionKit.conditionMatch(conditionModify,method,conditionContext)) {
                     Bean beanAnnotation = method.getAnnotation(Bean.class);
                     String name = beanAnnotation.name();
                     if (StrUtil.isNotEmpty(name)) {

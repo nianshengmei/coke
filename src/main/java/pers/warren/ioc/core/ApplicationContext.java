@@ -67,6 +67,11 @@ public class ApplicationContext implements BeanDefinitionRegistry ,Environment{
         return Container.getContainer().getBeanDefinitionCount();
     }
 
+    @Override
+    public int getBeanCount(Class<?> clz) {
+        return Container.getContainer().getBeanCount(clz);
+    }
+
     /**
      * bean的名称是否使用
      */

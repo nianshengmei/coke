@@ -335,6 +335,12 @@ public class Container implements BeanDefinitionRegistry, Environment {
     }
 
     @Override
+    public int getBeanCount(Class<?> clz) {
+        List<?> beans = getBeans(clz);
+        return beans.size();
+    }
+
+    @Override
     public boolean isBeanNameInUse(String name) {
         return beanDefinitionMap.containsKey(StrUtil.lowerFirst(name)) || componentMap.containsKey(StrUtil.lowerFirst(name));
     }

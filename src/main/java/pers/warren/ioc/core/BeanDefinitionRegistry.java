@@ -19,6 +19,8 @@ public interface BeanDefinitionRegistry {
 
     int getBeanDefinitionCount();
 
+    int getBeanCount(Class<?> clz);
+
     boolean isBeanNameInUse(String name);
 
     <T> T getBean(Class<T> clz);

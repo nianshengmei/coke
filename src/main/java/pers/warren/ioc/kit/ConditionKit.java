@@ -1,13 +1,15 @@
-package pers.warren.ioc.util;
+package pers.warren.ioc.kit;
 
 
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.condition.*;
+import pers.warren.ioc.core.BeanDefinitionRegistry;
+import pers.warren.ioc.core.Container;
 
 import java.lang.reflect.Method;
 
-public class ConditionUtil {
+public class ConditionKit {
 
     public static int hasCondition(Method method) {
         if (method.getAnnotation(ConditionalOnBean.class) != null) {
@@ -18,6 +20,14 @@ public class ConditionUtil {
             return 3;
         } else if (method.getAnnotation(ConditionalOnMissingProperties.class) != null) {
             return 4;
+        } else if (method.getAnnotation(ConditionalOnWebEnvironment.class) != null) {
+            return 5;
+        } else if (method.getAnnotation(ConditionalOnNotWebEnvironment.class) != null) {
+            return 6;
+        } else if (method.getAnnotation(ConditionalOnBeanCountLessThan.class) != null) {
+            return 7;
+        } else if (method.getAnnotation(ConditionalOnBeanCountMoreThan.class) != null) {
+            return 8;
         }
         return 0;
     }
@@ -28,22 +38,56 @@ public class ConditionUtil {
             case 1:
                 ConditionalOnBean conditionalOnBeanAnnotation = method.getAnnotation(ConditionalOnBean.class);
                 return handleConditionalOnBeanAnnotation(conditionalOnBeanAnnotation, conditionContext);
-
             case 2:
                 ConditionalOnMissingBean conditionalOnMissingBeanAnnotation = method.getAnnotation(ConditionalOnMissingBean.class);
                 return handleConditionalOnMissingBeanAnnotation(conditionalOnMissingBeanAnnotation, conditionContext);
-
             case 3:
                 ConditionalOnProperties conditionalOnPropertiesAnnotation = method.getAnnotation(ConditionalOnProperties.class);
                 return handleConditionalOnPropertiesAnnotation(conditionalOnPropertiesAnnotation, conditionContext);
-
             case 4:
                 ConditionalOnMissingProperties conditionalOnMissingPropertiesAnnotation = method.getAnnotation(ConditionalOnMissingProperties.class);
                 return handleConditionalOnMissingPropertiesAnnotation(conditionalOnMissingPropertiesAnnotation, conditionContext);
-
+            case 5:
+                return handleConditionalOnWebEnvironment(conditionContext);
+            case 6:
+                return handleConditionalOnNotWebEnvironment(conditionContext);
+            case 7:
+                ConditionalOnBeanCountLessThan conditionalOnBeanCountLessThanAnnotation = method.getAnnotation(ConditionalOnBeanCountLessThan.class);
+                return handleConditionalOnBeanCountLessThan(conditionalOnBeanCountLessThanAnnotation, conditionContext);
+            case 8:
+                ConditionalOnBeanCountMoreThan conditionalOnBeanCountMoreThanAnnotation = method.getAnnotation(ConditionalOnBeanCountMoreThan.class);
+                return handleConditionalOnBeanCountMoreThan(conditionalOnBeanCountMoreThanAnnotation, conditionContext);
             default:
                 return true;
         }
+    }
+
+    private static boolean handleConditionalOnBeanCountLessThan(ConditionalOnBeanCountLessThan annotation, ConditionContext conditionContext) {
+        BeanDefinitionRegistry registry = conditionContext.getRegistry();
+        Class<?>[] values = annotation.value();
+        if (values.length < 1) {
+            return true;
+        }
+        int beanCount = registry.getBeanCount(values[0]);
+        return beanCount < annotation.count();
+    }
+
+    private static boolean handleConditionalOnBeanCountMoreThan(ConditionalOnBeanCountMoreThan annotation, ConditionContext conditionContext) {
+        BeanDefinitionRegistry registry = conditionContext.getRegistry();
+        Class<?>[] values = annotation.value();
+        if (values.length < 1) {
+            return true;
+        }
+        int beanCount = registry.getBeanCount(values[0]);
+        return beanCount > annotation.count();
+    }
+
+    private static boolean handleConditionalOnNotWebEnvironment(ConditionContext conditionContext) {
+        return !handleConditionalOnWebEnvironment(conditionContext);
+    }
+
+    private static boolean handleConditionalOnWebEnvironment(ConditionContext conditionContext) {
+        return Container.getContainer().isWebEnvironment();
     }
 
     private static boolean handleConditionalOnMissingPropertiesAnnotation(ConditionalOnMissingProperties annotation, ConditionContext conditionContext) {
@@ -55,10 +99,7 @@ public class ConditionUtil {
                 continue;
             }
             Object v = conditionContext.getEnvironment().getProperty(key);
-            if (null == v) {
-                continue;
-
-            } else {
+            if (null != v) {
                 if (StrUtil.isEmpty(value)) {
                     return false;
                 }
