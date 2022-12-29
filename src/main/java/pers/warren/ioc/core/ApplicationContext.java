@@ -46,6 +46,11 @@ public class ApplicationContext implements BeanDefinitionRegistry ,Environment{
         return Container.getContainer().containsBeanDefinition(name);
     }
 
+    @Override
+    public boolean containsBeanDefinition(Class<?> clz) {
+        return Container.getContainer().containsBeanDefinition(clz);
+    }
+
     /**
      * 获取bean定义名称
      */

@@ -313,6 +313,17 @@ public class Container implements BeanDefinitionRegistry, Environment {
     }
 
     @Override
+    public boolean containsBeanDefinition(Class<?> clz) {
+        Collection<BeanDefinition> values = beanDefinitionMap.values();
+        for (BeanDefinition value : values) {
+            if (value.getClz().getTypeName().equals(clz.getTypeName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public String[] getBeanDefinitionNames() {
         String[] strings = new String[beanDefinitionMap.size()];
         return beanDefinitionMap.keySet().toArray(strings);
