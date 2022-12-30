@@ -124,6 +124,13 @@ public class ReflectUtil {
         return false;
     }
 
+    public boolean containsAnnotation(Class<?> clz, Class annotationClz) {
+        if (null != clz.getAnnotation(annotationClz)) {
+            return true;
+        }
+        return false;
+    }
+
     private CtClass[] changeArray(Class[] array) throws NotFoundException {
         ClassPool pool = ClassPool.getDefault();
         CtClass[] clzArr = new CtClass[array.length];
