@@ -44,7 +44,7 @@ public class AutowiredInject implements Inject {
                 b = getBean(field.getType(), injectField.isProxy());
                 if (null == b) {
                     throw new RuntimeException("no bean type autowired :" + field.getType().getName()
-                            + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                            + "  , source bean " + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
                     );
                 }
             }
@@ -56,7 +56,7 @@ public class AutowiredInject implements Inject {
                     throw new RuntimeException("the bean " + beanDefinition.getName() + " not instantiation !");
                 }
                 throw new NoMatchBeanException("no bean type autowired :" + field.getType().getName()
-                        + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                        + "  , source bean " + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
                 );
             }
         }
