@@ -2,6 +2,7 @@ package pers.warren.ioc.core;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.Getter;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.handler.CokePropertiesHandler;
 
@@ -19,9 +20,26 @@ public class Container implements BeanDefinitionRegistry, Environment {
      */
     private Map<String, Object> propertiesMap = new HashMap<>();
 
-    private final Map<String, Object> componentMap = new HashMap<>();
+    private final Map<String, Object> componentMap = new TreeMap<>();
 
-    private final Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
+    private final Map<String, BeanDefinition> beanDefinitionMap = new TreeMap<>();
+
+    private final Map<String, List<Class<?>>> findClassMap = new HashMap<>();
+
+    /**
+     * 排除器
+     */
+    @Getter
+    private final Eliminator eliminator = new Eliminator();
+
+    public <R> List<R> findClass(Class<?> clz) {
+        return (List<R>)findClassMap.get(clz.getTypeName());
+    }
+
+    public void addFindClass(Class<?> clz,Class<?> c){
+        findClassMap.putIfAbsent(clz.getTypeName(),new ArrayList<>());
+        findClassMap.get(clz.getTypeName()).add(c);
+    }
 
     /**
      * 获取特定配置属性
@@ -158,9 +176,9 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return false;
     }
 
-    public Object getSimpleBean(String name){
-        if(name.endsWith("#proxy")){
-            name = StrUtil.removeSuffix(name,"#proxy");
+    public Object getSimpleBean(String name) {
+        if (name.endsWith("#proxy")) {
+            name = StrUtil.removeSuffix(name, "#proxy");
         }
         return getBean(name);
     }
@@ -170,7 +188,7 @@ public class Container implements BeanDefinitionRegistry, Environment {
         Collection<BeanWrapper> wrappers = new ArrayList<>();
         Collection<BeanDefinition> values = beanDefinitionMap.values();
         for (BeanDefinition key : values) {
-            if(!key.isProxy()) {
+            if (!key.isProxy()) {
                 wrappers.add(
                         new BeanWrapper()
                                 .setName(StrUtil.lowerFirst(key.getName()))
@@ -191,6 +209,9 @@ public class Container implements BeanDefinitionRegistry, Environment {
         List<T> tList = new CopyOnWriteArrayList<>();
         for (Object bean : values) {
             try {
+                if (null == bean) {
+                    continue;
+                }
                 if (clz.isAssignableFrom(bean.getClass()) || clz.getTypeName().equals(bean.getClass().getTypeName())) {
                     tList.add((T) bean);
                 }
@@ -204,6 +225,11 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     @Override
     public void registerBeanDefinition(String name, BeanDefinition beanDefinition) {
+        //排除指定bean
+        Eliminator eliminator = Container.getContainer().getEliminator();
+        if (eliminator.isExclude(beanDefinition.getClz()) || eliminator.isExclude(name)) {
+            return;
+        }
         if (StrUtil.isNotEmpty(name) && null != beanDefinition) {
             beanDefinition.setName(StrUtil.lowerFirst(beanDefinition.getName()));
             this.beanDefinitionMap.put(StrUtil.lowerFirst(name), beanDefinition);
@@ -221,8 +247,8 @@ public class Container implements BeanDefinitionRegistry, Environment {
     }
 
     public BeanDefinition getProxyBeanDefinition(String name) {
-        if(name.endsWith("#proxy")){
-            name = StrUtil.removeSuffix(name,"#proxy");
+        if (name.endsWith("#proxy")) {
+            name = StrUtil.removeSuffix(name, "#proxy");
         }
         return this.beanDefinitionMap.get(getProxyBeanName(name));
     }
@@ -297,6 +323,17 @@ public class Container implements BeanDefinitionRegistry, Environment {
     }
 
     @Override
+    public boolean containsBeanDefinition(Class<?> clz) {
+        Collection<BeanDefinition> values = beanDefinitionMap.values();
+        for (BeanDefinition value : values) {
+            if (value.getClz().getTypeName().equals(clz.getTypeName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public String[] getBeanDefinitionNames() {
         String[] strings = new String[beanDefinitionMap.size()];
         return beanDefinitionMap.keySet().toArray(strings);
@@ -305,6 +342,12 @@ public class Container implements BeanDefinitionRegistry, Environment {
     @Override
     public int getBeanDefinitionCount() {
         return beanDefinitionMap.size();
+    }
+
+    @Override
+    public int getBeanCount(Class<?> clz) {
+        List<?> beans = getBeans(clz);
+        return beans.size();
     }
 
     @Override

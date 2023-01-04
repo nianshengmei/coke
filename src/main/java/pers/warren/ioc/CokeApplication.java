@@ -3,13 +3,15 @@ package pers.warren.ioc;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import lombok.extern.slf4j.Slf4j;
+import pers.warren.ioc.annotation.Coke;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.handler.CokePostHandler;
+import pers.warren.ioc.handler.CokePostService;
 import pers.warren.ioc.inject.Inject;
 import pers.warren.ioc.loader.Loader;
+import pers.warren.ioc.util.ReflectUtil;
 import pers.warren.ioc.util.ScanUtil;
-
 import java.util.*;
 
 /**
@@ -86,6 +88,7 @@ public class CokeApplication {
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.COMPONENT));
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.SIMPLE_BEAN));
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.PROXY));
+        bdfDQueue.addAll(container.getBeanDefinitions(BeanType.OTHER));
         while (bdfDQueue.size() != 0) {
             BeanDefinition bdf = bdfDQueue.poll();
             createBean(bdf);
@@ -112,8 +115,22 @@ public class CokeApplication {
      * 启动开始
      */
     private static void start() {
+        addEliminator();
         startTimeMills = System.currentTimeMillis();
         printBanner();
+    }
+
+    private static void addEliminator() {
+        Class<?> mainApplicationClass = ReflectUtil.deduceMainApplicationClass();
+        if(null == mainApplicationClass){
+            log.error("推测的main方法未空!");
+            return;
+        }
+        if (ReflectUtil.containsAnnotation(mainApplicationClass, Coke.class)) {
+            Coke annotation = mainApplicationClass.getAnnotation(Coke.class);
+            Container.getContainer().getEliminator().addExcludeBeanClzList(annotation.excludeClass());
+            Container.getContainer().getEliminator().addExcludeBeanNameList(annotation.excludeBeanName());
+        }
     }
 
     /**
@@ -129,6 +146,22 @@ public class CokeApplication {
     private static void end() {
         postHandlerRun();
         log.info("coke start ok! cost = {} ms !", System.currentTimeMillis() - startTimeMills);
+        postServiceRun();
+    }
+
+    private static void postServiceRun() {
+        Container container = Container.getContainer();
+        List<CokePostService> postHandlers = container.getBeans(CokePostService.class);
+        if (CollUtil.isNotEmpty(postHandlers)) {
+            log.info("coke start cost {} ms before post handler run !", System.currentTimeMillis() - startTimeMills);
+        }
+        for (CokePostService postHandler : postHandlers) {
+            try {
+                postHandler.run();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     /**
@@ -152,7 +185,11 @@ public class CokeApplication {
             log.info("coke start cost {} ms before post handler run !", System.currentTimeMillis() - startTimeMills);
         }
         for (CokePostHandler postHandler : postHandlers) {
-            postHandler.run();
+            try {
+                postHandler.run();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

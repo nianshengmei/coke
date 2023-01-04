@@ -18,7 +18,7 @@ import java.util.List;
  * @since jdk1.8
  */
 @Slf4j
-public class DefaultFactoryBean implements FactoryBean{
+public class DefaultFactoryBean implements FactoryBean {
 
     /**
      * beanDefinition
@@ -75,22 +75,22 @@ public class DefaultFactoryBean implements FactoryBean{
             Object[] params = new Object[methodParamNames.size()];
             for (int i = 0; i < methodParamNames.size(); i++) {
                 Object bean = Container.getContainer().getBean(methodParamNames.get(i));
-                if(bean != null && !bean.getClass().getTypeName().equals(parameterTypes[i].getTypeName())){
+                if (bean != null && !bean.getClass().getTypeName().equals(parameterTypes[i].getTypeName())) {
                     bean = null;
                 }
                 if (null == bean) {
-                    bean =  Container.getContainer().getBean(parameterTypes[i]);
+                    bean = Container.getContainer().getBean(parameterTypes[i]);
                 }
                 if (null == bean) {
                     BeanDefinition bdByName = Container.getContainer().getBeanDefinition(methodParamNames.get(i));
                     BeanDefinition bdByType = Container.getContainer().getBeanDefinition(parameterTypes[i]);
                     if (null == bdByName && null == bdByType) {
-                        throw new NoMatchBeanException("can't find param in container named : " + methodParamNames.get(i));
+                        throw new NoMatchBeanException(String.format("%s can't find param in container named : %s", getName(), methodParamNames.get(i)));
                     }
                     Object obj = null;
                     if (null != bdByName) {
                         FactoryBean factoryBean = currentBeanFactory.createBean(bdByName);
-                        if(factoryBean.getType().getTypeName().equals(parameterTypes[i].getTypeName())){
+                        if (factoryBean.getType().getTypeName().equals(parameterTypes[i].getTypeName())) {
                             factoryBean = currentBeanFactory.createBean(bdByType);
                         }
                         obj = factoryBean.getObject();
@@ -110,7 +110,7 @@ public class DefaultFactoryBean implements FactoryBean{
             Object o = constructor.newInstance(params);
             return o;
         } catch (Exception e) {
-            log.error("bean name {}, need inject a bean name like {} , type = {}",beanDefinition.getName(),methodParamNames,parameterTypes);
+            log.error("bean name {}, need inject a bean name like {} , type = {}", beanDefinition.getName(), methodParamNames, parameterTypes);
             throw new RuntimeException(e);
         }
     }

@@ -8,13 +8,18 @@ public interface BeanDefinitionRegistry {
 
     void removeBeanDefinition(String name) ;
 
+
     BeanDefinition getBeanDefinition(String name) ;
 
     boolean containsBeanDefinition(String name);
 
+    boolean containsBeanDefinition(Class<?> clz);
+
     String[] getBeanDefinitionNames();
 
     int getBeanDefinitionCount();
+
+    int getBeanCount(Class<?> clz);
 
     boolean isBeanNameInUse(String name);
 

@@ -1,8 +1,7 @@
 package pers.warren.ioc.core;
 
-import pers.warren.ioc.condition.Conditional;
-
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +40,19 @@ public class AnnotationMetadata {
     }
 
     /**
+     * 判断特定注解是否存在
+     */
+    public boolean hasAnnotation(String annotationName) {
+        Collection<Annotation> values = annotationSet.values();
+        for (Annotation value : values) {
+            if(value.annotationType().getName().equals(annotationName)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 获取特定注解
      */
     public Annotation getAnnotation(Class annotation) {
@@ -69,13 +81,6 @@ public class AnnotationMetadata {
      */
     public Class<?> getSourceClass() {
         return clz;
-    }
-
-    /**
-     * 包含conditional注解
-     */
-    public boolean hasConditional(){
-        return annotationSet.containsKey(Conditional.class);
     }
 
 }

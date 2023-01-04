@@ -36,5 +36,8 @@ public enum BeanType {
      */
     CONFIGURATION,
 
-    PROXY;
+    PROXY,
+
+    OTHER
+    ;
 }

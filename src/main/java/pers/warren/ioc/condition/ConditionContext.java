@@ -8,4 +8,5 @@ public interface ConditionContext {
     BeanDefinitionRegistry getRegistry();
 
     Environment getEnvironment();
+
 }

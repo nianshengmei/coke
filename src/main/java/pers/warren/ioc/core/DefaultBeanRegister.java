@@ -31,7 +31,7 @@ public class DefaultBeanRegister implements BeanRegister {
 
     @Override
     public BeanDefinition initialization(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
-        if(metadata.isAnnotation() || metadata.hasAnnotation(ClassLoaderUtil.loadClass("org.aspectj.lang.annotation.Aspect"))){
+        if(metadata.isAnnotation() || metadata.hasAnnotation("org.aspectj.lang.annotation.Aspect")){
             return null;
         }
         BeanDefinition beanDefinition = null;
@@ -44,6 +44,8 @@ public class DefaultBeanRegister implements BeanRegister {
                     null,
                     name
             );
+            builder.setScanByAnnotation(metadata.getAnnotation(Configuration.class));
+            builder.setScanByAnnotationClass(Configuration.class);
             builder.setRegister(this);
             beanDefinition = builder.build();
         } else if (metadata.hasAnnotation(Component.class)) {
@@ -54,6 +56,8 @@ public class DefaultBeanRegister implements BeanRegister {
                     null,
                     name
             );
+            builder.setScanByAnnotation(metadata.getAnnotation(Component.class));
+            builder.setScanByAnnotationClass(Component.class);
             builder.setRegister(this);
             beanDefinition = builder.build();
         }

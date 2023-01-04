@@ -1,5 +1,6 @@
 package pers.warren.ioc.loader;
 
+import cn.hutool.core.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import pers.warren.ioc.core.BeanDefinitionBuilder;
 import pers.warren.ioc.core.Container;
@@ -20,6 +21,7 @@ import java.util.List;
  * @author warren
  */
 @Slf4j
+@SuppressWarnings("unchecked")
 public class PreLoadLoader implements Loader {
 
     private final Container container;
@@ -32,6 +34,8 @@ public class PreLoadLoader implements Loader {
 
     private static final List<Class<Annotation>> preLoadAnnotationClasses = new ArrayList<>();
 
+    private static final List<Class<?>> findClassList= new ArrayList<>();
+
     @Override
     public boolean load(Class<?> clz) {
         if (PreLoad.class.isAssignableFrom(clz) && (!clz.equals(PreLoad.class))) {
@@ -42,11 +46,22 @@ public class PreLoadLoader implements Loader {
                 }
                 Method method = clz.getMethod("preloadBasicComponentClass");
                 Class<?>[] preClzArray = (Class<?>[]) method.invoke(preLoad);
-                preLoadClasses.addAll(Arrays.asList(preClzArray));
+                if(preClzArray.length > 0) {
+                    preLoadClasses.addAll(Arrays.asList(preClzArray));
+                }
 
                 Method m2 = clz.getMethod("preloadBasicComponentAnnotationClass");
                 Class<Annotation>[] preAnnotationClzArray = (Class<Annotation>[]) m2.invoke(preLoad);
-                preLoadAnnotationClasses.addAll(Arrays.asList(preAnnotationClzArray));
+                if(preAnnotationClzArray.length > 0) {
+                    preLoadAnnotationClasses.addAll(Arrays.asList(preAnnotationClzArray));
+                }
+
+                Method m3 = clz.getMethod("findClasses");
+                Class<Class<?>>[] findClasses = (Class<Class<?>>[]) m3.invoke(preLoad);
+                if(findClasses.length > 0) {
+                    findClassList.addAll(Arrays.asList(findClasses));
+                }
+
             } catch (Exception e) {
                 log.error("coke 's PreLoad must use constructor with no parameter !  error init class {}", clz.getTypeName());
             }
@@ -67,11 +82,23 @@ public class PreLoadLoader implements Loader {
                 loadClz(clz);
             }
         }
+
+        for (Class<?> fClz : findClassList) {
+            if (fClz.isAssignableFrom(clz)) {
+                Container.getContainer().addFindClass(fClz,clz);
+            }
+        }
+
         return true;
     }
 
     private void loadClz(Class<?> clz){
         Object o = null;
+        final String prefixName = clz.getSimpleName();
+        String beanName = clz.getSimpleName();
+        while (container.containsBeanDefinition(beanName)) {
+            beanName = prefixName + "@" + RandomUtil.randomString(6);
+        }
         try {
             Constructor<?> constructor = null;
             try {
@@ -90,11 +117,11 @@ public class PreLoadLoader implements Loader {
                 }
             }
             o = constructor.newInstance(paramArr);
-            container.addBeanDefinition(BeanDefinitionBuilder.genericBeanDefinition(clz, clz.getSimpleName(), BeanType.BASE_COMPONENT, null, null).build());
+            container.addBeanDefinition(BeanDefinitionBuilder.genericBeanDefinition(clz, beanName, BeanType.BASE_COMPONENT, null, null).build());
         } catch (Exception e) {
             throw new RuntimeException("preload component class " + clz.getTypeName() + " must have a constructor with no param , " + clz.getName(), e);
         }
-        container.addComponent(clz.getSimpleName(), o);
+        container.addComponent(beanName, o);
     }
 
     private <A extends Annotation> boolean containsAnnotation(Class<?> clz, Class<A> annotationClz) {

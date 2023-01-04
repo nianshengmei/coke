@@ -5,8 +5,10 @@ import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.annotation.Autowired;
 import pers.warren.ioc.annotation.Bean;
 import pers.warren.ioc.annotation.Value;
+import pers.warren.ioc.condition.ConditionContext;
+import pers.warren.ioc.condition.DefaultConditionContext;
 import pers.warren.ioc.enums.BeanType;
-
+import pers.warren.ioc.kit.ConditionKit;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.lang.reflect.*;
@@ -59,23 +61,27 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
         Method[] methods = clz.getMethods();
         for (Method method : methods) {
             if (method.getAnnotation(Bean.class) != null) {
-                Bean beanAnnotation = method.getAnnotation(Bean.class);
-                String name = beanAnnotation.name();
-                if (StrUtil.isNotEmpty(name)) {
-                    if (Container.getContainer().isBeanNameInUse(name)) {
-                        throw new RuntimeException("bean name in used :" + name);
+                int conditionModify = ConditionKit.hasCondition(method);
+                ConditionContext conditionContext = new DefaultConditionContext();
+                if(ConditionKit.conditionMatch(conditionModify,method,conditionContext)) {
+                    Bean beanAnnotation = method.getAnnotation(Bean.class);
+                    String name = beanAnnotation.name();
+                    if (StrUtil.isNotEmpty(name)) {
+                        if (Container.getContainer().isBeanNameInUse(name)) {
+                            throw new RuntimeException("bean name in used :" + name);
+                        }
+                    } else {
+                        name = method.getName();
+                        if (Container.getContainer().isBeanNameInUse(name)) {
+                            name += ("#" + RandomUtil.randomString(7));
+                        }
                     }
-                } else {
-                    name = method.getName();
-                    if (Container.getContainer().isBeanNameInUse(name)) {
-                        name += ("#" + RandomUtil.randomString(7));
+                    if (!method.getReturnType().equals(Void.class)) {
+                        BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(method.getReturnType(),
+                                name, BeanType.SIMPLE_BEAN, method, beanDefinition.getName()).setFactoryBeanType(SimpleFactoryBean.class);
+                        builder.setRegister(register);
+                        register.registerBeanDefinition(builder.build(), Container.getContainer());
                     }
-                }
-                if (!method.getReturnType().equals(Void.class)) {
-                    BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(method.getReturnType(),
-                            name, BeanType.SIMPLE_BEAN, method, beanDefinition.getName()).setFactoryBeanType(SimpleFactoryBean.class);
-                    builder.setRegister(register);
-                    register.registerBeanDefinition(builder.build(), Container.getContainer());
                 }
             }
         }
