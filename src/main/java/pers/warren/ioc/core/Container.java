@@ -2,6 +2,7 @@ package pers.warren.ioc.core;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.Getter;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.handler.CokePropertiesHandler;
 
@@ -25,6 +26,12 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     private final Map<String, List<Class<?>>> findClassMap = new HashMap<>();
 
+    /**
+     * 排除器
+     */
+    @Getter
+    private final Eliminator eliminator = new Eliminator();
+
     public <R> List<R> findClass(Class<?> clz) {
         return (List<R>)findClassMap.get(clz.getTypeName());
     }
@@ -33,8 +40,6 @@ public class Container implements BeanDefinitionRegistry, Environment {
         findClassMap.putIfAbsent(clz.getTypeName(),new ArrayList<>());
         findClassMap.get(clz.getTypeName()).add(c);
     }
-
-
 
     /**
      * 获取特定配置属性
@@ -220,6 +225,11 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     @Override
     public void registerBeanDefinition(String name, BeanDefinition beanDefinition) {
+        //排除指定bean
+        Eliminator eliminator = Container.getContainer().getEliminator();
+        if (eliminator.isExclude(beanDefinition.getClz()) || eliminator.isExclude(name)) {
+            return;
+        }
         if (StrUtil.isNotEmpty(name) && null != beanDefinition) {
             beanDefinition.setName(StrUtil.lowerFirst(beanDefinition.getName()));
             this.beanDefinitionMap.put(StrUtil.lowerFirst(name), beanDefinition);

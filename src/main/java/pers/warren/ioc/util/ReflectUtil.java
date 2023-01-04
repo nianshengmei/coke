@@ -3,6 +3,7 @@ package pers.warren.ioc.util;
 import javassist.*;
 import javassist.bytecode.*;
 import lombok.experimental.UtilityClass;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -138,6 +139,27 @@ public class ReflectUtil {
             clzArr[i] = pool.get(array[i].getName());
         }
         return clzArr;
+    }
+
+    public Class<?> mainClz;
+
+    /* 从堆栈信息推测主类 */
+    public static Class<?> deduceMainApplicationClass() {
+        if (null != mainClz) {
+            return mainClz;
+        }
+        try {
+            StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();
+            for (StackTraceElement stackTraceElement : stackTrace) {
+                if ("main".equals(stackTraceElement.getMethodName())) {
+                    mainClz = Class.forName(stackTraceElement.getClassName());
+                    return mainClz;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            // Swallow and continue
+        }
+        return null;
     }
 
 }

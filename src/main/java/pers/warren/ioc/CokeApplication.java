@@ -3,12 +3,14 @@ package pers.warren.ioc;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import lombok.extern.slf4j.Slf4j;
+import pers.warren.ioc.annotation.Coke;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.handler.CokePostHandler;
 import pers.warren.ioc.handler.CokePostService;
 import pers.warren.ioc.inject.Inject;
 import pers.warren.ioc.loader.Loader;
+import pers.warren.ioc.util.ReflectUtil;
 import pers.warren.ioc.util.ScanUtil;
 import java.util.*;
 
@@ -113,8 +115,22 @@ public class CokeApplication {
      * 启动开始
      */
     private static void start() {
+        addEliminator();
         startTimeMills = System.currentTimeMillis();
         printBanner();
+    }
+
+    private static void addEliminator() {
+        Class<?> mainApplicationClass = ReflectUtil.deduceMainApplicationClass();
+        if(null == mainApplicationClass){
+            log.error("推测的main方法未空!");
+            return;
+        }
+        if (ReflectUtil.containsAnnotation(mainApplicationClass, Coke.class)) {
+            Coke annotation = mainApplicationClass.getAnnotation(Coke.class);
+            Container.getContainer().getEliminator().addExcludeBeanClzList(annotation.excludeClass());
+            Container.getContainer().getEliminator().addExcludeBeanNameList(annotation.excludeBeanName());
+        }
     }
 
     /**
