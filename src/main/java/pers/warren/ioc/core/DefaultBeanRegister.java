@@ -1,5 +1,6 @@
 package pers.warren.ioc.core;
 
+import cn.hutool.core.util.ClassLoaderUtil;
 import pers.warren.ioc.annotation.Component;
 import pers.warren.ioc.annotation.Configuration;
 import pers.warren.ioc.enums.BeanType;
@@ -30,6 +31,9 @@ public class DefaultBeanRegister implements BeanRegister {
 
     @Override
     public BeanDefinition initialization(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+        if(metadata.isAnnotation() || metadata.hasAnnotation("org.aspectj.lang.annotation.Aspect")){
+            return null;
+        }
         BeanDefinition beanDefinition = null;
         BeanDefinitionBuilder builder = null;
         if (metadata.hasAnnotation(Configuration.class)) {
@@ -40,6 +44,8 @@ public class DefaultBeanRegister implements BeanRegister {
                     null,
                     name
             );
+            builder.setScanByAnnotation(metadata.getAnnotation(Configuration.class));
+            builder.setScanByAnnotationClass(Configuration.class);
             builder.setRegister(this);
             beanDefinition = builder.build();
         } else if (metadata.hasAnnotation(Component.class)) {
@@ -50,10 +56,15 @@ public class DefaultBeanRegister implements BeanRegister {
                     null,
                     name
             );
+            builder.setScanByAnnotation(metadata.getAnnotation(Component.class));
+            builder.setScanByAnnotationClass(Component.class);
             builder.setRegister(this);
             beanDefinition = builder.build();
         }
-        registerBeanDefinition(builder, registry);
+        if (null == beanDefinition) {
+            return null;
+        }
+        registry.registerBeanDefinition(beanDefinition.getName(), beanDefinition);
         return beanDefinition;
     }
 

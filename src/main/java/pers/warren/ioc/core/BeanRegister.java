@@ -42,16 +42,15 @@ public interface BeanRegister {
 
     BeanDefinition initialization(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry);
 
-    default void registerBeanDefinition(BeanDefinitionBuilder builder, BeanDefinitionRegistry registry) {
-        if (null == builder) {
+    default void registerBeanDefinition(BeanDefinition beanDefinition, BeanDefinitionRegistry registry) {
+        if (null == beanDefinition) {
             return;
         }
-        BeanDefinition beanDefinition = builder.build();
         registry.registerBeanDefinition(beanDefinition.getName(), beanDefinition);
         List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);
         for (BeanPostProcessor postProcessor : postProcessors) {
-            postProcessor.postProcessBeforeInitialization(builder.build(), this);
+            postProcessor.postProcessBeforeInitialization(beanDefinition, this);
         }
-
     }
+
 }

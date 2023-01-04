@@ -42,9 +42,8 @@ public class ScanUtil {
 
     public final Set<String> jarFilePath = new HashSet<>();
 
-
     public Set<Class<?>> scan() {
-        Class<?> mainClass = deduceMainApplicationClass(); //从堆栈信息推测主类
+        Class<?> mainClass = ReflectUtil.deduceMainApplicationClass(); //从堆栈信息推测主类
         String name = ClassUtil.getPackage(mainClass);
         scanPackageFor("pers.warren.ioc");
         scanPackageFor("org.needcoke");
@@ -53,20 +52,7 @@ public class ScanUtil {
         return clzs;
     }
 
-    /* 从堆栈信息推测主类 */
-    private static Class<?> deduceMainApplicationClass() {
-        try {
-            StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();
-            for (StackTraceElement stackTraceElement : stackTrace) {
-                if ("main".equals(stackTraceElement.getMethodName())) {
-                    return Class.forName(stackTraceElement.getClassName());
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            // Swallow and continue
-        }
-        return null;
-    }
+
 
     /* 扫描包路径 */
     public void scanPackageFor(String packagePath) {
@@ -75,13 +61,11 @@ public class ScanUtil {
             Configuration configurationAnnotation = aClass.getAnnotation(Configuration.class);
             if (configurationAnnotation != null) {
                 scanArray(configurationAnnotation.scanner());
-
                 Scanner scannerAnnotation = aClass.getAnnotation(Scanner.class);
                 if (scannerAnnotation != null) {
                     scanArray(scannerAnnotation.value());
                 }
             }
-            //TODO component初始化
         }
     }
 

@@ -1,6 +1,7 @@
 package pers.warren.ioc.core;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,12 +16,16 @@ public class AnnotationMetadata {
     /**
      * 注解信息
      */
-    private Map<Class<?>, Annotation> annotationSet;
+    private final Map<Class<?>, Annotation> annotationSet;
 
     /**
      * 注解信息源类
      */
     private Class<?> clz;
+
+    public boolean isAnnotation(){
+        return clz.isAnnotation();
+    }
 
     public AnnotationMetadata(Class<?> clz) {
         this.annotationSet = new HashMap<>();
@@ -32,6 +37,19 @@ public class AnnotationMetadata {
      */
     public boolean hasAnnotation(Class<?> annotation) {
         return annotationSet.containsKey(annotation);
+    }
+
+    /**
+     * 判断特定注解是否存在
+     */
+    public boolean hasAnnotation(String annotationName) {
+        Collection<Annotation> values = annotationSet.values();
+        for (Annotation value : values) {
+            if(value.annotationType().getName().equals(annotationName)){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -49,6 +67,11 @@ public class AnnotationMetadata {
         AnnotationMetadata annotationMetadata = new AnnotationMetadata(clz);
         for (Annotation annotation : annotations) {
             annotationMetadata.annotationSet.put(annotation.annotationType(), annotation);
+            Class<? extends Annotation> annotationType = annotation.annotationType();
+            Annotation[] typeAnnotations = annotationType.getAnnotations();
+            for (Annotation typeAnnotation : typeAnnotations) {
+                annotationMetadata.annotationSet.put(typeAnnotation.annotationType(), typeAnnotation);
+            }
         }
         return annotationMetadata;
     }

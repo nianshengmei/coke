@@ -9,6 +9,16 @@ package pers.warren.ioc.enums;
 public enum BeanType {
 
     /**
+     * 容器上下文
+     */
+    CONTEXT,
+
+    /**
+     * 基础组件
+     */
+    BASE_COMPONENT,
+
+    /**
      * 简单bean
      * 一般是由函数声明的Bean,例如@Bean修饰的方法创建出的Bean
      */
@@ -24,5 +34,10 @@ public enum BeanType {
      * 配置
      * 仅限于@Confguration,也可以扩展，但需要支持包扫描，一般不建议
      */
-    CONFIGURATION;
+    CONFIGURATION,
+
+    PROXY,
+
+    OTHER
+    ;
 }

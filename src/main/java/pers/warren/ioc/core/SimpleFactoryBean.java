@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 
 /**
  * 简单Bean的FactoryBean
+ *
  * @author warren
  */
 public class SimpleFactoryBean implements FactoryBean {
@@ -59,7 +60,7 @@ public class SimpleFactoryBean implements FactoryBean {
                     BeanDefinition bdByName = Container.getContainer().getBeanDefinition(parameterNames[i]);
                     BeanDefinition bdByType = Container.getContainer().getBeanDefinition(parameterTypes[i]);
                     if (null == bdByName && null == bdByType) {
-                        throw new RuntimeException("can't find param in container named : " + parameterNames[i]);
+                        throw new RuntimeException(String.format("%s can't find param in container named : %s", invokeSource, parameterNames[i]));
                     }
                     if (null != bdByName) {
                         FactoryBean factoryBean = currentBeanFactory.createBean(bdByName);
@@ -81,6 +82,11 @@ public class SimpleFactoryBean implements FactoryBean {
             e.printStackTrace();
             throw new RuntimeException("invoke method exception , bean name :" + beanDefinition.getName());
         }
+    }
+
+    @Override
+    public String getName() {
+        return beanDefinition.getName();
     }
 
     @Override

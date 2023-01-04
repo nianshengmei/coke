@@ -1,21 +1,18 @@
 package pers.warren.ioc;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
-import pers.warren.ioc.annotation.Autowired;
+import pers.warren.ioc.annotation.Coke;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.handler.CokePostHandler;
-import pers.warren.ioc.handler.CokePropertiesHandler;
-import pers.warren.ioc.util.InjectUtil;
+import pers.warren.ioc.handler.CokePostService;
+import pers.warren.ioc.inject.Inject;
+import pers.warren.ioc.loader.Loader;
+import pers.warren.ioc.util.ReflectUtil;
 import pers.warren.ioc.util.ScanUtil;
-
-import javax.annotation.Resource;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 容器的启动辅助类
@@ -39,201 +36,78 @@ public class CokeApplication {
 
         clzSet = ScanUtil.scan();   //包扫描
 
-        loadContext();       //加载ApplicationContext
+        Loader.loadConfigEnvironment();   //读取配置文件
 
-        CokePropertiesHandler.read();   //读取配置文件  ， 依赖于包扫描
+        log.info("scan java and resource files ok, cost {} ms !", System.currentTimeMillis() - startTimeMills);
 
-        log.info("scan java and resource files ok, cost {} ms ",System.currentTimeMillis()-startTimeMills);
+        Loader.preload(clzSet);   //预加载
 
-        loadBasicComponent();       //加载基础组件 、 包括BeanRegister初始化，BeanFactory初始化，BeanPostProcessor初始化
+        initBeanDefinition();         //扫描需要初始化的Bean生成BeanDefinition
 
-        loadConfiguration();         //扫描需要初始化的Bean生成BeanDefinition
+        componentPostProcessorBefore();
 
         loadBean();                  //初始化Bean
 
-        injectProperties();          //注入配置文件
+        beanDeduce();                //bean推断
 
-        injectField();               //注入Bean
+        Inject.injectFiled();
 
         end();                       //容器启动后置方法
 
         return Container.getContainer().applicationContext();
     }
 
-    /**
-     * 加载上下文
-     */
-    protected static void loadContext() {
+    private static void beanDeduce() {
         Container container = Container.getContainer();
-        for (Class<?> aClass : clzSet) {
-            if (ApplicationContext.class.isAssignableFrom(aClass) && (!container.hasEqualComponent(aClass))) {
-                Object o = null;
-                try {
-                    Constructor<?> constructor = aClass.getConstructor();
-                    o = constructor.newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException("class ApplicationContext must have a constructor with no param , " + aClass.getName());
-                }
-                container.addComponent(aClass.getSimpleName(), o);
-            }
+        List<BeanDeduce> beanDeduces = container.getBeans(BeanDeduce.class);
+        for (BeanDeduce beanDeduce : beanDeduces) {
+            beanDeduce.deduce();
         }
-
     }
 
-    protected static void loadBasicComponent() {
+    private static void componentPostProcessorBefore() {
         Container container = Container.getContainer();
-        for (Class<?> aClass : clzSet) {
-            if (BeanPostProcessor.class.isAssignableFrom(aClass) && (!BeanPostProcessor.class.equals(aClass))) {
-                Object o = null;
-                try {
-                    Constructor<?> constructor = aClass.getConstructor();
-                    o = constructor.newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException("class BeanPostProcessor must have a constructor with no param , " + aClass.getName());
-                }
-                container.addComponent(aClass.getSimpleName(), o);
-            }
-
-            if (BeanFactory.class.isAssignableFrom(aClass) && (!BeanFactory.class.equals(aClass))) {
-                Object o = null;
-                try {
-                    Constructor<?> constructor = aClass.getConstructor();
-                    o = constructor.newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException("class BeanFactory must have a constructor with no param , " + aClass.getName());
-                }
-                container.addComponent(aClass.getSimpleName(), o);
-            }
-
-            if (BeanRegister.class.isAssignableFrom(aClass) && (!BeanRegister.class.equals(aClass))) {
-                Object o = null;
-                try {
-                    Constructor<?> constructor = aClass.getConstructor();
-                    o = constructor.newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException("class BeanRegister must have a constructor with no param , " + aClass.getName());
-                }
-                container.addComponent(aClass.getSimpleName(), o);
+        Collection<BeanDefinition> beanDefinitions = container.getBeanDefinitions();
+        List<BeanPostProcessor> beanPostProcessors = container.getBeans(BeanPostProcessor.class);
+        for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
+            for (BeanDefinition beanDefinition : beanDefinitions) {
+                beanPostProcessor.postProcessBeforeInitialization(beanDefinition, beanDefinition.getRegister());
             }
         }
 
+        for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
+            for (BeanDefinition beanDefinition : beanDefinitions) {
+                beanPostProcessor.postProcessAfterBeforeProcessor(beanDefinition, beanDefinition.getRegister());
+            }
+        }
     }
 
     private static void loadBean() {
         Container container = Container.getContainer();
-        BeanType[] beanTypes = new BeanType[]{BeanType.CONFIGURATION, BeanType.COMPONENT, BeanType.SIMPLE_BEAN};
-        for (BeanType beanType : beanTypes) {
-            List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(beanType);
-            for (BeanDefinition beanDefinition : beanDefinitions) {
-                if (null != container.getBean(beanDefinition.getName())) {
-                    continue;
-                }
-                BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
-                FactoryBean factoryBean = beanFactory.createBean(beanDefinition);
-                container.addFactoryBean(beanDefinition.getName(), factoryBean);
-                container.addComponent(beanDefinition.getName(), factoryBean.getObject());
-            }
+        LinkedList<BeanDefinition> bdfDQueue = new LinkedList<>(container.getBeanDefinitions(BeanType.CONFIGURATION));
+        bdfDQueue.addAll(container.getBeanDefinitions(BeanType.COMPONENT));
+        bdfDQueue.addAll(container.getBeanDefinitions(BeanType.SIMPLE_BEAN));
+        bdfDQueue.addAll(container.getBeanDefinitions(BeanType.PROXY));
+        bdfDQueue.addAll(container.getBeanDefinitions(BeanType.OTHER));
+        while (bdfDQueue.size() != 0) {
+            BeanDefinition bdf = bdfDQueue.poll();
+            createBean(bdf);
         }
     }
 
-    public static void injectProperties() {
+    private static void createBean(BeanDefinition beanDefinition) {
         Container container = Container.getContainer();
-        List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(BeanType.CONFIGURATION);
-        beanDefinitions.addAll(container.getBeanDefinitions(BeanType.COMPONENT));
-        for (BeanDefinition beanDefinition : beanDefinitions) {
-            List<ValueField> valueFiledInject = beanDefinition.getValueFiledInject();
-            for (ValueField field : valueFiledInject) {
-                if (null == field.getConfigValue() && null == field.getDefaultValue()) {
-                    continue;
-                }
-                Field f = field.getField();
-                Object bean = container.getBean(beanDefinition.getName());
-
-                try {
-                    Object value = InjectUtil.getDstValue(field);
-                    f.setAccessible(true);
-                    f.set(bean, value);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                } catch (Exception e) {
-                    throw new RuntimeException("the value in the configuration file cannot be converted to the corresponding attribute , value field info : " + field);
-                }
-            }
+        if (null != container.getBean(beanDefinition.getName())) {
+            return;
         }
-    }
-
-    public static void injectField() {
-        Container container = Container.getContainer();
-        List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(BeanType.CONFIGURATION);
-        beanDefinitions.addAll(container.getBeanDefinitions(BeanType.COMPONENT));
-        for (BeanDefinition beanDefinition : beanDefinitions) {
-            List<Field> autowiredFieldList = beanDefinition.getAutowiredFieldInject();
-            Object bean = container.getBean(beanDefinition.getName());
-            for (Field field : autowiredFieldList) {
-                String name = field.getName();
-                Autowired annotation = field.getAnnotation(Autowired.class);
-                Object b = null;
-                if (StrUtil.isNotEmpty(annotation.value())) {
-                    name = annotation.value();
-                    b = container.getBean(name);
-                    if (null == b) {
-                        throw new RuntimeException("without bean autowired named :" + name
-                                + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
-                        );
-                    }
-
-                } else {
-                    b = container.getBean(field.getType());
-                    if (null == b) {
-                        throw new RuntimeException("no bean type autowired :" + field.getType().getName()
-                                + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
-                        );
-                    }
-                }
-                try {
-                    field.setAccessible(true);
-                    field.set(bean, b);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("no bean type autowired :" + field.getType().getName()
-                            + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
-                    );
-                }
-            }
-
-            List<Field> resourceFieldList = beanDefinition.getResourceFieldInject();
-            bean = container.getBean(beanDefinition.getName());
-            for (Field field : resourceFieldList) {
-                String name = field.getName();
-                Resource annotation = field.getAnnotation(Resource.class);
-                Object b = null;
-                if (StrUtil.isNotEmpty(annotation.name())) {
-                    name = annotation.name();
-                    b = container.getBean(name);
-                    if (null == b) {
-                        throw new RuntimeException("without bean autowired named :" + name
-                                + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
-                        );
-                    }
-
-                } else {
-                    b = container.getBean(field.getType());
-                    if (null == b) {
-                        throw new RuntimeException("no bean type autowired :" + field.getType().getName()
-                                + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
-                        );
-                    }
-                }
-                try {
-                    field.setAccessible(true);
-                    field.set(bean, b);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("no bean type autowired :" + field.getType().getName()
-                            + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
-                    );
-                }
-            }
-
+        BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
+        FactoryBean factoryBean = null;
+        try {
+            factoryBean = beanFactory.createBean(beanDefinition);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        container.addComponent(beanDefinition.getName(), factoryBean.getObject());
     }
 
 
@@ -241,8 +115,22 @@ public class CokeApplication {
      * 启动开始
      */
     private static void start() {
+        addEliminator();
         startTimeMills = System.currentTimeMillis();
         printBanner();
+    }
+
+    private static void addEliminator() {
+        Class<?> mainApplicationClass = ReflectUtil.deduceMainApplicationClass();
+        if(null == mainApplicationClass){
+            log.error("推测的main方法未空!");
+            return;
+        }
+        if (ReflectUtil.containsAnnotation(mainApplicationClass, Coke.class)) {
+            Coke annotation = mainApplicationClass.getAnnotation(Coke.class);
+            Container.getContainer().getEliminator().addExcludeBeanClzList(annotation.excludeClass());
+            Container.getContainer().getEliminator().addExcludeBeanNameList(annotation.excludeBeanName());
+        }
     }
 
     /**
@@ -257,13 +145,29 @@ public class CokeApplication {
      */
     private static void end() {
         postHandlerRun();
-        log.info("coke start ok! cost = {}ms", System.currentTimeMillis() - startTimeMills);
+        log.info("coke start ok! cost = {} ms !", System.currentTimeMillis() - startTimeMills);
+        postServiceRun();
+    }
+
+    private static void postServiceRun() {
+        Container container = Container.getContainer();
+        List<CokePostService> postHandlers = container.getBeans(CokePostService.class);
+        if (CollUtil.isNotEmpty(postHandlers)) {
+            log.info("coke start cost {} ms before post handler run !", System.currentTimeMillis() - startTimeMills);
+        }
+        for (CokePostService postHandler : postHandlers) {
+            try {
+                postHandler.run();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     /**
      * 加载配置类
      */
-    private static void loadConfiguration() {
+    private static void initBeanDefinition() {
         Container container = Container.getContainer();
         List<BeanRegister> beanRegisters = container.getBeans(BeanRegister.class);
         for (Class<?> clz : clzSet) {
@@ -277,9 +181,18 @@ public class CokeApplication {
     private static void postHandlerRun() {
         Container container = Container.getContainer();
         List<CokePostHandler> postHandlers = container.getBeans(CokePostHandler.class);
+        if (CollUtil.isNotEmpty(postHandlers)) {
+            log.info("coke start cost {} ms before post handler run !", System.currentTimeMillis() - startTimeMills);
+        }
         for (CokePostHandler postHandler : postHandlers) {
-            postHandler.run();
+            try {
+                postHandler.run();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
         }
     }
+
+
 }
 

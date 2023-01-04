@@ -16,6 +16,7 @@ public class BeanDefinitionBuilder {
 
     public BeanDefinitionBuilder() {
         this.beanDefinition = new BeanDefinition();
+        this.beanDefinition.setProxy(false);
     }
 
     public static BeanDefinitionBuilder genericBeanDefinition(Class<?> beanClass, String name, Object function, String invokeSource) {
@@ -64,6 +65,11 @@ public class BeanDefinitionBuilder {
 
     public BeanDefinitionBuilder setScanByAnnotation(Annotation annotation){
         this.beanDefinition.setScanByAnnotation(annotation);
+        return this;
+    }
+
+    public BeanDefinitionBuilder setAnnotationMetadata(AnnotationMetadata metadata){
+        this.beanDefinition.setAnnotationMetadata(metadata);
         return this;
     }
 

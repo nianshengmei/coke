@@ -18,6 +18,8 @@ public interface FactoryBean<T> {
      */
     Class<T> getType();
 
+    String getName();
+
     /**
      * 是否单例
      */

@@ -7,7 +7,7 @@
     <groupId>org.needcoke</groupId>
     <artifactId>coke</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <properties>
         <jv>1.8</jv>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -45,6 +45,10 @@
                     <groupId>org.springframework</groupId>
                     <artifactId>spring-jdbc</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -59,8 +63,23 @@
             <version>3.27.0-GA</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.13.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.13.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.13.3</version>
+        </dependency>
     </dependencies>
-
-
 
 </project>

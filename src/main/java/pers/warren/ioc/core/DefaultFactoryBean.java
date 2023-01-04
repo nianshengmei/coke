@@ -1,12 +1,12 @@
 package pers.warren.ioc.core;
 
+import lombok.extern.slf4j.Slf4j;
 import pers.warren.ioc.annotation.Autowired;
+import pers.warren.ioc.ec.NoMatchBeanException;
 import pers.warren.ioc.util.ReflectUtil;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -17,6 +17,7 @@ import java.util.List;
  * @author warren
  * @since jdk1.8
  */
+@Slf4j
 public class DefaultFactoryBean implements FactoryBean {
 
     /**
@@ -65,12 +66,18 @@ public class DefaultFactoryBean implements FactoryBean {
                 constructor = c;
             }
         }
+        if (null == constructor) {
+            throw new RuntimeException("class " + clz.getName() + " have no constructor !");
+        }
+        List<String> methodParamNames = ReflectUtil.getParameterNames(constructor);
+        Class[] parameterTypes = constructor.getParameterTypes();
         try {
-            List<String> methodParamNames = ReflectUtil.getParameterNames(constructor);
-            Class[] parameterTypes = constructor.getParameterTypes();
             Object[] params = new Object[methodParamNames.size()];
             for (int i = 0; i < methodParamNames.size(); i++) {
                 Object bean = Container.getContainer().getBean(methodParamNames.get(i));
+                if (bean != null && !bean.getClass().getTypeName().equals(parameterTypes[i].getTypeName())) {
+                    bean = null;
+                }
                 if (null == bean) {
                     bean = Container.getContainer().getBean(parameterTypes[i]);
                 }
@@ -78,30 +85,32 @@ public class DefaultFactoryBean implements FactoryBean {
                     BeanDefinition bdByName = Container.getContainer().getBeanDefinition(methodParamNames.get(i));
                     BeanDefinition bdByType = Container.getContainer().getBeanDefinition(parameterTypes[i]);
                     if (null == bdByName && null == bdByType) {
-                        throw new RuntimeException("can't find param in container named : " + methodParamNames.get(i));
+                        throw new NoMatchBeanException(String.format("%s can't find param in container named : %s", getName(), methodParamNames.get(i)));
                     }
+                    Object obj = null;
                     if (null != bdByName) {
                         FactoryBean factoryBean = currentBeanFactory.createBean(bdByName);
-                        Container.getContainer().addComponent(bdByName.getName(), factoryBean.getObject());
-                        Container.getContainer().addFactoryBean(bdByName.getName(), factoryBean);
+                        if (factoryBean.getType().getTypeName().equals(parameterTypes[i].getTypeName())) {
+                            factoryBean = currentBeanFactory.createBean(bdByType);
+                        }
+                        obj = factoryBean.getObject();
+                        Container.getContainer().addComponent(factoryBean.getName(), obj);
                     } else {
                         FactoryBean factoryBean = currentBeanFactory.createBean(bdByType);
-                        Container.getContainer().addComponent(bdByType.getName(), factoryBean.getObject());
-                        Container.getContainer().addFactoryBean(bdByType.getName(), factoryBean);
+                        obj = factoryBean.getObject();
+                        Container.getContainer().addComponent(bdByType.getName(), obj);
                     }
-                    bean = Container.getContainer().getBean(methodParamNames.get(i));
+                    bean = obj;
                     if (null == bean) {
                         bean = Container.getContainer().getBean(parameterTypes[i]);
                     }
                 }
                 params[i] = bean;
             }
-            return constructor.newInstance(params);
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
+            Object o = constructor.newInstance(params);
+            return o;
+        } catch (Exception e) {
+            log.error("bean name {}, need inject a bean name like {} , type = {}", beanDefinition.getName(), methodParamNames, parameterTypes);
             throw new RuntimeException(e);
         }
     }
@@ -112,6 +121,11 @@ public class DefaultFactoryBean implements FactoryBean {
     @Override
     public Class<?> getType() {
         return beanDefinition.getClz();
+    }
+
+    @Override
+    public String getName() {
+        return beanDefinition.getName();
     }
 
     /**

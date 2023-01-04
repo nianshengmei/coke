@@ -5,12 +5,13 @@ import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.annotation.Autowired;
 import pers.warren.ioc.annotation.Bean;
 import pers.warren.ioc.annotation.Value;
+import pers.warren.ioc.condition.ConditionContext;
+import pers.warren.ioc.condition.DefaultConditionContext;
 import pers.warren.ioc.enums.BeanType;
-
+import pers.warren.ioc.kit.ConditionKit;
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,16 +21,16 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
     public void postProcessBeforeInitialization(BeanDefinition beanDefinition, BeanRegister register) {
         Class<?> clz = beanDefinition.getClz();
         Field[] declaredFields = clz.getDeclaredFields();
-        List<Field> autowiredFields = new ArrayList<>();
-        List<Field> resourceFields = new ArrayList<>();
+        List<InjectField> autowiredFields = new ArrayList<>();
+        List<InjectField> resourceFields = new ArrayList<>();
         List<ValueField> valueFields = new ArrayList<>();
         for (Field declaredField : declaredFields) {
             if (null != declaredField.getAnnotation(Autowired.class)) {
-                autowiredFields.add(declaredField);
+                autowiredFields.add(new InjectField(beanDefinition.name, declaredField));
             }
 
             if (null != declaredField.getAnnotation(Resource.class)) {
-                resourceFields.add(declaredField);
+                resourceFields.add(new InjectField(beanDefinition.name, declaredField));
             }
 
             if (null != declaredField.getAnnotation(Value.class)) {
@@ -60,23 +61,27 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
         Method[] methods = clz.getMethods();
         for (Method method : methods) {
             if (method.getAnnotation(Bean.class) != null) {
-                Bean beanAnnotation = method.getAnnotation(Bean.class);
-                String name = beanAnnotation.name();
-                if (StrUtil.isNotEmpty(name)) {
-                    if (Container.getContainer().isBeanNameInUse(name)) {
-                        throw new RuntimeException("bean name in used :" + name);
+                int conditionModify = ConditionKit.hasCondition(method);
+                ConditionContext conditionContext = new DefaultConditionContext();
+                if(ConditionKit.conditionMatch(conditionModify,method,conditionContext)) {
+                    Bean beanAnnotation = method.getAnnotation(Bean.class);
+                    String name = beanAnnotation.name();
+                    if (StrUtil.isNotEmpty(name)) {
+                        if (Container.getContainer().isBeanNameInUse(name)) {
+                            throw new RuntimeException("bean name in used :" + name);
+                        }
+                    } else {
+                        name = method.getName();
+                        if (Container.getContainer().isBeanNameInUse(name)) {
+                            name += ("#" + RandomUtil.randomString(7));
+                        }
                     }
-                } else {
-                    name = method.getName();
-                    if (Container.getContainer().isBeanNameInUse(name)) {
-                        name += ("#" + RandomUtil.randomString(7));
+                    if (!method.getReturnType().equals(Void.class)) {
+                        BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(method.getReturnType(),
+                                name, BeanType.SIMPLE_BEAN, method, beanDefinition.getName()).setFactoryBeanType(SimpleFactoryBean.class);
+                        builder.setRegister(register);
+                        register.registerBeanDefinition(builder.build(), Container.getContainer());
                     }
-                }
-                if (!method.getReturnType().equals(Void.class)) {
-                    BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(method.getReturnType(),
-                            name, BeanType.SIMPLE_BEAN, method, beanDefinition.getName()).setFactoryBeanType(SimpleFactoryBean.class);
-                    builder.setRegister(register);
-                    register.registerBeanDefinition(builder, Container.getContainer());
                 }
             }
         }
@@ -85,6 +90,26 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public void postProcessAfterInitialization(BeanDefinition beanDefinition, BeanRegister register) {
+        Class<?> clz = beanDefinition.getClz();
+        Method[] declaredMethods = clz.getDeclaredMethods();
+        for (Method declaredMethod : declaredMethods) {
+            PostConstruct annotation = declaredMethod.getAnnotation(PostConstruct.class);
+            if (null != annotation) {
+                Object bean = Container.getContainer().getBean(beanDefinition.getName());
+                Parameter[] parameters = declaredMethod.getParameters();
+                Object[] paramArr = null;
+                if (null != parameters && parameters.length > 0) {
+                    //TODO 容器中寻找一波参数
+                } else {
+                    paramArr = new Object[0];
+                }
+                try {
+                    declaredMethod.invoke(bean, paramArr);
+                } catch (Exception e) {
+                    throw new RuntimeException("@PostConstruct error see class " + clz.getName() + " method = " + declaredMethod.getName(), e);
+                }
+            }
+        }
     }
 
 
