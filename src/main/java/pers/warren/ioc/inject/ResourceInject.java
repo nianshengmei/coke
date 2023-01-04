@@ -33,7 +33,7 @@ public class ResourceInject implements Inject {
                 b = getBean(name,injectField.isProxy());
                 if (null == b) {
                     throw new RuntimeException("without bean autowired named :" + name
-                            + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                            + "  , source bean " + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
                     );
                 }
 
@@ -41,7 +41,7 @@ public class ResourceInject implements Inject {
                 b = getBean(field.getType(),injectField.isProxy());
                 if (null == b) {
                     throw new RuntimeException("no bean type autowired :" + field.getType().getName()
-                            + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
+                            + "  , source bean " + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
                     );
                 }
             }
