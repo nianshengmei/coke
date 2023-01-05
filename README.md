@@ -234,8 +234,7 @@ public class RunApplication {
 
 ## 📥下载jar
 
-下载页面https://gitee.com/needcoke/coke/releases
-
+[**🌎下载页面**](https://gitee.com/needcoke/coke/releases)
 
 ## 🏗️添砖加瓦
 coke开发者QQ群聊169208957,期待你的加入!
