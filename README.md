@@ -158,3 +158,39 @@ public class CokeConfig {
     }
 }
 ```
+
+#### 2.5 @Autowired
+
+通过@Autowired可以在一个bean中注入另一个bean。该注解作用于属性，setter方法和构造函数上。
+
+
+示例:
+
+```java
+import com.hello.coke.config.CokeConfig;
+import pers.warren.ioc.annotation.Autowired;
+import pers.warren.ioc.annotation.Component;
+
+@Component
+public class UserService {
+
+    @Autowired("userDemo2")
+    private User user;
+
+    @Autowired
+    private CokeConfig config;
+    
+    private Integer max;
+
+    @Autowired
+    public void setMax(Integer max) {
+        this.max = max;
+    }
+    public void sayHello(){
+        System.out.println(user.getName() + "hello" + hashCode());
+        System.out.println(config.toString());
+    }
+}
+
+```
+
