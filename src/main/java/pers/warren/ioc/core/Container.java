@@ -46,6 +46,10 @@ public class Container implements BeanDefinitionRegistry, Environment {
      */
     @Override
     public Object getProperty(String k) {
+        String env = System.getenv(k);
+        if (StrUtil.isNotEmpty(env)) {
+            return env;
+        }
         return this.propertiesMap.get(k);
     }
 
@@ -53,6 +57,10 @@ public class Container implements BeanDefinitionRegistry, Environment {
      * 判断是否存在特定配置属性
      */
     public boolean containsProperties(String k) {
+        String env = System.getenv(k);
+        if (StrUtil.isNotEmpty(env)) {
+            return true;
+        }
         return this.propertiesMap.containsKey(k);
     }
 
