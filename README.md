@@ -49,7 +49,7 @@ implementation 'org.needcoke:coke:1.0.2'
 
 ## 📦使用文档
 
-### 1、启动类
+### 🚚1、启动类
 [**🌎示例项目**](https://gitee.com/needcoke/coke-example/blob/master/example_run_demo/src/main/java/com/hello/coke/RunApplication.java)
 使用coke框架必须要在启动类中按照如下格式书写,以RunApplication类为例:
 
@@ -64,10 +64,10 @@ public class RunApplication {
 
 -------------------------------------------------------------------------------
 
-### 2、常用注解
-
+### 🚚2、常用注解
+[**🌎示例项目**](https://gitee.com/needcoke/coke-example/tree/master/example_run_demo)
 -------------------------------------------------------------------------------
-#### 2.1 @Component
+#### 🚗2.1 @Component
 
 <p>a、@Component注解用于定义一个组件bean,该注解作用在类上。</p>
 <p> b、coke启动时会为@Component类创建一个单例bean。 </p>
@@ -93,7 +93,7 @@ public class UserService {
 
 -------------------------------------------------------------------------------
 
-#### 2.2 @Configuration
+#### 🚗2.2 @Configuration
 <p>a、@Configuration注解定义一个配置bean,该注解作用在类上。</p>
 <p> b、coke启动时会为@Configuration类创建一个单例bean。 </p>
 <p>c、通过@Configuration的value属性或者name属性可以修改bean在容器中的名称(唯一标识)，name属性的优先级高于value。</p>
@@ -105,7 +105,7 @@ public class UserService {
 
 -------------------------------------------------------------------------------
 
-#### 2.3 @Value
+#### 🚗2.3 @Value
 @Value注解可以在bean中注入配置文件的配置。coke支持注入的配置文件包括: application.yml,application.yaml,application.properties,优先级从高到低。
 
 <p>配置文件示例:</p>
@@ -135,7 +135,7 @@ public class CokeConfig {
 }
 ```
 
-#### 2.4 @Bean
+#### 🚗2.4 @Bean
 
 <p> a、@Bean用于定义一个简单bean，作用在方法上(该方法必须是@Component或@Configuration标注的类中的方法)</p>
 <p> b、coke启动时会为@Bean类创建一个单例bean。 </p>
@@ -159,7 +159,7 @@ public class CokeConfig {
 }
 ```
 
-#### 2.5 @Autowired
+#### 🚗2.5 @Autowired
 
 通过@Autowired可以在一个bean中注入另一个bean。该注解作用于属性，setter方法和构造函数上。
 
@@ -192,5 +192,40 @@ public class UserService {
     }
 }
 
+```
+
+### 🍉3、获取bean
+1、通过@Autowired注入
+2、通过@Resource注入
+3、通过ApplicationContext.getBean(xxx)
+
+```java
+import com.hello.coke.cp.User;
+import pers.warren.ioc.CokeApplication;
+import pers.warren.ioc.annotation.Autowired;
+import pers.warren.ioc.annotation.Component;
+import pers.warren.ioc.core.ApplicationContext;
+
+import javax.annotation.Resource;
+import java.nio.file.attribute.UserDefinedFileAttributeView;
+
+/**
+ * 启动类
+ */
+@Component  //增加该注解，可以在启动类中注入需要使用的bean
+public class RunApplication {
+
+    @Autowired
+    private static User user;
+
+    @Resource
+    private static User userDemo;
+
+    public static void main(String[] args) {
+        ApplicationContext applicationContext = CokeApplication.run(RunApplication.class, args);   //获取coke容器上下文
+        User user1 = applicationContext.getBean("user");          //获取bean
+        User user2 = applicationContext.getBean(User.class);      //获取bean
+    }
+}
 ```
 
