@@ -195,9 +195,9 @@ public class UserService {
 ```
 
 ### 🍉3、获取bean
-1、通过@Autowired注入
-2、通过@Resource注入
-3、通过ApplicationContext.getBean(xxx)
+<p> 1、通过@Autowired注入 </p>
+<p> 2、通过@Resource注入 </p>
+<p> 3、通过ApplicationContext.getBean(xxx) </p>
 
 ```java
 import com.hello.coke.cp.User;
@@ -229,3 +229,21 @@ public class RunApplication {
 }
 ```
 
+### 4、详细文档
+
+
+### 📥下载jar
+
+下载页面https://gitee.com/needcoke/coke/releases
+
+
+## 🏗️添砖加瓦
+coke开发者QQ群聊169208957,期待你的加入!
+### 🧬贡献代码的步骤
+
+1. 在Gitee或者Github上fork项目到自己的repo
+2. 把fork过去的项目也就是你的项目clone到你的本地
+3. 修改代码（记得一定要修改develop分支）
+4. commit后push到自己的库（develop分支）
+5. 登录Gitee或Github在你首页可以看到一个 pull request 按钮，点击它，填写一些说明信息，然后提交即可。
+6. 等待维护者合并
