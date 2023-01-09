@@ -32,17 +32,18 @@ coke拥有丰富的官方扩展包，[**🌎coke-extend项目**](https://gitee.c
 在项目的pom.xml的dependencies中加入以下内容:
 
 ```xml
-        <dependency>
-            <groupId>org.needcoke</groupId>
-            <artifactId>coke</artifactId>
-            <version>1.0.2-RELEASE</version>
-        </dependency>
+
+<dependency>
+    <groupId>io.gitee.needcoke</groupId>
+    <artifactId>coke</artifactId>
+    <version>1.0.2-RELEASE</version>
+</dependency>
 ```
 
 ### 🍐Gradle
 
 ```
-implementation 'org.needcoke:coke:1.0.2'
+implementation group: 'io.gitee.needcoke', name: 'coke', version: '1.0.2-RELEASE'
 ```
 
 -------------------------------------------------------------------------------
