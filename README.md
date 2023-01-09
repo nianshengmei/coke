@@ -1,5 +1,5 @@
 <p align="center">
-	<a href="https://gitee.com/needcoke/coke"><img src="./image/logo.png" width="45%"></a>
+	<a href="https://gitee.com/needcoke/coke"><img src="./image/newLogo.png" width="45%"></a>
 </p>
 <p align="center">
     <strong style="color: cyan">coke : a java ioc foundation framework </strong>
@@ -35,7 +35,7 @@ coke拥有丰富的官方扩展包，[**🌎coke-extend项目**](https://gitee.c
         <dependency>
             <groupId>org.needcoke</groupId>
             <artifactId>coke</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.2-RELEASE</version>
         </dependency>
 ```
 
