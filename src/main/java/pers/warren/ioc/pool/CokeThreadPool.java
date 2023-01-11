@@ -1,18 +1,36 @@
 package pers.warren.ioc.pool;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import pers.warren.ioc.annotation.Init;
 import pers.warren.ioc.annotation.Value;
 
 import java.util.concurrent.*;
 
-public enum CokeThreadPool {
+public class CokeThreadPool {
 
-    threadPool;
+    public CokeThreadPool() {
+        namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("coke-pool-%d").build();
+    }
+
+    @Init
+    public void init(){
+        service = new ThreadPoolExecutor(
+                iocCoreThreadPoolSize,
+                iocMaximumPoolSize,
+                iocKeepAliveTime,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(iocPoolCapacity),
+                namedThreadFactory,
+                new ThreadPoolExecutor.AbortPolicy()
+        );
+
+    }
+
 
     /**
      * 自定义线程名称,方便的出错的时候溯源
      */
-    private ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("coke-pool-%d").build();
+    private ThreadFactory namedThreadFactory ;
 
     @Value("coke.ioc.pool.coreSize:4")
     private int iocCoreThreadPoolSize = 4;
@@ -36,16 +54,7 @@ public enum CokeThreadPool {
      * threadFactory   创建线程的工厂类
      * handler         拒绝策略类,当线程池数量达到上线并且workQueue队列长度达到上限时就需要对到来的任务做拒绝处理
      */
-    private  ExecutorService service = new ThreadPoolExecutor(
-            iocCoreThreadPoolSize,
-            iocMaximumPoolSize,
-            iocKeepAliveTime,
-            TimeUnit.MILLISECONDS,
-            new ArrayBlockingQueue<>(iocPoolCapacity),
-            namedThreadFactory,
-            new ThreadPoolExecutor.AbortPolicy()
-    );
-
+    private  ExecutorService service;
     /**
      * 获取线程池
      * @return 线程池

@@ -101,4 +101,6 @@ public class BeanDefinition {
     protected Map<String,BeanDefinitionExtendedField> extendedFields;
 
     protected AnnotationMetadata annotationMetadata;
+
+    protected int step = 0;
 }

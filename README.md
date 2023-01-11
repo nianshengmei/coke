@@ -231,6 +231,7 @@ public class RunApplication {
 ```
 
 ### 4、详细文档
+- [**0、♫coke生命周期**](/doc/coke_life_cycle.md)
 - [**1、♫更改banner打印**](https://juejin.cn/post/7185076457020850233)
 - [**2、♫条件注入相关注解**](https://juejin.cn/post/7185076457020850233)  （待完善文档）
 - [**3、♫web支持**](https://juejin.cn/post/7185076457020850233) （待完善文档）

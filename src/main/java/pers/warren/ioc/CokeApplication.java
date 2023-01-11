@@ -11,10 +11,10 @@ import pers.warren.ioc.handler.CokePostHandler;
 import pers.warren.ioc.handler.CokePostService;
 import pers.warren.ioc.inject.Inject;
 import pers.warren.ioc.loader.Loader;
+import pers.warren.ioc.pool.CokeThreadPool;
 import pers.warren.ioc.util.ReflectUtil;
 import pers.warren.ioc.util.ScanUtil;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -74,15 +74,21 @@ public class CokeApplication {
         Container container = Container.getContainer();
         Collection<BeanDefinition> beanDefinitions = container.getBeanDefinitions();
         List<BeanPostProcessor> beanPostProcessors = container.getBeans(BeanPostProcessor.class);
-        for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
-            for (BeanDefinition beanDefinition : beanDefinitions) {
-                beanPostProcessor.postProcessBeforeInitialization(beanDefinition, beanDefinition.getRegister());
+        for (BeanDefinition beanDefinition : beanDefinitions) {
+            if (0 == beanDefinition.getStep()) {
+                for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
+                    beanPostProcessor.postProcessBeforeInitialization(beanDefinition, beanDefinition.getRegister());
+                }
+                beanDefinition.setStep(1);
             }
         }
 
-        for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
-            for (BeanDefinition beanDefinition : beanDefinitions) {
-                beanPostProcessor.postProcessAfterBeforeProcessor(beanDefinition, beanDefinition.getRegister());
+        for (BeanDefinition beanDefinition : beanDefinitions) {
+            if (1 == beanDefinition.getStep()) {
+                for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
+                    beanPostProcessor.postProcessAfterBeforeProcessor(beanDefinition, beanDefinition.getRegister());
+                }
+                beanDefinition.setStep(2);
             }
         }
     }
@@ -165,7 +171,7 @@ public class CokeApplication {
             if (CollUtil.size(methodList) == 1 && methodList.get(0).getParameterTypes().length == 0) {
                 Object bean = container.getBean(beanDefinition.getName());
                 try {
-                    methodList.get(0).invoke(bean, methodList.get(0));
+                    methodList.get(0).invoke(bean);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -179,12 +185,15 @@ public class CokeApplication {
         if (CollUtil.isNotEmpty(postHandlers)) {
             log.info("coke start cost {} ms before post handler run !", System.currentTimeMillis() - startTimeMills);
         }
+        CokeThreadPool pool = container.getBean(CokeThreadPool.class);
         for (CokePostService postHandler : postHandlers) {
-            try {
-                postHandler.run();
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
+            pool.newTask(()->{
+                try {
+                    postHandler.run();
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
     }
 
