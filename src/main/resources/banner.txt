@@ -8,4 +8,4 @@
 
                                                                           组织:needcoke.org
                                                                           作者:warren
-                                                                          version: 1.0.1
+                                                                          version: 1.0.2

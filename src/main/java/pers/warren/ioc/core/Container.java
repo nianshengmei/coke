@@ -46,6 +46,10 @@ public class Container implements BeanDefinitionRegistry, Environment {
      */
     @Override
     public Object getProperty(String k) {
+        String env = System.getenv(k);
+        if (StrUtil.isNotEmpty(env)) {
+            return env;
+        }
         return this.propertiesMap.get(k);
     }
 
@@ -53,6 +57,10 @@ public class Container implements BeanDefinitionRegistry, Environment {
      * 判断是否存在特定配置属性
      */
     public boolean containsProperties(String k) {
+        String env = System.getenv(k);
+        if (StrUtil.isNotEmpty(env)) {
+            return true;
+        }
         return this.propertiesMap.containsKey(k);
     }
 
@@ -90,7 +98,7 @@ public class Container implements BeanDefinitionRegistry, Environment {
         componentMap.put(StrUtil.lowerFirst(name), o);
         /* 后面的是对后置拦截的补偿 */
         BeanDefinition beanDefinition = beanDefinitionMap.get(StrUtil.lowerFirst(name));
-        if (null == beanDefinition) {
+        if (null == beanDefinition || beanDefinition.getStep() != 3) {
             return;
         }
         List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);

@@ -4,15 +4,20 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import lombok.extern.slf4j.Slf4j;
 import pers.warren.ioc.annotation.Coke;
+import pers.warren.ioc.annotation.Init;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.handler.CokePostHandler;
 import pers.warren.ioc.handler.CokePostService;
 import pers.warren.ioc.inject.Inject;
 import pers.warren.ioc.loader.Loader;
+import pers.warren.ioc.pool.CokeThreadPool;
 import pers.warren.ioc.util.ReflectUtil;
 import pers.warren.ioc.util.ScanUtil;
+
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 容器的启动辅助类
@@ -69,15 +74,21 @@ public class CokeApplication {
         Container container = Container.getContainer();
         Collection<BeanDefinition> beanDefinitions = container.getBeanDefinitions();
         List<BeanPostProcessor> beanPostProcessors = container.getBeans(BeanPostProcessor.class);
-        for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
-            for (BeanDefinition beanDefinition : beanDefinitions) {
-                beanPostProcessor.postProcessBeforeInitialization(beanDefinition, beanDefinition.getRegister());
+        for (BeanDefinition beanDefinition : beanDefinitions) {
+            if (0 == beanDefinition.getStep()) {
+                for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
+                    beanPostProcessor.postProcessBeforeInitialization(beanDefinition, beanDefinition.getRegister());
+                }
+                beanDefinition.setStep(1);
             }
         }
 
-        for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
-            for (BeanDefinition beanDefinition : beanDefinitions) {
-                beanPostProcessor.postProcessAfterBeforeProcessor(beanDefinition, beanDefinition.getRegister());
+        for (BeanDefinition beanDefinition : beanDefinitions) {
+            if (1 == beanDefinition.getStep()) {
+                for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
+                    beanPostProcessor.postProcessAfterBeforeProcessor(beanDefinition, beanDefinition.getRegister());
+                }
+                beanDefinition.setStep(2);
             }
         }
     }
@@ -122,7 +133,7 @@ public class CokeApplication {
 
     private static void addEliminator() {
         Class<?> mainApplicationClass = ReflectUtil.deduceMainApplicationClass();
-        if(null == mainApplicationClass){
+        if (null == mainApplicationClass) {
             log.error("推测的main方法未空!");
             return;
         }
@@ -144,9 +155,28 @@ public class CokeApplication {
      * 启动完成的后置操作
      */
     private static void end() {
+        initMethodRun();
         postHandlerRun();
         log.info("coke start ok! cost = {} ms !", System.currentTimeMillis() - startTimeMills);
         postServiceRun();
+    }
+
+    private static void initMethodRun() {
+        Container container = Container.getContainer();
+        Collection<BeanDefinition> beanDefinitions = container.getBeanDefinitions();
+        for (BeanDefinition beanDefinition : beanDefinitions) {
+            List<Method> methodList = Arrays.stream(beanDefinition.getClz().getDeclaredMethods())
+                    .filter(method -> ReflectUtil.containsAnnotation(method, Init.class))
+                    .collect(Collectors.toList());
+            if (CollUtil.size(methodList) == 1 && methodList.get(0).getParameterTypes().length == 0) {
+                Object bean = container.getBean(beanDefinition.getName());
+                try {
+                    methodList.get(0).invoke(bean);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
     private static void postServiceRun() {
@@ -155,12 +185,15 @@ public class CokeApplication {
         if (CollUtil.isNotEmpty(postHandlers)) {
             log.info("coke start cost {} ms before post handler run !", System.currentTimeMillis() - startTimeMills);
         }
+        CokeThreadPool pool = container.getBean(CokeThreadPool.class);
         for (CokePostService postHandler : postHandlers) {
-            try {
-                postHandler.run();
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
+            pool.newTask(()->{
+                try {
+                    postHandler.run();
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
     }
 

@@ -48,9 +48,13 @@ public interface BeanRegister {
         }
         registry.registerBeanDefinition(beanDefinition.getName(), beanDefinition);
         List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);
-        for (BeanPostProcessor postProcessor : postProcessors) {
-            postProcessor.postProcessBeforeInitialization(beanDefinition, this);
+        if (0 == beanDefinition.getStep()) {
+            for (BeanPostProcessor postProcessor : postProcessors) {
+                postProcessor.postProcessBeforeInitialization(beanDefinition, this);
+            }
+            beanDefinition.setStep(1);
         }
+
     }
 
 }

@@ -1,8 +1,8 @@
 <p align="center">
-	<a href="https://gitee.com/needcoke/coke"><img src="./image/logo.png" width="45%"></a>
+	<a href="https://gitee.com/needcoke/coke"><img src="./image/newLogo.png" width="45%"></a>
 </p>
 <p align="center">
-    <strong style="">coke : a java ioc foundation framework </strong>
+    <strong style="color: cyan">coke : a java ioc foundation framework </strong>
 </p>
 
 -------------------------------------------------------------------------------
@@ -18,11 +18,11 @@ coke拥有丰富的官方扩展包，[**🌎coke-extend项目**](https://gitee.c
 
 ### 🎁coke适合哪些项目
 
-<p>1、对框架国产化有要求的项目</p>
-<p>2、对包体积有要求的场景</p>
-<p>3、高启动速度、低web延迟项目</p>
-<p>4、轻量级项目或demo</p>
-<p>5、java脚本</p>
+- 1、对框架国产化有要求的项目
+- 2、对包体积有要求的场景
+- 3、高启动速度、低web延迟项目
+- 4、轻量级项目或demo
+- 5、java脚本
 
 -------------------------------------------------------------------------------
 
@@ -32,17 +32,18 @@ coke拥有丰富的官方扩展包，[**🌎coke-extend项目**](https://gitee.c
 在项目的pom.xml的dependencies中加入以下内容:
 
 ```xml
-        <dependency>
-            <groupId>org.needcoke</groupId>
-            <artifactId>coke</artifactId>
-            <version>1.0.2</version>
-        </dependency>
+
+<dependency>
+    <groupId>io.gitee.needcoke</groupId>
+    <artifactId>coke</artifactId>
+    <version>1.0.3</version>
+</dependency>
 ```
 
 ### 🍐Gradle
 
 ```
-implementation 'org.needcoke:coke:1.0.2'
+implementation group: 'io.gitee.needcoke', name: 'coke', version: '1.0.3'
 ```
 
 -------------------------------------------------------------------------------
@@ -69,9 +70,9 @@ public class RunApplication {
 -------------------------------------------------------------------------------
 #### 🚗2.1 @Component
 
-<p>a、@Component注解用于定义一个组件bean,该注解作用在类上。</p>
-<p> b、coke启动时会为@Component类创建一个单例bean。 </p>
-<p>c、通过@Component的value属性或者name属性可以修改bean在容器中的名称(唯一标识)，name属性的优先级高于value。</p>
+- a、@Component注解用于定义一个组件bean,该注解作用在类上。
+- b、coke启动时会为@Component类创建一个单例bean。 
+- c、通过@Component的value属性或者name属性可以修改bean在容器中的名称(唯一标识)，name属性的优先级高于value。
 如果不为name和value赋值，则coke会为该bean赋默认名称，类名首字母首字母小写，该场景下(coke自动分配)如果名称与其他bean重复则会加上@符加六位随机字符。手动分配场景出现名称重复会直接报错。
 
 <p>参考如下:</p>
@@ -94,9 +95,9 @@ public class UserService {
 -------------------------------------------------------------------------------
 
 #### 🚗2.2 @Configuration
-<p>a、@Configuration注解定义一个配置bean,该注解作用在类上。</p>
-<p> b、coke启动时会为@Configuration类创建一个单例bean。 </p>
-<p>c、通过@Configuration的value属性或者name属性可以修改bean在容器中的名称(唯一标识)，name属性的优先级高于value。</p>
+- a、@Configuration注解定义一个配置bean,该注解作用在类上。
+- b、coke启动时会为@Configuration类创建一个单例bean。 
+- c、通过@Configuration的value属性或者name属性可以修改bean在容器中的名称(唯一标识)，name属性的优先级高于value。
 如果不为name和value赋值，则coke会为该bean赋默认名称，类名首字母首字母小写，该场景下(coke自动分配)如果名称与其他bean重复则会加上@符加六位随机字符。手动分配场景出现名称重复会直接报错。
 
 <p>
@@ -106,7 +107,7 @@ public class UserService {
 -------------------------------------------------------------------------------
 
 #### 🚗2.3 @Value
-@Value注解可以在bean中注入配置文件的配置。coke支持注入的配置文件包括: application.yml,application.yaml,application.properties,优先级从高到低。
+@Value注解可以在bean中注入配置文件的配置。coke支持注入的配置文件包括: 启动命令行参数,环境变量,application.yaml,application.yml,application.properties,优先级从高到低。
 
 <p>配置文件示例:</p>
 
@@ -137,9 +138,9 @@ public class CokeConfig {
 
 #### 🚗2.4 @Bean
 
-<p> a、@Bean用于定义一个简单bean，作用在方法上(该方法必须是@Component或@Configuration标注的类中的方法)</p>
-<p> b、coke启动时会为@Bean类创建一个单例bean。 </p>
-<p> c、生成的bean的名称默认会使用@bean所标注的方法名,也可以通过@Bean的name属性手动分配。 </p>
+- a、@Bean用于定义一个简单bean，作用在方法上(该方法必须是@Component或@Configuration标注的类中的方法)
+- b、coke启动时会为@Bean类创建一个单例bean。
+- c、生成的bean的名称默认会使用@bean所标注的方法名,也可以通过@Bean的name属性手动分配。
 coke自动分配名称，如果名称与其他bean重复则会加上@符加六位随机字符。手动分配场景出现名称重复会直接报错。
 
 <p>示例如下:</p>
@@ -195,9 +196,9 @@ public class UserService {
 ```
 
 ### 🍉3、获取bean
-<p> 1、通过@Autowired注入 </p>
-<p> 2、通过@Resource注入 </p>
-<p> 3、通过ApplicationContext.getBean(xxx) </p>
+- 1、通过@Autowired注入
+- 2、通过@Resource注入
+- 3、通过ApplicationContext.getBean(xxx)
 
 ```java
 import com.hello.coke.cp.User;
@@ -230,8 +231,16 @@ public class RunApplication {
 ```
 
 ### 4、详细文档
-
-
+- [**0、♫coke生命周期**](/doc/coke_life_cycle.md)
+- [**1、♫更改banner打印**](https://juejin.cn/post/7185076457020850233)
+- [**2、♫条件注入相关注解**](https://juejin.cn/post/7185076457020850233)  （待完善文档）
+- [**3、♫web支持**](https://juejin.cn/post/7185076457020850233) （待完善文档）
+- [**4、♫声明式web客户端**](https://juejin.cn/post/7185076457020850233) （待完善文档）
+- [**5、♫web全局异常处理**](https://juejin.cn/post/7185076457020850233) （待完善文档）
+- [**6、♫web拦截器**](https://juejin.cn/post/7185076457020850233) （待完善文档）
+- [**7、♫AOP支持**](https://juejin.cn/post/7185076457020850233) （待完善文档）
+- [**8、♫acids数据库开发框架**](https://juejin.cn/post/7185076457020850233) （待完善文档）
+- [**9、♫coke自定义注解指南**](https://juejin.cn/post/7185076457020850233) （待完善文档）
 ## 📥下载jar
 
 [**🌎下载页面**](https://gitee.com/needcoke/coke/releases)
@@ -240,9 +249,9 @@ public class RunApplication {
 coke开发者QQ群聊169208957,期待你的加入!
 ### 🧬贡献代码的步骤
 
-1. 在Gitee或者Github上fork项目到自己的repo
-2. 把fork过去的项目也就是你的项目clone到你的本地
-3. 修改代码（记得一定要修改develop分支）
-4. commit后push到自己的库（develop分支）
-5. 登录Gitee或Github在你首页可以看到一个 pull request 按钮，点击它，填写一些说明信息，然后提交即可。
-6. 等待维护者合并
+- 1. 在Gitee或者Github上fork项目到自己的repo
+- 2. 把fork过去的项目也就是你的项目clone到你的本地
+- 3. 修改代码（记得一定要修改develop分支）
+- 4. commit后push到自己的库（develop分支）
+- 5. 登录Gitee或Github在你首页可以看到一个 pull request 按钮，点击它，填写一些说明信息，然后提交即可。
+- 6. 等待维护者合并
