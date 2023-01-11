@@ -1,8 +1,8 @@
-## 1、coke生命周期时序图
+## 1、🦄coke生命周期时序图
 
 <img src="https://gitee.com/needcoke/coke/raw/develop_warren/image/coke_life_cycle.png" width="100%">
 
-## coke生命周期
+## 2、⚡coke生命周期
 
 - 1、start
 - 2、包扫描
