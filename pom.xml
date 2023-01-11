@@ -7,7 +7,7 @@
     <groupId>io.gitee.needcoke</groupId>
     <artifactId>coke</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.2-RELEASE</version>
+    <version>1.0.3</version>
 
     <name>coke</name>
     <description>a light weight Java ioc platform</description>

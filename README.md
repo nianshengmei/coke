@@ -36,14 +36,14 @@ coke拥有丰富的官方扩展包，[**🌎coke-extend项目**](https://gitee.c
 <dependency>
     <groupId>io.gitee.needcoke</groupId>
     <artifactId>coke</artifactId>
-    <version>1.0.2-RELEASE</version>
+    <version>1.0.3</version>
 </dependency>
 ```
 
 ### 🍐Gradle
 
 ```
-implementation group: 'io.gitee.needcoke', name: 'coke', version: '1.0.2-RELEASE'
+implementation group: 'io.gitee.needcoke', name: 'coke', version: '1.0.3'
 ```
 
 -------------------------------------------------------------------------------
