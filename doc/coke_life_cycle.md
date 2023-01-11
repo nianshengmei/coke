@@ -2,7 +2,6 @@
 
 <img src="https://gitee.com/needcoke/coke/raw/develop_warren/image/coke_life_cycle.png" width="100%">
 
-
 ## coke生命周期
 
 - 1、start
@@ -20,4 +19,5 @@
 - 13、@init方法执行
 - 14、Coke启动后置方法
 - 15、Coke异步后置业务方法执行
-- 到这容器已经启动完成!
+
+<p>到这容器已经启动完成!</p>
