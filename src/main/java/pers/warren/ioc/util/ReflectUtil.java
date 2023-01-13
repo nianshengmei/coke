@@ -145,6 +145,8 @@ public class ReflectUtil {
 
     public Class<?> mainClz;
 
+    public Class<?> customEntryClass;
+
     /* 从堆栈信息推测主类 */
     public static Class<?> deduceMainApplicationClass() {
         if (null != mainClz) {
@@ -159,9 +161,8 @@ public class ReflectUtil {
                     return mainClz;
                 }
             }
-            return ClassUtil.loadClass("cn.warren.ff.ObkTest");
+            return customEntryClass;
         } catch (ClassNotFoundException ex) {
-            // Swallow and continue
         }
         return null;
     }
