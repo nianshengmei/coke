@@ -114,10 +114,13 @@ public class CokeApplication {
                 beanDefinition.setStep(1);
             }
         }
+        //重新获取beanDefinition,因为beanPostProcessor.postProcessBeforeInitialization中初始化了@Bean定义的bean的BeanDefinition
+        beanDefinitions = container.getBeanDefinitions();
 
         //参考生命周期 step 7 - BeanPostProcessor前置方法的后置方法执行
         for (BeanDefinition beanDefinition : beanDefinitions) {
             if (1 == beanDefinition.getStep()) {  //1代表此beandefinition未执行过BeanPostProcessor前置方法的后置方法执行，防止重复执行
+
                 for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
                     beanPostProcessor.postProcessAfterBeforeProcessor(beanDefinition, beanDefinition.getRegister());
                 }
@@ -128,19 +131,29 @@ public class CokeApplication {
 
     private static void loadBean() {
         Container container = Container.getContainer();
+        List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);
+
+        //按照顺序添加到队列中,为了按顺序初始化
         LinkedList<BeanDefinition> bdfDQueue = new LinkedList<>(container.getBeanDefinitions(BeanType.CONFIGURATION));
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.COMPONENT));
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.SIMPLE_BEAN));
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.PROXY));
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.OTHER));
+
         while (bdfDQueue.size() != 0) {
-            BeanDefinition bdf = bdfDQueue.poll();
-            createBean(bdf);
+            BeanDefinition bdf = bdfDQueue.poll();  //按顺序取出BeanDefinition
+            createBean(bdf);  //创建bean并放入容器
+            if (2 == bdf.getStep()) {
+                for (BeanPostProcessor postProcessor : postProcessors) {
+                    postProcessor.postProcessAfterInitialization(bdf, bdf.getRegister());   //执行后置处理器
+                }
+                bdf.setStep(3);   //已实例化
+            }
         }
     }
 
     /**
-     * 执行bean推断，coke没有提供bean推断的具体实现
+     * 执行bean推断,暂时coke没有提供bean推断的具体实现,不推荐作为生命周期使用
      */
     private static void beanDeduce() {
         Container container = Container.getContainer();
@@ -208,6 +221,11 @@ public class CokeApplication {
         postServiceRun();
     }
 
+    /**
+     * 运行bean的类中加入了@Init注解的方法
+     *
+     * <p>注意一个类只能有一个@Init注解,且标注的方法不能有任何参数,否则将不作任何处理</p>
+     */
     private static void initMethodRun() {
         Container container = Container.getContainer();
         Collection<BeanDefinition> beanDefinitions = container.getBeanDefinitions();

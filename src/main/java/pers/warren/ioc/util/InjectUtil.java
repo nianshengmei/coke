@@ -48,11 +48,11 @@ public class InjectUtil {
             return vs;
         } else if (field.getType().getTypeName().equals(String.class.getTypeName())) {
             return vs;
-        } else if (field.getType().getTypeName().equals("int")) {
+        } else if (field.getType().getTypeName().equals(int.class.getTypeName())) {
             return Integer.parseInt(vs);
-        } else if (field.getType().getTypeName().equals("double")) {
+        } else if (field.getType().getTypeName().equals(double.class.getTypeName())) {
             return Double.parseDouble(vs);
-        } else if (field.getType().getTypeName().equals("boolean")) {
+        } else if (field.getType().getTypeName().equals(boolean.class.getTypeName())) {
             return Boolean.parseBoolean(vs);
         } else if (field.getType().getTypeName().equals(ArrayList.class.getTypeName())) {
             List list = new ArrayList<>();

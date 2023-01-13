@@ -109,11 +109,7 @@ public class Container implements BeanDefinitionRegistry, Environment {
             return;
         }
         componentMap.put(StrUtil.lowerFirst(name), o);
-        /* 后面的是对后置拦截的补偿 */
-        List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);
-        for (BeanPostProcessor postProcessor : postProcessors) {
-            postProcessor.postProcessAfterInitialization(beanDefinition, beanDefinition.getRegister());
-        }
+
     }
 
     public void addPreloadComponent(String name, Object o){

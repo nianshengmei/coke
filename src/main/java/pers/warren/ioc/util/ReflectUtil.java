@@ -154,13 +154,12 @@ public class ReflectUtil {
             StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();
             long count = Arrays.stream(stackTrace).filter(e -> e.getClassName().equals("org.junit.runner.JUnitCore")).count();
             for (StackTraceElement stackTraceElement : stackTrace) {
-                if ("main".equals(stackTraceElement.getMethodName()) && count > 0) {
+                if ("main".equals(stackTraceElement.getMethodName()) && count == 0) {
                     mainClz = Class.forName(stackTraceElement.getClassName());
                     return mainClz;
-                } else{
-                    return ClassUtil.loadClass("cn.warren.ff.ObkTest");
                 }
             }
+            return ClassUtil.loadClass("cn.warren.ff.ObkTest");
         } catch (ClassNotFoundException ex) {
             // Swallow and continue
         }

@@ -33,7 +33,7 @@ public class CokeThreadPool {
     private ThreadFactory namedThreadFactory ;
 
     @Value("coke.ioc.pool.coreSize:4")
-    private int iocCoreThreadPoolSize = 4;
+    private int iocCoreThreadPoolSize;
 
     @Value("coke.ioc.pool.maxSize:16")
     private int iocMaximumPoolSize;
