@@ -6,7 +6,6 @@ import pers.warren.ioc.annotation.Configuration;
 @Configuration
 public class ThreadPoolConfig {
 
-
     @Bean
     public CokeThreadPool cokeThreadPool(){
         return new CokeThreadPool();

@@ -37,7 +37,7 @@ public class CokeApplication {
     private static long startTimeMills;
 
     public static ApplicationContext run(Class<?> clz, String[] args) {
-        start();      //IOC启动前置方法,包括打印banner
+        start(clz);      //IOC启动前置方法,包括打印banner
 
         scan(); //包扫描
 
@@ -65,7 +65,8 @@ public class CokeApplication {
     /**
      * 启动开始
      */
-    private static void start() {
+    private static void start(Class<?> clz) {
+        ReflectUtil.customEntryClass = clz;
         addEliminator();
         startTimeMills = System.currentTimeMillis();
         printBanner();
