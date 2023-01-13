@@ -85,7 +85,6 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
                 }
             }
         }
-        BeanPostProcessor.super.postProcessBeforeInitialization(beanDefinition, register);
     }
 
     @Override

@@ -36,7 +36,7 @@ public class BeanPostProcessorLoader implements Loader {
                 log.error("class BeanPostProcessor must have a constructor with no param , beanPostProcessor name {}", beanName);
                 return false;
             }
-            container.addComponent(beanName, o);
+            container.addPreloadComponent(beanName, o);
             return true;
         }
         return false;

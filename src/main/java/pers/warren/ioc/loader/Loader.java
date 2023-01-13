@@ -26,6 +26,7 @@ public interface Loader {
         BeanRegisterLoader beanRegisterLoader = new BeanRegisterLoader();
         BeanFactoryLoader beanFactoryLoader = new BeanFactoryLoader();
         PreLoadLoader preLoadLoader = new PreLoadLoader();
+        BeanDeduceLoader beanDeduceLoader = new BeanDeduceLoader();
         for (Class<?> clz : clzSet) {
 
             new PreLoadLoader().load(clz);
@@ -41,6 +42,11 @@ public interface Loader {
             }
 
             if (beanRegisterLoader.load(clz)) {
+                Loader.alreadyLoadClzNames.add(clz.getTypeName());
+                continue;
+            }
+
+            if(beanDeduceLoader.load(clz)){
                 Loader.alreadyLoadClzNames.add(clz.getTypeName());
                 continue;
             }

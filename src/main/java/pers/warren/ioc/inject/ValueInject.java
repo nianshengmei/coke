@@ -38,7 +38,7 @@ public class ValueInject implements Inject {
                     log.error("the value in the configuration file cannot be converted to the corresponding attribute , value field info : {}",field);
                     continue;
                 }
-                throw new RuntimeException("the value in the configuration file cannot be converted to the corresponding attribute , value field info : " + field);
+                throw new RuntimeException("the value in the configuration file cannot be converted to the corresponding attribute , value field info : " + field,e);
             }
         }
     }

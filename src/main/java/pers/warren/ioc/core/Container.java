@@ -20,14 +20,23 @@ public class Container implements BeanDefinitionRegistry, Environment {
      */
     private Map<String, Object> propertiesMap = new HashMap<>();
 
+    /**
+     * 存放bean的Map
+     */
     private final Map<String, Object> componentMap = new TreeMap<>();
 
+    /**
+     * 存放bean定义
+     */
     private final Map<String, BeanDefinition> beanDefinitionMap = new TreeMap<>();
 
+    /**
+     * 委托coke寻找的类(一般是给出接口或类,寻找其所有实现类)
+     */
     private final Map<String, List<Class<?>>> findClassMap = new HashMap<>();
 
     /**
-     * 排除器
+     * 排除器,用于启动时排除某个bean
      */
     @Getter
     private final Eliminator eliminator = new Eliminator();
@@ -95,16 +104,20 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
 
     public void addComponent(String name, Object o) {
-        componentMap.put(StrUtil.lowerFirst(name), o);
-        /* 后面的是对后置拦截的补偿 */
         BeanDefinition beanDefinition = beanDefinitionMap.get(StrUtil.lowerFirst(name));
-        if (null == beanDefinition || beanDefinition.getStep() != 3) {
+        if (null == beanDefinition || beanDefinition.getStep() != 2) {
             return;
         }
-        List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);
-        for (BeanPostProcessor postProcessor : postProcessors) {
-            postProcessor.postProcessAfterInitialization(beanDefinition, beanDefinition.getRegister());
+        componentMap.put(StrUtil.lowerFirst(name), o);
+
+    }
+
+    public void addPreloadComponent(String name, Object o){
+        BeanDefinition beanDefinition = beanDefinitionMap.get(StrUtil.lowerFirst(name));
+        if (null == beanDefinition || beanDefinition.getStep() != 0) {
+            return;
         }
+        componentMap.put(StrUtil.lowerFirst(name), o);
     }
 
     public boolean hasEqualComponent(Class<?> clz) {

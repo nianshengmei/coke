@@ -36,6 +36,9 @@ public enum BeanType {
      */
     CONFIGURATION,
 
+    /**
+     * 代理bean --- 为AOP埋下
+     */
     PROXY,
 
     OTHER

@@ -37,7 +37,7 @@ public class BeanFactoryLoader implements Loader{
                 log.error("class BeanFactory must have a constructor with no param , beanFactory name {} ",beanName);
                 return false;
             }
-            container.addComponent(beanName, o);
+            container.addPreloadComponent(beanName, o);
             return true;
         }
         return false;

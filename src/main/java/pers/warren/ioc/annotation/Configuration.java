@@ -3,7 +3,7 @@ package pers.warren.ioc.annotation;
 import java.lang.annotation.*;
 
 /**
- * 配置类注解
+ * 配置类注解,作用于类上
  *
  * @author warren
  * @since jdk1.8
