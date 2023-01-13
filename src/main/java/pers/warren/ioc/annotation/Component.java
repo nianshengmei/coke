@@ -4,7 +4,7 @@ package pers.warren.ioc.annotation;
 import java.lang.annotation.*;
 
 /**
- * 声明组件的注解
+ * 声明组件的注解,作用于类上
  *
  * @author warren
  * @since jdk1.8

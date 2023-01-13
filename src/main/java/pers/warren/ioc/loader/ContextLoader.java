@@ -40,7 +40,7 @@ public class ContextLoader implements Loader {
             } catch (Exception e) {
                 throw new RuntimeException("class ApplicationContext must have a constructor with no param , " + beanName);
             }
-            container.addComponent(beanName, o);
+            container.addPreloadComponent(beanName, o);
             return true;
         }
         return false;

@@ -95,16 +95,24 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
 
     public void addComponent(String name, Object o) {
-        componentMap.put(StrUtil.lowerFirst(name), o);
-        /* 后面的是对后置拦截的补偿 */
         BeanDefinition beanDefinition = beanDefinitionMap.get(StrUtil.lowerFirst(name));
-        if (null == beanDefinition || beanDefinition.getStep() != 3) {
+        if (null == beanDefinition || beanDefinition.getStep() != 2) {
             return;
         }
+        componentMap.put(StrUtil.lowerFirst(name), o);
+        /* 后面的是对后置拦截的补偿 */
         List<BeanPostProcessor> postProcessors = Container.getContainer().getBeans(BeanPostProcessor.class);
         for (BeanPostProcessor postProcessor : postProcessors) {
             postProcessor.postProcessAfterInitialization(beanDefinition, beanDefinition.getRegister());
         }
+    }
+
+    public void addPreloadComponent(String name, Object o){
+        BeanDefinition beanDefinition = beanDefinitionMap.get(StrUtil.lowerFirst(name));
+        if (null == beanDefinition || beanDefinition.getStep() != 0) {
+            return;
+        }
+        componentMap.put(StrUtil.lowerFirst(name), o);
     }
 
     public boolean hasEqualComponent(Class<?> clz) {

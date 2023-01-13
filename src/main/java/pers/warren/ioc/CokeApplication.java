@@ -39,43 +39,75 @@ public class CokeApplication {
     public static ApplicationContext run(Class<?> clz, String[] args) {
         start();      //IOC启动前置方法,包括打印banner
 
-        clzSet = ScanUtil.scan();   //包扫描
+        scan(); //包扫描
 
-        Loader.loadConfigEnvironment();   //读取配置文件
+        loadEnvironment();  //读取配置文件
 
         log.info("scan java and resource files ok, cost {} ms !", System.currentTimeMillis() - startTimeMills);
 
-        Loader.preload(clzSet);   //预加载
+        preload();   //预加载
 
         initBeanDefinition();         //扫描需要初始化的Bean生成BeanDefinition
 
-        componentPostProcessorBefore();
+        componentPostProcessorBefore();  // BeanPostProcessor的前置方法
 
-        loadBean();                  //初始化Bean
+        loadBean();                  //初始化Bean , 在这一步会将bean生成后丢入容器，并调用BeanPostProcessor的后置方法，
 
-        beanDeduce();                //bean推断
+        beanDeduce();                //bean推断(暂时未使用)
 
-        Inject.injectFiled();
+        inject();                    //注入
 
         end();                       //容器启动后置方法
 
         return Container.getContainer().applicationContext();
     }
 
-    private static void beanDeduce() {
-        Container container = Container.getContainer();
-        List<BeanDeduce> beanDeduces = container.getBeans(BeanDeduce.class);
-        for (BeanDeduce beanDeduce : beanDeduces) {
-            beanDeduce.deduce();
-        }
+    /**
+     * 启动开始
+     */
+    private static void start() {
+        addEliminator();
+        startTimeMills = System.currentTimeMillis();
+        printBanner();
     }
 
+    /**
+     * 包扫描
+     */
+    private static void scan() {
+        clzSet = ScanUtil.scan();
+    }
+
+    /**
+     * 加载配置文件等环境参数
+     */
+    private static void loadEnvironment() {
+        Loader.loadConfigEnvironment();
+    }
+
+    /**
+     * 预加载
+     * <p>
+     * 所谓加载就是bean的初始化,预加载的本质就是将一部分核心组件先加载成bean,
+     * 比如ApplicationContext,BeanRegister,BeanFactory,BeanPostProcessor和开发者指定预加载项
+     */
+    private static void preload() {
+        Loader.preload(clzSet);
+    }
+
+
+    /**
+     * 该方法会执行BeanPostProcessor的前置方法
+     */
     private static void componentPostProcessorBefore() {
         Container container = Container.getContainer();
         Collection<BeanDefinition> beanDefinitions = container.getBeanDefinitions();
         List<BeanPostProcessor> beanPostProcessors = container.getBeans(BeanPostProcessor.class);
+
+
+        //参考生命周期 step 6 - BeanPostProcessor前置方法执行
         for (BeanDefinition beanDefinition : beanDefinitions) {
-            if (0 == beanDefinition.getStep()) {
+            if (0 == beanDefinition.getStep()) {   // 0代表此beandefinition未执行过BeanPostProcessor前置方法，防止重复执行
                 for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
                     beanPostProcessor.postProcessBeforeInitialization(beanDefinition, beanDefinition.getRegister());
                 }
@@ -83,8 +115,9 @@ public class CokeApplication {
             }
         }
 
+        //参考生命周期 step 7 - BeanPostProcessor前置方法的后置方法执行
         for (BeanDefinition beanDefinition : beanDefinitions) {
-            if (1 == beanDefinition.getStep()) {
+            if (1 == beanDefinition.getStep()) {  //1代表此beandefinition未执行过BeanPostProcessor前置方法的后置方法执行，防止重复执行
                 for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
                     beanPostProcessor.postProcessAfterBeforeProcessor(beanDefinition, beanDefinition.getRegister());
                 }
@@ -106,6 +139,27 @@ public class CokeApplication {
         }
     }
 
+    /**
+     * 执行bean推断，coke没有提供bean推断的具体实现
+     */
+    private static void beanDeduce() {
+        Container container = Container.getContainer();
+        List<BeanDeduce> beanDeduces = container.getBeans(BeanDeduce.class);
+        for (BeanDeduce beanDeduce : beanDeduces) {
+            beanDeduce.deduce();
+        }
+    }
+
+    /**
+     * 注入操作(配置文件注入和bean注入)
+     */
+    private static void inject() {
+        Inject.injectFiled();
+    }
+
+    /**
+     * 创建bean
+     */
     private static void createBean(BeanDefinition beanDefinition) {
         Container container = Container.getContainer();
         if (null != container.getBean(beanDefinition.getName())) {
@@ -121,16 +175,9 @@ public class CokeApplication {
         container.addComponent(beanDefinition.getName(), factoryBean.getObject());
     }
 
-
     /**
-     * 启动开始
+     * 排除器
      */
-    private static void start() {
-        addEliminator();
-        startTimeMills = System.currentTimeMillis();
-        printBanner();
-    }
-
     private static void addEliminator() {
         Class<?> mainApplicationClass = ReflectUtil.deduceMainApplicationClass();
         if (null == mainApplicationClass) {
@@ -187,7 +234,7 @@ public class CokeApplication {
         }
         CokeThreadPool pool = container.getBean(CokeThreadPool.class);
         for (CokePostService postHandler : postHandlers) {
-            pool.newTask(()->{
+            pool.newTask(() -> {
                 try {
                     postHandler.run();
                 } catch (Throwable e) {

@@ -1,5 +1,6 @@
 package pers.warren.ioc.util;
 
+import cn.hutool.core.util.ClassUtil;
 import javassist.*;
 import javassist.bytecode.*;
 import lombok.experimental.UtilityClass;
@@ -8,6 +9,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @UtilityClass
@@ -150,10 +152,13 @@ public class ReflectUtil {
         }
         try {
             StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();
+            long count = Arrays.stream(stackTrace).filter(e -> e.getClassName().equals("org.junit.runner.JUnitCore")).count();
             for (StackTraceElement stackTraceElement : stackTrace) {
-                if ("main".equals(stackTraceElement.getMethodName())) {
+                if ("main".equals(stackTraceElement.getMethodName()) && count > 0) {
                     mainClz = Class.forName(stackTraceElement.getClassName());
                     return mainClz;
+                } else{
+                    return ClassUtil.loadClass("cn.warren.ff.ObkTest");
                 }
             }
         } catch (ClassNotFoundException ex) {

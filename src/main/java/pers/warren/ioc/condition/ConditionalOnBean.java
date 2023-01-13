@@ -2,6 +2,9 @@ package pers.warren.ioc.condition;
 
 import java.lang.annotation.*;
 
+/**
+ * 注意该注解仅对@Bean定义的bean生效
+ */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

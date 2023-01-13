@@ -121,7 +121,7 @@ public class PreLoadLoader implements Loader {
         } catch (Exception e) {
             throw new RuntimeException("preload component class " + clz.getTypeName() + " must have a constructor with no param , " + clz.getName(), e);
         }
-        container.addComponent(beanName, o);
+        container.addPreloadComponent(beanName, o);
     }
 
     private <A extends Annotation> boolean containsAnnotation(Class<?> clz, Class<A> annotationClz) {

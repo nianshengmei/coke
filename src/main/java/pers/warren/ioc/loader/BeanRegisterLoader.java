@@ -35,7 +35,7 @@ public class BeanRegisterLoader implements Loader{
                 log.error("class BeanRegister must have a constructor with no param , BeanRegister name {}" + clz.getName());
                 return false;
             }
-            container.addComponent(beanName, o);
+            container.addPreloadComponent(beanName, o);
             return true;
         }
         return false;
