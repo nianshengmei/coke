@@ -20,14 +20,23 @@ public class Container implements BeanDefinitionRegistry, Environment {
      */
     private Map<String, Object> propertiesMap = new HashMap<>();
 
+    /**
+     * 存放bean的Map
+     */
     private final Map<String, Object> componentMap = new TreeMap<>();
 
+    /**
+     * 存放bean定义
+     */
     private final Map<String, BeanDefinition> beanDefinitionMap = new TreeMap<>();
 
+    /**
+     * 委托coke寻找的类(一般是给出接口或类,寻找其所有实现类)
+     */
     private final Map<String, List<Class<?>>> findClassMap = new HashMap<>();
 
     /**
-     * 排除器
+     * 排除器,用于启动时排除某个bean
      */
     @Getter
     private final Eliminator eliminator = new Eliminator();
