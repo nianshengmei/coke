@@ -4,11 +4,19 @@ import java.util.Collection;
 
 public interface BeanDefinitionRegistry {
 
+    /**
+     * 注册beanDefinition
+     */
     void registerBeanDefinition(String name, BeanDefinition beanDefinition) ;
 
+    /**
+     * 移除beanDefinition
+     */
     void removeBeanDefinition(String name) ;
 
-
+    /**
+     * 获取beanDefinition
+     */
     BeanDefinition getBeanDefinition(String name) ;
 
     boolean containsBeanDefinition(String name);

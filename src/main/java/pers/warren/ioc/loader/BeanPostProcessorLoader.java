@@ -31,7 +31,6 @@ public class BeanPostProcessorLoader implements Loader {
                 Constructor<?> constructor = clz.getConstructor();
                 o = constructor.newInstance();
                 container.addBeanDefinition(BeanDefinitionBuilder.genericBeanDefinition(clz, beanName, BeanType.BASE_COMPONENT, null, null).build());
-
             } catch (Exception e) {
                 log.error("class BeanPostProcessor must have a constructor with no param , beanPostProcessor name {}", beanName);
                 return false;
