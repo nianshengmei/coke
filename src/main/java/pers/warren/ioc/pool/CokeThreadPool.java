@@ -14,7 +14,7 @@ public class CokeThreadPool {
 
     @Init
     public void init(){
-        if (iocPoolCapacity > 0) {
+        if (iocPoolCapacity > 100) {
             service = new ThreadPoolExecutor(
                     iocCoreThreadPoolSize,
                     iocMaximumPoolSize,
