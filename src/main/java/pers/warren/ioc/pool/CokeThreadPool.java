@@ -14,15 +14,27 @@ public class CokeThreadPool {
 
     @Init
     public void init(){
-        service = new ThreadPoolExecutor(
-                iocCoreThreadPoolSize,
-                iocMaximumPoolSize,
-                iocKeepAliveTime,
-                TimeUnit.MILLISECONDS,
-                new ArrayBlockingQueue<>(iocPoolCapacity),
-                namedThreadFactory,
-                new ThreadPoolExecutor.AbortPolicy()
-        );
+        if (iocPoolCapacity > 0) {
+            service = new ThreadPoolExecutor(
+                    iocCoreThreadPoolSize,
+                    iocMaximumPoolSize,
+                    iocKeepAliveTime,
+                    TimeUnit.MILLISECONDS,
+                    new LinkedBlockingDeque<>(),
+                    namedThreadFactory,
+                    new ThreadPoolExecutor.AbortPolicy()
+            );
+        } else {
+            service = new ThreadPoolExecutor(
+                    iocCoreThreadPoolSize,
+                    iocMaximumPoolSize,
+                    iocKeepAliveTime,
+                    TimeUnit.MILLISECONDS,
+                    new ArrayBlockingQueue<>(iocPoolCapacity),
+                    namedThreadFactory,
+                    new ThreadPoolExecutor.AbortPolicy()
+            );
+        }
 
     }
 
@@ -41,7 +53,7 @@ public class CokeThreadPool {
     @Value("coke.ioc.pool.keepAliveTime:2000")
     private long iocKeepAliveTime;
 
-    @Value("coke.ioc.pool.iocPoolCapacity:99999")
+    @Value("coke.ioc.pool.iocPoolCapacity:0")
     private int iocPoolCapacity;
 
 

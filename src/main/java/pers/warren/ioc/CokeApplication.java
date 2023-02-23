@@ -195,7 +195,7 @@ public class CokeApplication {
     private static void addEliminator() {
         Class<?> mainApplicationClass = ReflectUtil.deduceMainApplicationClass();
         if (null == mainApplicationClass) {
-            log.error("推测的main方法未空!");
+            log.error("推测的main方法为空!");
             return;
         }
         if (ReflectUtil.containsAnnotation(mainApplicationClass, Coke.class)) {
