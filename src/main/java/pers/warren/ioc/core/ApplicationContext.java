@@ -1,5 +1,8 @@
 package pers.warren.ioc.core;
 
+import pers.warren.ioc.event.Event;
+import pers.warren.ioc.event.Signal;
+
 import java.util.*;
 
 /**
@@ -111,5 +114,10 @@ public class ApplicationContext implements BeanDefinitionRegistry ,Environment{
      */
     public boolean isWebEnvironment(){
         return Container.getContainer().isWebEnvironment();
+    }
+
+    @Override
+    public void runEvent(Signal signal, List<Class<? extends Event>> eventClasses) {
+        Container.getContainer().runEvent(signal, eventClasses);
     }
 }

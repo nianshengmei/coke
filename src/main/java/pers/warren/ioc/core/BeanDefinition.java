@@ -2,9 +2,9 @@ package pers.warren.ioc.core;
 
 import lombok.Data;
 import pers.warren.ioc.enums.BeanType;
+import pers.warren.ioc.event.Event;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
@@ -101,6 +101,28 @@ public class BeanDefinition {
     protected Map<String,BeanDefinitionExtendedField> extendedFields;
 
     protected AnnotationMetadata annotationMetadata;
+
+    /**
+     * 注册beanDefinition事件
+     */
+    protected List<Class<? extends Event>> registerEvent;
+
+    /**
+     * 前置处理事件
+     */
+    protected  List<Class<? extends Event>> beforeProcessorEvent;
+
+    /**
+     * 后置处理事件
+     */
+    protected  List<Class<? extends Event>> afterProcessorEvent;
+
+    protected  List<Class<? extends Event>> afterInitializationEvent;
+
+    /**
+     * 字段注入事件
+     */
+    protected  List<Class<? extends Event>> whenFieldInjectEvent;
 
     protected int step = 0;
 }

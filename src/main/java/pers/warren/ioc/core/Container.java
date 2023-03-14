@@ -3,10 +3,17 @@ package pers.warren.ioc.core;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
+import pers.warren.ioc.ec.WarnEnum;
+import pers.warren.ioc.ec.WithoutNoParamConstructorException;
 import pers.warren.ioc.enums.BeanType;
+import pers.warren.ioc.event.Event;
+import pers.warren.ioc.event.LifeCycleEvent;
+import pers.warren.ioc.event.LifeCycleStep;
+import pers.warren.ioc.event.Signal;
 import pers.warren.ioc.handler.CokePropertiesHandler;
-
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -253,7 +260,18 @@ public class Container implements BeanDefinitionRegistry, Environment {
         }
         if (StrUtil.isNotEmpty(name) && null != beanDefinition) {
             beanDefinition.setName(StrUtil.lowerFirst(beanDefinition.getName()));
+
+            AnnotationMetadata annotationMetadata = beanDefinition.getAnnotationMetadata();
+            if (annotationMetadata.hasAnnotation(LifeCycleEvent.class)) {
+                LifeCycleEvent annotation = (LifeCycleEvent) annotationMetadata.getAnnotation(LifeCycleEvent.class);
+                beanDefinition.setRegisterEvent(Arrays.asList(annotation.register()));
+                beanDefinition.setBeforeProcessorEvent(Arrays.asList(annotation.beforeProcessor()));
+                beanDefinition.setAfterProcessorEvent(Arrays.asList(annotation.afterProcessor()));
+                beanDefinition.setWhenFieldInjectEvent(Arrays.asList(annotation.whenFieldInject()));
+                beanDefinition.setAfterInitializationEvent(Arrays.asList(annotation.afterInitialization()));
+            }
             this.beanDefinitionMap.put(StrUtil.lowerFirst(name), beanDefinition);
+            runEvent(new Signal(beanDefinition).setStep(LifeCycleStep.REGISTER), beanDefinition.registerEvent);
         }
     }
 
@@ -393,5 +411,27 @@ public class Container implements BeanDefinitionRegistry, Environment {
             }
         }
         return null;
+    }
+
+    /**
+     * 执行事件
+     *
+     * @param signal 信号
+     *
+     *
+     */
+    public void runEvent(Signal signal, List<Class<? extends Event>> eventClasses) {
+        if (CollUtil.isEmpty(eventClasses)) {
+            return;
+        }
+        for (Class<? extends Event> eventClz : eventClasses) {
+            try {
+                Constructor<? extends Event> constructor = eventClz.getConstructor();
+                Event event = constructor.newInstance();
+                event.doEvent(signal);
+            } catch (Throwable e) {
+                throw new WithoutNoParamConstructorException(WarnEnum.LIFE_CYCLE_EVENTS_MUST_HAVE_NON_PARAMETER_CONSTRUCTORS);
+            }
+        }
     }
 }

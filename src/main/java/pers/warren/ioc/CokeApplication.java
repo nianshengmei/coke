@@ -7,6 +7,8 @@ import pers.warren.ioc.annotation.Coke;
 import pers.warren.ioc.annotation.Init;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
+import pers.warren.ioc.event.LifeCycleStep;
+import pers.warren.ioc.event.Signal;
 import pers.warren.ioc.handler.CokePostHandler;
 import pers.warren.ioc.handler.CokePostService;
 import pers.warren.ioc.inject.Inject;
@@ -112,6 +114,7 @@ public class CokeApplication {
                 for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
                     beanPostProcessor.postProcessBeforeInitialization(beanDefinition, beanDefinition.getRegister());
                 }
+                container.runEvent(new Signal(beanDefinition).setStep(LifeCycleStep.BEFORE_PROCESSOR), beanDefinition.getBeforeProcessorEvent());
                 beanDefinition.setStep(1);
             }
         }
@@ -125,6 +128,7 @@ public class CokeApplication {
                 for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
                     beanPostProcessor.postProcessAfterBeforeProcessor(beanDefinition, beanDefinition.getRegister());
                 }
+                container.runEvent(new Signal(beanDefinition).setStep(LifeCycleStep.AFTER_PROCESSOR), beanDefinition.getAfterProcessorEvent());
                 beanDefinition.setStep(2);
             }
         }
@@ -148,6 +152,7 @@ public class CokeApplication {
                 for (BeanPostProcessor postProcessor : postProcessors) {
                     postProcessor.postProcessAfterInitialization(bdf, bdf.getRegister());   //执行后置处理器
                 }
+                container.runEvent(new Signal(bdf).setStep(LifeCycleStep.AFTER_INITIALIZATION),bdf.getAfterInitializationEvent());
                 bdf.setStep(3);   //已实例化
             }
         }
