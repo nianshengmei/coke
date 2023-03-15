@@ -84,4 +84,28 @@ public interface Inject extends CokeLogger {
         }
         return container.getBean(clz);
     }
+
+    default BeanDefinition getBeanDefinition(Class<?> clz, boolean proxy){
+        BeanDefinition beanDefinition = container.getBeanDefinition(clz, proxy);
+        if(null == beanDefinition){
+            return container.getBeanDefinition(clz);
+        }
+        return beanDefinition;
+    }
+
+
+    default BeanDefinition getBeanDefinition(String name, boolean proxy) {
+        if (proxy) {
+            if (container.isAopEnvironment()) {
+                if (container.containsProxyBeanDefinition(name)) {
+                    return container.getProxyBeanDefinition(name);
+                } else {
+                    warn(WarnEnum.BEAN_WITHOUT_PROXY_INSTANCE);
+                }
+            } else {
+                warn(WarnEnum.NOT_AOP_ENVIRONMENT);
+            }
+        }
+        return Container.getContainer().getBeanDefinition(name);
+    }
 }

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import pers.warren.ioc.core.BeanDefinition;
 import pers.warren.ioc.core.InjectField;
+import pers.warren.ioc.event.Signal;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
@@ -27,10 +28,10 @@ public class ResourceInject implements Inject {
             Field field = injectField.getField();
             String name = field.getName();
             Resource annotation = field.getAnnotation(Resource.class);
-            Object b = null;
+            BeanDefinition b = null;
             if (StrUtil.isNotEmpty(annotation.name())) {
                 name = annotation.name();
-                b = getBean(name,injectField.isProxy());
+                b = getBeanDefinition(name,injectField.isProxy());
                 if (null == b) {
                     throw new RuntimeException("without bean autowired named :" + name
                             + "  , source bean " + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
@@ -38,7 +39,7 @@ public class ResourceInject implements Inject {
                 }
 
             } else {
-                b = getBean(field.getType(),injectField.isProxy());
+                b = getBeanDefinition(field.getType(),injectField.isProxy());
                 if (null == b) {
                     throw new RuntimeException("no bean type autowired :" + field.getType().getName()
                             + "  , source bean " + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
@@ -47,7 +48,9 @@ public class ResourceInject implements Inject {
             }
             try {
                 field.setAccessible(true);
-                field.set(bean, b);
+                Object filedBean = container.getBean(b.getName());
+                field.set(bean, filedBean);
+                container.runEvent(new Signal(beanDefinition).setFieldBeanName(b.getName()), beanDefinition.getWhenFieldInjectEvent());
             } catch (Exception e) {
                 throw new RuntimeException("no bean type autowired :" + field.getType().getName()
                         + "  , source bean " + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()

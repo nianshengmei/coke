@@ -2,11 +2,14 @@ package pers.warren.ioc.event;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import pers.warren.ioc.core.BeanDefinition;
+import pers.warren.ioc.core.ValueField;
 
 @Data
 @NoArgsConstructor
+@ToString
 @Accessors(chain = true)
 public class Signal {
 
@@ -17,7 +20,9 @@ public class Signal {
     /**
      * 注入bean的名称
      */
-    private String sourceBeanName;
+    private String fieldBeanName;
+
+    private ValueField valueField;
 
     private LifeCycleStep step;
 
