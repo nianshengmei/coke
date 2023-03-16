@@ -11,8 +11,9 @@ import pers.warren.ioc.event.LifeCycleEvent;
 import pers.warren.ioc.event.LifeCycleStep;
 import pers.warren.ioc.event.Signal;
 import pers.warren.ioc.handler.CokePropertiesHandler;
+import pers.warren.ioc.loader.LoadPair;
+
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -47,6 +48,16 @@ public class Container implements BeanDefinitionRegistry, Environment {
      */
     @Getter
     private final Eliminator eliminator = new Eliminator();
+
+    /**
+     * 用于因为@Before和@After导致的循环优先加载问题
+     */
+    @Getter
+    private final Set<LoadPair> pairs = new HashSet<>();
+
+    public boolean containsPair(LoadPair pair){
+        return pairs.contains(pair);
+    }
 
     public <R> List<R> findClass(Class<?> clz) {
         return (List<R>)findClassMap.get(clz.getTypeName());

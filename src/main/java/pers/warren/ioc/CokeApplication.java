@@ -2,9 +2,9 @@ package pers.warren.ioc;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
-import pers.warren.ioc.annotation.Coke;
-import pers.warren.ioc.annotation.Init;
+import pers.warren.ioc.annotation.*;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.event.LifeCycleStep;
@@ -12,6 +12,7 @@ import pers.warren.ioc.event.Signal;
 import pers.warren.ioc.handler.CokePostHandler;
 import pers.warren.ioc.handler.CokePostService;
 import pers.warren.ioc.inject.Inject;
+import pers.warren.ioc.loader.LoadPair;
 import pers.warren.ioc.loader.Loader;
 import pers.warren.ioc.pool.CokeThreadPool;
 import pers.warren.ioc.util.ReflectUtil;
@@ -132,6 +133,51 @@ public class CokeApplication {
                 beanDefinition.setStep(2);
             }
         }
+
+        beanDefinitions.stream().forEach(beanDefinition -> {
+            //beanRegister注册BeanDefinition
+            //设置优先级
+            if (beanDefinition != null && null != beanDefinition.getInvokeFunction()) {
+                Method method = (Method) beanDefinition.getInvokeFunction();
+                Priority priority = method.getAnnotation(Priority.class);
+                if(null != priority){
+                    beanDefinition.setPriority(priority.priority());
+                }
+                After after = method.getAnnotation(After.class);
+                if(null != after){
+                    beanDefinition.getLoadAfter().addAll(Arrays.asList(after.name()));
+                }
+
+                Before before = method.getAnnotation(Before.class);
+                if(null != before){
+                    String[] names = before.name();
+                    for (String name : names) {
+                        BeanDefinition bd = container.getBeanDefinition(name);
+                        bd.getLoadAfter().add(beanDefinition.getName());
+                    }
+                }
+            } else {
+                Class<?> clz = beanDefinition.getClz();
+                Priority priority = clz.getAnnotation(Priority.class);
+                if(null != priority){
+                    beanDefinition.setPriority(priority.priority());
+                }
+
+                After after = clz.getAnnotation(After.class);
+                if(null != after){
+                    beanDefinition.getLoadAfter().addAll(Arrays.asList(after.name()));
+                }
+
+                Before before = clz.getAnnotation(Before.class);
+                if(null != before){
+                    String[] names = before.name();
+                    for (String name : names) {
+                        BeanDefinition bd = container.getBeanDefinition(name);
+                        bd.getLoadAfter().add(beanDefinition.getName());
+                    }
+                }
+            }
+        });
     }
 
     private static void loadBean() {
@@ -144,18 +190,44 @@ public class CokeApplication {
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.SIMPLE_BEAN));
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.PROXY));
         bdfDQueue.addAll(container.getBeanDefinitions(BeanType.OTHER));
+        bdfDQueue.sort((o1, o2) -> -NumberUtil.compare(o1.getPriority(), o2.getPriority()));
 
         while (bdfDQueue.size() != 0) {
             BeanDefinition bdf = bdfDQueue.poll();  //按顺序取出BeanDefinition
+            if (bdf.isLoad() || loadAfter(bdf, bdfDQueue)) {
+                continue;
+            }
             createBean(bdf);  //创建bean并放入容器
+            System.out.println("创建bean -> "+bdf.getName() + "优先级 = "+bdf.getPriority());
+            bdf.setLoad(true);
             if (2 == bdf.getStep()) {
                 for (BeanPostProcessor postProcessor : postProcessors) {
                     postProcessor.postProcessAfterInitialization(bdf, bdf.getRegister());   //执行后置处理器
                 }
-                container.runEvent(new Signal(bdf).setStep(LifeCycleStep.AFTER_INITIALIZATION),bdf.getAfterInitializationEvent());
+                container.runEvent(new Signal(bdf).setStep(LifeCycleStep.AFTER_INITIALIZATION), bdf.getAfterInitializationEvent());
                 bdf.setStep(3);   //已实例化
             }
         }
+    }
+
+    private static boolean loadAfter(BeanDefinition bd, LinkedList<BeanDefinition> bdfDQueue) {
+        Container container = Container.getContainer();
+        List<String> loadAfter = bd.getLoadAfter();
+        if (loadAfter.size() > 0) {
+            for (String name : loadAfter) {
+                if ((null == container.getBean(name))) {
+                    LoadPair pair = new LoadPair().setA(bd.getName()).setB(name);
+                    if (container.containsPair(pair)) {
+                        throw new RuntimeException("循环优先引用 "+ bd.getName() + " <=> "+name);
+                    }
+                    bdfDQueue.addFirst(bd);
+                    bdfDQueue.addFirst(container.getBeanDefinition(name));
+                    container.getPairs().add(pair);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

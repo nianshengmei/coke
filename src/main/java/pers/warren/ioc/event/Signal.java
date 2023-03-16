@@ -6,6 +6,7 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import pers.warren.ioc.core.BeanDefinition;
 import pers.warren.ioc.core.ValueField;
+import pers.warren.ioc.inject.InjectField;
 
 @Data
 @NoArgsConstructor
@@ -22,7 +23,7 @@ public class Signal {
      */
     private String fieldBeanName;
 
-    private ValueField valueField;
+    private InjectField valueField;
 
     private LifeCycleStep step;
 

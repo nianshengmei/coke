@@ -4,10 +4,8 @@ import cn.hutool.core.collection.CollUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import pers.warren.ioc.core.BeanDefinition;
-import pers.warren.ioc.core.ValueField;
 import pers.warren.ioc.event.Signal;
 import pers.warren.ioc.util.InjectUtil;
-
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -18,11 +16,11 @@ public class ValueInject implements Inject {
         if(beanDefinition.isProxy()){
             return;
         }
-        List<ValueField> valueFiledInject = beanDefinition.getValueFiledInject();
+        List<InjectField> valueFiledInject = beanDefinition.getValueFiledInject();
         if (CollUtil.isEmpty(valueFiledInject)) {
             return;
         }
-        for (ValueField field : valueFiledInject) {
+        for (InjectField field : valueFiledInject) {
             if (null == field.getConfigValue() && null == field.getDefaultValue()) {
                 continue;
             }

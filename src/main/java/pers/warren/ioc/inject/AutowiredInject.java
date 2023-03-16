@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import pers.warren.ioc.annotation.Autowired;
 import pers.warren.ioc.core.BeanDefinition;
 import pers.warren.ioc.core.Container;
-import pers.warren.ioc.core.InjectField;
 import pers.warren.ioc.ec.NoMatchBeanException;
 import pers.warren.ioc.event.Signal;
 
@@ -23,6 +22,9 @@ public class AutowiredInject implements Inject {
 
     @Override
     public void inject(BeanDefinition beanDefinition) {
+        if(beanDefinition.isProxy()){
+            return;
+        }
         Object bean = Container.getContainer().getBean(beanDefinition.getName());
         if (CollUtil.isEmpty(beanDefinition.getAutowiredFieldInject())) {
             return;
@@ -34,7 +36,7 @@ public class AutowiredInject implements Inject {
             BeanDefinition b = null;
             if (StrUtil.isNotEmpty(annotation.value())) {
                 name = annotation.value();
-                b = getBeanDefinition(name, injectField.isProxy());
+                b = container.getBeanDefinition(name);
                 if (null == b) {
                     throw new RuntimeException("without bean autowired named :" + name
                             + "  , source bean" + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
@@ -42,7 +44,7 @@ public class AutowiredInject implements Inject {
                 }
 
             } else {
-                b = getBeanDefinition(field.getType(), injectField.isProxy());
+                b = container.getBeanDefinition(field.getType());
                 if (null == b) {
                     throw new RuntimeException("no bean type autowired :" + field.getType().getName()
                             + "  , source bean " + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()

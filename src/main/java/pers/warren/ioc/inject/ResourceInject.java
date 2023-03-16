@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import pers.warren.ioc.core.BeanDefinition;
-import pers.warren.ioc.core.InjectField;
 import pers.warren.ioc.event.Signal;
 
 import javax.annotation.Resource;
@@ -20,6 +19,9 @@ import java.lang.reflect.Field;
 public class ResourceInject implements Inject {
     @Override
     public void inject(BeanDefinition beanDefinition) {
+        if(beanDefinition.isProxy()){
+            return;
+        }
         Object bean = container.getBean(beanDefinition.getName());
         if (CollUtil.isEmpty(beanDefinition.getResourceFieldInject()) || beanDefinition.isProxy()) {
             return;
@@ -31,7 +33,7 @@ public class ResourceInject implements Inject {
             BeanDefinition b = null;
             if (StrUtil.isNotEmpty(annotation.name())) {
                 name = annotation.name();
-                b = getBeanDefinition(name,injectField.isProxy());
+                b = container.getBeanDefinition(name);
                 if (null == b) {
                     throw new RuntimeException("without bean autowired named :" + name
                             + "  , source bean " + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
@@ -39,7 +41,7 @@ public class ResourceInject implements Inject {
                 }
 
             } else {
-                b = getBeanDefinition(field.getType(),injectField.isProxy());
+                b = container.getBeanDefinition(field.getType());
                 if (null == b) {
                     throw new RuntimeException("no bean type autowired :" + field.getType().getName()
                             + "  , source bean " + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()
