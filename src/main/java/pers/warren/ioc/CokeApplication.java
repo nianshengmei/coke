@@ -156,6 +156,10 @@ public class CokeApplication {
                         bd.getLoadAfter().add(beanDefinition.getName());
                     }
                 }
+
+                if (null != method.getAnnotation(Lazy.class)) {
+                    beanDefinition.setLazy(true);
+                }
             } else {
                 Class<?> clz = beanDefinition.getClz();
                 Priority priority = clz.getAnnotation(Priority.class);
@@ -175,6 +179,10 @@ public class CokeApplication {
                         BeanDefinition bd = container.getBeanDefinition(name);
                         bd.getLoadAfter().add(beanDefinition.getName());
                     }
+                }
+
+                if (null != clz.getAnnotation(Lazy.class)) {
+                    beanDefinition.setLazy(true);
                 }
             }
         });
@@ -257,11 +265,14 @@ public class CokeApplication {
             return;
         }
         BeanFactory beanFactory = (BeanFactory) container.getBean(beanDefinition.getBeanFactoryClass());
+        if(beanDefinition.isLazy()){
+            beanFactory = container.getBean(LazyBeanFactory.class);
+        }
         FactoryBean factoryBean = null;
         try {
             factoryBean = beanFactory.createBean(beanDefinition);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("创建bean失败 "+ beanDefinition.getName());
         }
         container.addComponent(beanDefinition.getName(), factoryBean.getObject());
     }

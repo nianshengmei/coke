@@ -55,6 +55,12 @@ public class Container implements BeanDefinitionRegistry, Environment {
     @Getter
     private final Set<LoadPair> pairs = new HashSet<>();
 
+    /**
+     * k beanName
+     * v @Lazy标注的bean的BeanDefinition
+     */
+    private Map<String,BeanDefinition> lazyBeanDefinitionMap = new HashMap<>();
+
     public boolean containsPair(LoadPair pair){
         return pairs.contains(pair);
     }

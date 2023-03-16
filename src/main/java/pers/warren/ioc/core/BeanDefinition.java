@@ -141,5 +141,10 @@ public class BeanDefinition {
 
     protected boolean load;
 
+    /**
+     * 是否懒加载
+     */
+    protected boolean lazy;
+
     protected int step = 0;
 }
