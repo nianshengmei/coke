@@ -206,7 +206,6 @@ public class CokeApplication {
                 continue;
             }
             createBean(bdf);  //创建bean并放入容器
-            System.out.println("创建bean -> "+bdf.getName() + "优先级 = "+bdf.getPriority());
             bdf.setLoad(true);
             if (2 == bdf.getStep()) {
                 for (BeanPostProcessor postProcessor : postProcessors) {

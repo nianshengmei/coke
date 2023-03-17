@@ -57,9 +57,12 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     /**
      * k beanName
-     * v @Lazy标注的bean的BeanDefinition
+     * v @Lazy标注的bean的真实bean
+     *
+     * 该字段的左右是为了给@lazy标注的字段注入属性和配置
      */
-    private Map<String,BeanDefinition> lazyBeanDefinitionMap = new HashMap<>();
+    @Getter
+    private Map<String,Object> lazyBeanMap = new HashMap<>();
 
     public boolean containsPair(LoadPair pair){
         return pairs.contains(pair);
@@ -190,6 +193,9 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
 
     public <T> T getBean(String name) {
+        if(lazyBeanMap.containsKey(name)){
+            return (T) lazyBeanMap.get(StrUtil.lowerFirst(name));
+        }
         return (T) componentMap.get(StrUtil.lowerFirst(name));
     }
 
@@ -245,8 +251,11 @@ public class Container implements BeanDefinitionRegistry, Environment {
     }
 
     public <T> T getBean(Class<T> clz) {
-        List<T> beans = getBeans(clz);
-        return CollUtil.isNotEmpty(beans) ? beans.get(0) : null;
+        List<BeanDefinition> beanDefinitions= getBeanDefinitions(clz);
+        if(CollUtil.isNotEmpty(beanDefinitions)){
+            return getBean(beanDefinitions.get(0).getName());
+        }
+        return null;
     }
 
     public <T> List<T> getBeans(Class<T> clz) {

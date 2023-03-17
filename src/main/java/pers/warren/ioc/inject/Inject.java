@@ -7,6 +7,7 @@ import pers.warren.ioc.log.CokeLogger;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * bean注入接口
@@ -19,10 +20,16 @@ public interface Inject extends CokeLogger {
     static void injectFiled() {
         Collection<BeanDefinition> beanDefinitions = container.getBeanDefinitions();
         for (BeanDefinition beanDefinition : beanDefinitions) {
-            new AutowiredInject().inject(beanDefinition);
-            new ResourceInject().inject(beanDefinition);
-            new ValueInject().inject(beanDefinition);
+            if(!beanDefinition.isLazy()) {
+                injectBeanDefinitionFiled(beanDefinition);
+            }
         }
+    }
+
+    static void injectBeanDefinitionFiled(BeanDefinition beanDefinition){
+        new AutowiredInject().inject(beanDefinition);
+        new ResourceInject().inject(beanDefinition);
+        new ValueInject().inject(beanDefinition);
     }
 
     /**

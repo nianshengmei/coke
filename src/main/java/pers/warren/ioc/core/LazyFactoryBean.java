@@ -3,6 +3,7 @@ package pers.warren.ioc.core;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
+import pers.warren.ioc.inject.Inject;
 import java.lang.reflect.Method;
 
 public class LazyFactoryBean implements FactoryBean{
@@ -60,8 +61,11 @@ public class LazyFactoryBean implements FactoryBean{
             if(bean == null){
                 BeanFactory beanFactory = (BeanFactory) Container.getContainer().getBean(beanDefinition.getBeanFactoryClass());
                 bean = beanFactory.createBean(beanDefinition).getObject();
+                Container.getContainer().getLazyBeanMap().put(beanDefinition.getName(), bean);
+                Inject.injectBeanDefinitionFiled(beanDefinition);  //依赖注入
             }
-            return methodProxy.invokeSuper(bean, objects);
+            Method superMethod = beanDefinition.getClz().getMethod(method.getName(), method.getParameterTypes());
+            return superMethod.invoke(bean,objects);
         }
     }
 }
