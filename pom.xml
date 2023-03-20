@@ -56,6 +56,12 @@
         </dependency>
 
         <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.24</version>
@@ -121,6 +127,8 @@
             <version>31.1-jre</version>
             <scope>compile</scope>
         </dependency>
+
+
     </dependencies>
 
 

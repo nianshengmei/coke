@@ -5,9 +5,11 @@ import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.annotation.Autowired;
 import pers.warren.ioc.annotation.Bean;
 import pers.warren.ioc.annotation.Value;
+import pers.warren.ioc.inject.InjectField;
 import pers.warren.ioc.condition.ConditionContext;
 import pers.warren.ioc.condition.DefaultConditionContext;
 import pers.warren.ioc.enums.BeanType;
+import pers.warren.ioc.inject.InjectType;
 import pers.warren.ioc.kit.ConditionKit;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -23,34 +25,35 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
         Field[] declaredFields = clz.getDeclaredFields();
         List<InjectField> autowiredFields = new ArrayList<>();
         List<InjectField> resourceFields = new ArrayList<>();
-        List<ValueField> valueFields = new ArrayList<>();
+        List<InjectField> valueFields = new ArrayList<>();
         for (Field declaredField : declaredFields) {
             if (null != declaredField.getAnnotation(Autowired.class)) {
-                autowiredFields.add(new InjectField(beanDefinition.name, declaredField));
+                autowiredFields.add(new InjectField(beanDefinition.name, declaredField, InjectType.BEAN));
             }
 
             if (null != declaredField.getAnnotation(Resource.class)) {
-                resourceFields.add(new InjectField(beanDefinition.name, declaredField));
+                resourceFields.add(new InjectField(beanDefinition.name, declaredField, InjectType.BEAN));
             }
 
             if (null != declaredField.getAnnotation(Value.class)) {
                 Value valueAnnotation = declaredField.getAnnotation(Value.class);
                 String value = valueAnnotation.value();
-                ValueField field = new ValueField();
+                InjectField field = new InjectField();
+                field.setType(InjectType.CONFIG);
                 field.setSourceBeanName(beanDefinition.getName());
                 field.setField(declaredField);
                 if (value.contains(":")) {
                     String[] vs = value.split(":");
-                    field.setKey(vs[0]);
+                    field.setConfigKey(vs[0]);
                     field.setDefaultValue(vs[1]);
                 } else {
-                    field.setKey(value);
+                    field.setConfigKey(value);
                 }
                 Type genericType = declaredField.getGenericType();
                 field.setGenericType(genericType);
-                field.setType(declaredField.getType());
+                field.setFieldType(declaredField.getType());
                 ApplicationContext applicationContext = Container.getContainer().getBean(ApplicationContext.class.getSimpleName());
-                field.setConfigValue(applicationContext.getProperty(field.getKey()));
+                field.setConfigValue(applicationContext.getProperty(field.getConfigKey()));
                 valueFields.add(field);
             }
         }

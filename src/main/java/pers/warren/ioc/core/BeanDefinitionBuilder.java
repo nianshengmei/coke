@@ -28,6 +28,7 @@ public class BeanDefinitionBuilder {
         builder.beanDefinition.setBeanType(BeanType.SIMPLE_BEAN);
         builder.beanDefinition.setFactoryBeanClass(DefaultFactoryBean.class);
         builder.beanDefinition.setBeanFactoryClass(DefaultBeanFactory.class);
+        builder.setAnnotationMetadata(AnnotationMetadata.metadata(beanClass));
         return builder;
     }
 
@@ -40,6 +41,7 @@ public class BeanDefinitionBuilder {
         builder.beanDefinition.setBeanType(beanType);
         builder.beanDefinition.setFactoryBeanClass(DefaultFactoryBean.class);
         builder.beanDefinition.setBeanFactoryClass(DefaultBeanFactory.class);
+        builder.setAnnotationMetadata(AnnotationMetadata.metadata(beanClass));
         return builder;
     }
 

@@ -3,10 +3,18 @@ package pers.warren.ioc.core;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
+import pers.warren.ioc.ec.WarnEnum;
+import pers.warren.ioc.ec.WithoutNoParamConstructorException;
 import pers.warren.ioc.enums.BeanType;
+import pers.warren.ioc.event.Event;
+import pers.warren.ioc.event.LifeCycleEvent;
+import pers.warren.ioc.event.LifeCycleStep;
+import pers.warren.ioc.event.Signal;
 import pers.warren.ioc.handler.CokePropertiesHandler;
+import pers.warren.ioc.loader.LoadPair;
 
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -40,6 +48,25 @@ public class Container implements BeanDefinitionRegistry, Environment {
      */
     @Getter
     private final Eliminator eliminator = new Eliminator();
+
+    /**
+     * 用于因为@Before和@After导致的循环优先加载问题
+     */
+    @Getter
+    private final Set<LoadPair> pairs = new HashSet<>();
+
+    /**
+     * k beanName
+     * v @Lazy标注的bean的真实bean
+     *
+     * 该字段的左右是为了给@lazy标注的字段注入属性和配置
+     */
+    @Getter
+    private Map<String,Object> lazyBeanMap = new HashMap<>();
+
+    public boolean containsPair(LoadPair pair){
+        return pairs.contains(pair);
+    }
 
     public <R> List<R> findClass(Class<?> clz) {
         return (List<R>)findClassMap.get(clz.getTypeName());
@@ -166,6 +193,9 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
 
     public <T> T getBean(String name) {
+        if(lazyBeanMap.containsKey(name)){
+            return (T) lazyBeanMap.get(StrUtil.lowerFirst(name));
+        }
         return (T) componentMap.get(StrUtil.lowerFirst(name));
     }
 
@@ -221,8 +251,11 @@ public class Container implements BeanDefinitionRegistry, Environment {
     }
 
     public <T> T getBean(Class<T> clz) {
-        List<T> beans = getBeans(clz);
-        return CollUtil.isNotEmpty(beans) ? beans.get(0) : null;
+        List<BeanDefinition> beanDefinitions= getBeanDefinitions(clz);
+        if(CollUtil.isNotEmpty(beanDefinitions)){
+            return getBean(beanDefinitions.get(0).getName());
+        }
+        return null;
     }
 
     public <T> List<T> getBeans(Class<T> clz) {
@@ -253,7 +286,18 @@ public class Container implements BeanDefinitionRegistry, Environment {
         }
         if (StrUtil.isNotEmpty(name) && null != beanDefinition) {
             beanDefinition.setName(StrUtil.lowerFirst(beanDefinition.getName()));
+
+            AnnotationMetadata annotationMetadata = beanDefinition.getAnnotationMetadata();
+            if (annotationMetadata.hasAnnotation(LifeCycleEvent.class)) {
+                LifeCycleEvent annotation = (LifeCycleEvent) annotationMetadata.getAnnotation(LifeCycleEvent.class);
+                beanDefinition.setRegisterEvent(Arrays.asList(annotation.register()));
+                beanDefinition.setBeforeProcessorEvent(Arrays.asList(annotation.beforeProcessor()));
+                beanDefinition.setAfterProcessorEvent(Arrays.asList(annotation.afterProcessor()));
+                beanDefinition.setWhenFieldInjectEvent(Arrays.asList(annotation.whenFieldInject()));
+                beanDefinition.setAfterInitializationEvent(Arrays.asList(annotation.afterInitialization()));
+            }
             this.beanDefinitionMap.put(StrUtil.lowerFirst(name), beanDefinition);
+            runEvent(new Signal(beanDefinition).setStep(LifeCycleStep.REGISTER), beanDefinition.registerEvent);
         }
     }
 
@@ -393,5 +437,27 @@ public class Container implements BeanDefinitionRegistry, Environment {
             }
         }
         return null;
+    }
+
+    /**
+     * 执行事件
+     *
+     * @param signal 信号
+     *
+     *
+     */
+    public void runEvent(Signal signal, List<Class<? extends Event>> eventClasses) {
+        if (CollUtil.isEmpty(eventClasses)) {
+            return;
+        }
+        for (Class<? extends Event> eventClz : eventClasses) {
+            try {
+                Constructor<? extends Event> constructor = eventClz.getConstructor();
+                Event event = constructor.newInstance();
+                event.doEvent(signal);
+            } catch (Throwable e) {
+                throw new WithoutNoParamConstructorException(WarnEnum.LIFE_CYCLE_EVENTS_MUST_HAVE_NON_PARAMETER_CONSTRUCTORS);
+            }
+        }
     }
 }

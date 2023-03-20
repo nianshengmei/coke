@@ -42,7 +42,7 @@ public class DefaultFactoryBean implements FactoryBean {
     public Object getObject() {
         if (beanDefinition.isSingleton()) {
             Object beanDef = Container.getContainer().getBean(beanDefinition.getName());
-            if (null != beanDef) {
+            if (null != beanDef && !beanDefinition.isLazy()) {
                 return beanDef;
             }
         }

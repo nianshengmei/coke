@@ -2,9 +2,11 @@ package pers.warren.ioc.core;
 
 import lombok.Data;
 import pers.warren.ioc.enums.BeanType;
+import pers.warren.ioc.event.Event;
+import pers.warren.ioc.inject.InjectField;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -74,7 +76,7 @@ public class BeanDefinition {
     /**
      * 标注了@Value的字段
      */
-    protected List<ValueField> valueFiledInject;
+    protected List<InjectField> valueFiledInject;
 
     /**
      * 用于创建的beanFactory类型
@@ -101,6 +103,48 @@ public class BeanDefinition {
     protected Map<String,BeanDefinitionExtendedField> extendedFields;
 
     protected AnnotationMetadata annotationMetadata;
+
+    /**
+     * 注册beanDefinition事件
+     */
+    protected List<Class<? extends Event>> registerEvent;
+
+    /**
+     * 前置处理事件
+     */
+    protected  List<Class<? extends Event>> beforeProcessorEvent;
+
+    /**
+     * 后置处理事件
+     */
+    protected  List<Class<? extends Event>> afterProcessorEvent;
+
+    protected  List<Class<? extends Event>> afterInitializationEvent;
+
+    /**
+     * 字段注入事件
+     */
+    protected  List<Class<? extends Event>> whenFieldInjectEvent;
+
+    /**
+     * bean的初始化优先级
+     *
+     * <p>默认为 0</p>
+     * <p>优先级 0 - 9 </p>
+     */
+    protected int priority;
+
+    /**
+     * 初始化落后于
+     */
+    protected List<String> loadAfter = new ArrayList<>();
+
+    protected boolean load;
+
+    /**
+     * 是否懒加载
+     */
+    protected boolean lazy;
 
     protected int step = 0;
 }
