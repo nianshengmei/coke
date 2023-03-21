@@ -6,7 +6,7 @@
 </p>
 
 -------------------------------------------------------------------------------
-## 热烈欢迎有志之士加入coke的开发,只要会使用spring框架即可，可以带你揭秘ioc,aop等等框架背后的逻辑
+
 ## 📚简介
 coke是一个类springboot的ioc框架，与之不同的是coke更为简单，纯粹。在使用方式上coke继承了springboot的简单易用，在框架本身上对开发者更加友好，是真正拥抱自定义框架的开发者的。
 
@@ -71,9 +71,9 @@ public class RunApplication {
 #### 🚗2.1 @Component
 
 - a、@Component注解用于定义一个组件bean,该注解作用在类上。
-- b、coke启动时会为@Component类创建一个单例bean。 
+- b、coke启动时会为@Component类创建一个单例bean。
 - c、通过@Component的value属性或者name属性可以修改bean在容器中的名称(唯一标识)，name属性的优先级高于value。
-如果不为name和value赋值，则coke会为该bean赋默认名称，类名首字母首字母小写，该场景下(coke自动分配)如果名称与其他bean重复则会加上@符加六位随机字符。手动分配场景出现名称重复会直接报错。
+  如果不为name和value赋值，则coke会为该bean赋默认名称，类名首字母首字母小写，该场景下(coke自动分配)如果名称与其他bean重复则会加上@符加六位随机字符。手动分配场景出现名称重复会直接报错。
 
 <p>参考如下:</p>
 
@@ -84,7 +84,7 @@ import pers.warren.ioc.annotation.Component;
 //@Component("userService")
 @Component
 public class UserService {
-    
+
     public void sayHello(){
         System.out.println("hello coke");
     }
@@ -96,9 +96,9 @@ public class UserService {
 
 #### 🚗2.2 @Configuration
 - a、@Configuration注解定义一个配置bean,该注解作用在类上。
-- b、coke启动时会为@Configuration类创建一个单例bean。 
+- b、coke启动时会为@Configuration类创建一个单例bean。
 - c、通过@Configuration的value属性或者name属性可以修改bean在容器中的名称(唯一标识)，name属性的优先级高于value。
-如果不为name和value赋值，则coke会为该bean赋默认名称，类名首字母首字母小写，该场景下(coke自动分配)如果名称与其他bean重复则会加上@符加六位随机字符。手动分配场景出现名称重复会直接报错。
+  如果不为name和value赋值，则coke会为该bean赋默认名称，类名首字母首字母小写，该场景下(coke自动分配)如果名称与其他bean重复则会加上@符加六位随机字符。手动分配场景出现名称重复会直接报错。
 
 <p>
     <a style="color: crimson">注:@Configuration所生成的bean在生成顺序上理论优先于@Component</a>
@@ -141,7 +141,7 @@ public class CokeConfig {
 - a、@Bean用于定义一个简单bean，作用在方法上(该方法必须是@Component或@Configuration标注的类中的方法)
 - b、coke启动时会为@Bean类创建一个单例bean。
 - c、生成的bean的名称默认会使用@bean所标注的方法名,也可以通过@Bean的name属性手动分配。
-coke自动分配名称，如果名称与其他bean重复则会加上@符加六位随机字符。手动分配场景出现名称重复会直接报错。
+  coke自动分配名称，如果名称与其他bean重复则会加上@符加六位随机字符。手动分配场景出现名称重复会直接报错。
 
 <p>示例如下:</p>
 
@@ -180,7 +180,7 @@ public class UserService {
 
     @Autowired
     private CokeConfig config;
-    
+
     private Integer max;
 
     @Autowired
