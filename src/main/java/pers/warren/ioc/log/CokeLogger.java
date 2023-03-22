@@ -23,6 +23,6 @@ public interface CokeLogger {
     }
 
     default void error(Error error) {
-        getLogger().info("coke warn log : error code = {} , error message = {} .", error.getErrorCode(), error.getErrorMessage());
+        getLogger().info("coke error log : error code = {} , error message = {} .", error.getErrorCode(), error.getErrorMessage());
     }
 }
