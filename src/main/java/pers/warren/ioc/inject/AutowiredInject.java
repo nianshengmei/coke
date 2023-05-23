@@ -8,6 +8,7 @@ import pers.warren.ioc.annotation.Autowired;
 import pers.warren.ioc.core.BeanDefinition;
 import pers.warren.ioc.core.Container;
 import pers.warren.ioc.ec.NoMatchBeanException;
+import pers.warren.ioc.event.LifeCycleSignal;
 import pers.warren.ioc.event.Signal;
 
 import java.lang.reflect.Field;
@@ -55,7 +56,7 @@ public class AutowiredInject implements Inject {
                 field.setAccessible(true);
                 Object filedBean = container.getBean(b.getName());
                 field.set(bean, filedBean);
-                container.runEvent(new Signal(beanDefinition).setFieldBeanName(b.getName()), beanDefinition.getWhenFieldInjectEvent());
+                container.runEvent(new LifeCycleSignal(beanDefinition).setFieldBeanName(b.getName()), beanDefinition.getWhenFieldInjectEvent());
             } catch (Exception e) {
                 if (null == bean) {
                     throw new RuntimeException("the bean " + beanDefinition.getName() + " not instantiation !");

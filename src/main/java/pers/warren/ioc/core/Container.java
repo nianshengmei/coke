@@ -6,10 +6,7 @@ import lombok.Getter;
 import pers.warren.ioc.ec.WarnEnum;
 import pers.warren.ioc.ec.WithoutNoParamConstructorException;
 import pers.warren.ioc.enums.BeanType;
-import pers.warren.ioc.event.Event;
-import pers.warren.ioc.event.LifeCycleEvent;
-import pers.warren.ioc.event.LifeCycleStep;
-import pers.warren.ioc.event.Signal;
+import pers.warren.ioc.event.*;
 import pers.warren.ioc.handler.CokePropertiesHandler;
 import pers.warren.ioc.loader.LoadPair;
 
@@ -297,7 +294,7 @@ public class Container implements BeanDefinitionRegistry, Environment {
                 beanDefinition.setAfterInitializationEvent(Arrays.asList(annotation.afterInitialization()));
             }
             this.beanDefinitionMap.put(StrUtil.lowerFirst(name), beanDefinition);
-            runEvent(new Signal(beanDefinition).setStep(LifeCycleStep.REGISTER), beanDefinition.registerEvent);
+            runEvent(new LifeCycleSignal(beanDefinition).setStep(LifeCycleStep.REGISTER), beanDefinition.registerEvent);
         }
     }
 

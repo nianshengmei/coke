@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import pers.warren.ioc.annotation.*;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
+import pers.warren.ioc.event.LifeCycleSignal;
 import pers.warren.ioc.event.LifeCycleStep;
 import pers.warren.ioc.event.Signal;
 import pers.warren.ioc.handler.CokePostHandler;
@@ -115,7 +116,7 @@ public class CokeApplication {
                 for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
                     beanPostProcessor.postProcessBeforeInitialization(beanDefinition, beanDefinition.getRegister());
                 }
-                container.runEvent(new Signal(beanDefinition).setStep(LifeCycleStep.BEFORE_PROCESSOR), beanDefinition.getBeforeProcessorEvent());
+                container.runEvent(new LifeCycleSignal(beanDefinition).setStep(LifeCycleStep.BEFORE_PROCESSOR), beanDefinition.getBeforeProcessorEvent());
                 beanDefinition.setStep(1);
             }
         }
@@ -129,7 +130,7 @@ public class CokeApplication {
                 for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
                     beanPostProcessor.postProcessAfterBeforeProcessor(beanDefinition, beanDefinition.getRegister());
                 }
-                container.runEvent(new Signal(beanDefinition).setStep(LifeCycleStep.AFTER_PROCESSOR), beanDefinition.getAfterProcessorEvent());
+                container.runEvent(new LifeCycleSignal(beanDefinition).setStep(LifeCycleStep.AFTER_PROCESSOR), beanDefinition.getAfterProcessorEvent());
                 beanDefinition.setStep(2);
             }
         }
@@ -211,7 +212,7 @@ public class CokeApplication {
                 for (BeanPostProcessor postProcessor : postProcessors) {
                     postProcessor.postProcessAfterInitialization(bdf, bdf.getRegister());   //执行后置处理器
                 }
-                container.runEvent(new Signal(bdf).setStep(LifeCycleStep.AFTER_INITIALIZATION), bdf.getAfterInitializationEvent());
+                container.runEvent(new LifeCycleSignal(bdf).setStep(LifeCycleStep.AFTER_INITIALIZATION), bdf.getAfterInitializationEvent());
                 bdf.setStep(3);   //已实例化
             }
         }

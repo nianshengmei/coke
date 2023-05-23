@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import pers.warren.ioc.core.BeanDefinition;
+import pers.warren.ioc.event.LifeCycleSignal;
 import pers.warren.ioc.event.Signal;
 
 import javax.annotation.Resource;
@@ -52,7 +53,7 @@ public class ResourceInject implements Inject {
                 field.setAccessible(true);
                 Object filedBean = container.getBean(b.getName());
                 field.set(bean, filedBean);
-                container.runEvent(new Signal(beanDefinition).setFieldBeanName(b.getName()), beanDefinition.getWhenFieldInjectEvent());
+                container.runEvent(new LifeCycleSignal(beanDefinition).setFieldBeanName(b.getName()), beanDefinition.getWhenFieldInjectEvent());
             } catch (Exception e) {
                 throw new RuntimeException("no bean type autowired :" + field.getType().getName()
                         + "  , source bean " + beanDefinition.getName() + " ,Class name " + beanDefinition.getClz().getName()

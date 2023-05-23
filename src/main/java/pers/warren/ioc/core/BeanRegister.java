@@ -2,6 +2,7 @@ package pers.warren.ioc.core;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import pers.warren.ioc.event.LifeCycleSignal;
 import pers.warren.ioc.event.LifeCycleStep;
 import pers.warren.ioc.event.Signal;
 
@@ -54,7 +55,7 @@ public interface BeanRegister {
             for (BeanPostProcessor postProcessor : postProcessors) {
                 postProcessor.postProcessBeforeInitialization(beanDefinition, this);
             }
-            registry.runEvent(new Signal(beanDefinition).setStep(LifeCycleStep.BEFORE_PROCESSOR), beanDefinition.getBeforeProcessorEvent());
+            registry.runEvent(new LifeCycleSignal(beanDefinition).setStep(LifeCycleStep.BEFORE_PROCESSOR), beanDefinition.getBeforeProcessorEvent());
             beanDefinition.setStep(1);
         }
 

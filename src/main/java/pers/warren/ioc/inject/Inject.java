@@ -29,7 +29,7 @@ public interface Inject extends CokeLogger {
     static void injectBeanDefinitionFiled(BeanDefinition beanDefinition){
         new AutowiredInject().inject(beanDefinition);
         new ResourceInject().inject(beanDefinition);
-        new ValueInject().inject(beanDefinition);
+        //new ValueInject().inject(beanDefinition);
     }
 
     /**

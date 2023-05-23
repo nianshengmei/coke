@@ -1,41 +1,19 @@
 package pers.warren.ioc.pool;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import pers.warren.ioc.annotation.Init;
-import pers.warren.ioc.annotation.Value;
+import lombok.Data;
+import pers.warren.ioc.annotation.*;
+import pers.warren.ioc.condition.ConditionalOnMissingBean;
 
+import javax.annotation.Resource;
 import java.util.concurrent.*;
 
+@Data
+@Component
 public class CokeThreadPool {
 
     public CokeThreadPool() {
         namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("coke-pool-%d").build();
-    }
-
-    @Init
-    public void init(){
-        if (iocPoolCapacity < 100) {
-            service = new ThreadPoolExecutor(
-                    iocCoreThreadPoolSize,
-                    iocMaximumPoolSize,
-                    iocKeepAliveTime,
-                    TimeUnit.MILLISECONDS,
-                    new LinkedBlockingDeque<>(),
-                    namedThreadFactory,
-                    new ThreadPoolExecutor.AbortPolicy()
-            );
-        } else {
-            service = new ThreadPoolExecutor(
-                    iocCoreThreadPoolSize,
-                    iocMaximumPoolSize,
-                    iocKeepAliveTime,
-                    TimeUnit.MILLISECONDS,
-                    new ArrayBlockingQueue<>(iocPoolCapacity),
-                    namedThreadFactory,
-                    new ThreadPoolExecutor.AbortPolicy()
-            );
-        }
-
     }
 
 
@@ -66,13 +44,40 @@ public class CokeThreadPool {
      * threadFactory   创建线程的工厂类
      * handler         拒绝策略类,当线程池数量达到上线并且workQueue队列长度达到上限时就需要对到来的任务做拒绝处理
      */
+    @Resource
     private  ExecutorService service;
+
     /**
      * 获取线程池
      * @return 线程池
      */
-    public ExecutorService getExecutorService() {
-        return service;
+    @Bean
+    @After(name = "cokeThreadPool")
+    @ConditionalOnMissingBean(name = "cokeExecutorService")
+    public ExecutorService cokeExecutorService() {
+        ExecutorService executorService = null ;
+        if (iocPoolCapacity < 100) {
+            executorService = new ThreadPoolExecutor(
+                    iocCoreThreadPoolSize,
+                    iocMaximumPoolSize,
+                    iocKeepAliveTime,
+                    TimeUnit.MILLISECONDS,
+                    new LinkedBlockingDeque<>(),
+                    namedThreadFactory,
+                    new ThreadPoolExecutor.AbortPolicy()
+            );
+        } else {
+            executorService = new ThreadPoolExecutor(
+                    iocCoreThreadPoolSize,
+                    iocMaximumPoolSize,
+                    iocKeepAliveTime,
+                    TimeUnit.MILLISECONDS,
+                    new ArrayBlockingQueue<>(iocPoolCapacity),
+                    namedThreadFactory,
+                    new ThreadPoolExecutor.AbortPolicy()
+            );
+        }
+        return executorService;
     }
 
     /**
