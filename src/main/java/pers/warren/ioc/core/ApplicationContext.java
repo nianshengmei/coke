@@ -120,4 +120,8 @@ public class ApplicationContext implements BeanDefinitionRegistry ,Environment{
     public void runEvent(Signal signal, List<Class<? extends Event>> eventClasses) {
         Container.getContainer().runEvent(signal, eventClasses);
     }
+
+    public Container container(){
+        return Container.getContainer();
+    }
 }

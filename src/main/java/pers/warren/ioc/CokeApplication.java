@@ -7,9 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import pers.warren.ioc.annotation.*;
 import pers.warren.ioc.core.*;
 import pers.warren.ioc.enums.BeanType;
+import pers.warren.ioc.event.DefaultEventBus;
 import pers.warren.ioc.event.LifeCycleSignal;
 import pers.warren.ioc.event.LifeCycleStep;
-import pers.warren.ioc.event.Signal;
 import pers.warren.ioc.handler.CokePostHandler;
 import pers.warren.ioc.handler.CokePostService;
 import pers.warren.ioc.inject.Inject;
@@ -212,6 +212,7 @@ public class CokeApplication {
                 for (BeanPostProcessor postProcessor : postProcessors) {
                     postProcessor.postProcessAfterInitialization(bdf, bdf.getRegister());   //执行后置处理器
                 }
+                new DefaultEventBus().sendSignal(new LifeCycleSignal(bdf).setStep(LifeCycleStep.AFTER_INITIALIZATION));
                 container.runEvent(new LifeCycleSignal(bdf).setStep(LifeCycleStep.AFTER_INITIALIZATION), bdf.getAfterInitializationEvent());
                 bdf.setStep(3);   //已实例化
             }
@@ -367,7 +368,9 @@ public class CokeApplication {
 
     private static void postHandlerRun() {
         Container container = Container.getContainer();
-        List<CokePostHandler> postHandlers = container.getBeans(CokePostHandler.class);
+        List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(CokePostHandler.class);
+        List<CokePostHandler> postHandlers = beanDefinitions.stream().sorted(Comparator.comparingInt(BeanDefinition::getPriority))
+                .map(a -> (CokePostHandler)container.getBean(a.getName())).collect(Collectors.toList());
         if (CollUtil.isNotEmpty(postHandlers)) {
             log.info("coke start cost {} ms before post handler run !", System.currentTimeMillis() - startTimeMills);
         }

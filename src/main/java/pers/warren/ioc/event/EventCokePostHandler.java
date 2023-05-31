@@ -1,0 +1,32 @@
+package pers.warren.ioc.event;
+
+import pers.warren.ioc.annotation.Component;
+import pers.warren.ioc.annotation.Listen;
+import pers.warren.ioc.annotation.Priority;
+import pers.warren.ioc.core.ApplicationContext;
+import pers.warren.ioc.core.Container;
+import pers.warren.ioc.handler.CokePostHandler;
+
+import javax.annotation.Resource;
+import java.util.Arrays;
+
+@Priority(priority = 9)     //置为高优先
+@Component
+public class EventCokePostHandler implements CokePostHandler {
+
+    @Resource
+    private ApplicationContext applicationContext;
+
+    @Override
+    public void run() throws Throwable {
+        applicationContext.getBeans(EventListener.class).stream()
+                .filter(a -> !a.getClass().getTypeName().equals(LifeCycleEventListener.class))
+                .forEach(eventListener -> {
+                    Class<? extends EventListener> aClass = eventListener.getClass();
+                    Listen listen = aClass.getAnnotation(Listen.class);
+                    String[] value = listen.value();
+                    Container container = applicationContext.container();
+                    Arrays.stream(value).forEach(s -> container.putListener(s, eventListener));
+                });
+    }
+}

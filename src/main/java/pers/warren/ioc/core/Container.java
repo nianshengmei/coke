@@ -7,6 +7,7 @@ import pers.warren.ioc.ec.WarnEnum;
 import pers.warren.ioc.ec.WithoutNoParamConstructorException;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.event.*;
+import pers.warren.ioc.event.EventListener;
 import pers.warren.ioc.handler.CokePropertiesHandler;
 import pers.warren.ioc.loader.LoadPair;
 
@@ -55,22 +56,25 @@ public class Container implements BeanDefinitionRegistry, Environment {
     /**
      * k beanName
      * v @Lazy标注的bean的真实bean
-     *
+     * <p>
      * 该字段的左右是为了给@lazy标注的字段注入属性和配置
      */
     @Getter
-    private Map<String,Object> lazyBeanMap = new HashMap<>();
+    private Map<String, Object> lazyBeanMap = new HashMap<>();
 
-    public boolean containsPair(LoadPair pair){
+    public boolean containsPair(LoadPair pair) {
         return pairs.contains(pair);
     }
 
     public <R> List<R> findClass(Class<?> clz) {
-        return (List<R>)findClassMap.get(clz.getTypeName());
+        return (List<R>) findClassMap.get(clz.getTypeName());
     }
 
-    public void addFindClass(Class<?> clz,Class<?> c){
-        findClassMap.putIfAbsent(clz.getTypeName(),new ArrayList<>());
+
+    private Map<String, List<Object>> listenerMap = new HashMap<>();
+
+    public void addFindClass(Class<?> clz, Class<?> c) {
+        findClassMap.putIfAbsent(clz.getTypeName(), new ArrayList<>());
         findClassMap.get(clz.getTypeName()).add(c);
     }
 
@@ -136,7 +140,7 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     }
 
-    public void addPreloadComponent(String name, Object o){
+    public void addPreloadComponent(String name, Object o) {
         BeanDefinition beanDefinition = beanDefinitionMap.get(StrUtil.lowerFirst(name));
         if (null == beanDefinition || beanDefinition.getStep() != 0) {
             return;
@@ -190,7 +194,7 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
 
     public <T> T getBean(String name) {
-        if(lazyBeanMap.containsKey(name)){
+        if (lazyBeanMap.containsKey(name)) {
             return (T) lazyBeanMap.get(StrUtil.lowerFirst(name));
         }
         return (T) componentMap.get(StrUtil.lowerFirst(name));
@@ -248,8 +252,8 @@ public class Container implements BeanDefinitionRegistry, Environment {
     }
 
     public <T> T getBean(Class<T> clz) {
-        List<BeanDefinition> beanDefinitions= getBeanDefinitions(clz);
-        if(CollUtil.isNotEmpty(beanDefinitions)){
+        List<BeanDefinition> beanDefinitions = getBeanDefinitions(clz);
+        if (CollUtil.isNotEmpty(beanDefinitions)) {
             return getBean(beanDefinitions.get(0).getName());
         }
         return null;
@@ -440,8 +444,6 @@ public class Container implements BeanDefinitionRegistry, Environment {
      * 执行事件
      *
      * @param signal 信号
-     *
-     *
      */
     public void runEvent(Signal signal, List<Class<? extends Event>> eventClasses) {
         if (CollUtil.isEmpty(eventClasses)) {
@@ -456,5 +458,23 @@ public class Container implements BeanDefinitionRegistry, Environment {
                 throw new WithoutNoParamConstructorException(WarnEnum.LIFE_CYCLE_EVENTS_MUST_HAVE_NON_PARAMETER_CONSTRUCTORS);
             }
         }
+    }
+
+    public void putListener(ISignalType signalType, Object o) {
+        if (!listenerMap.containsKey(signalType.getValue())) {
+            listenerMap.put(signalType.getValue(), new ArrayList<>());
+        }
+        listenerMap.get(signalType.getValue()).add(o);
+    }
+
+    public void putListener(String signalType, Object o) {
+        if (!listenerMap.containsKey(signalType)) {
+            listenerMap.put(signalType, new ArrayList<>());
+        }
+        listenerMap.get(signalType).add(o);
+    }
+
+    public List<EventListener> getListener(ISignalType signalType) {
+        return listenerMap.get(signalType.getValue()).stream().map(a -> (EventListener) a).collect(Collectors.toList());
     }
 }
