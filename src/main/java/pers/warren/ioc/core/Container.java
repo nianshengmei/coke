@@ -477,4 +477,8 @@ public class Container implements BeanDefinitionRegistry, Environment {
     public List<EventListener> getListener(ISignalType signalType) {
         return listenerMap.get(signalType.getValue()).stream().map(a -> (EventListener) a).collect(Collectors.toList());
     }
+
+    {
+        putListener(SignalType.LIFE_CYCLE,new LifeCycleEventListener());
+    }
 }

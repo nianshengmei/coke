@@ -28,6 +28,7 @@ public class DefaultEventBus implements EventBus {
         switch (processorType) {
             case "sync":
                 runListenerSync(signal);
+                break;
             case "async":
                 runListenerAsync(signal);
         }
@@ -35,7 +36,7 @@ public class DefaultEventBus implements EventBus {
 
     private void runListenerSync(Signal signal) {
         Container.getContainer().getListener(signal.getType()).forEach(eventListener -> {
-            CompletableFuture.runAsync(() -> eventListener.consume(signal), executorService).join();
+            CompletableFuture.runAsync(() -> eventListener.consume(signal)).join();
         });
     }
 
