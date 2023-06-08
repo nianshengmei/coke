@@ -6,14 +6,16 @@ import java.lang.reflect.Constructor;
  * 默认的Bean工厂
  *
  * @author warren
- * @since jdk1.8
+ * @since 1.0.0
  */
 public class DefaultBeanFactory implements BeanFactory {
 
     /**
      * 获取bean
+     *
      * @param beanName bean名称
      * @return {beanName}以$开头则返回FactoryBean,否则返回普通对象
+     * @since 1.0.0
      */
     @Override
     public <R> R getBean(String beanName) {
@@ -23,8 +25,10 @@ public class DefaultBeanFactory implements BeanFactory {
 
     /**
      * 获取bean
+     *
      * @param beanClz bean类型
      * @return bean实例
+     * @since 1.0.0
      */
     @Override
     public <R> R getBean(Class<R> beanClz) {
@@ -34,8 +38,10 @@ public class DefaultBeanFactory implements BeanFactory {
 
     /**
      * 容器中是否有bean
+     *
      * @param beanName bean名称
      * @return 有则 true
+     * @since 1.0.0
      */
     @Override
     public boolean containsBean(String beanName) {
@@ -45,8 +51,10 @@ public class DefaultBeanFactory implements BeanFactory {
 
     /**
      * 容器中是否有bean
+     *
      * @param beanClz bean类型
      * @return 有则 true
+     * @since 1.0.0
      */
     @Override
     public boolean containsBean(Class<?> beanClz) {
@@ -56,7 +64,9 @@ public class DefaultBeanFactory implements BeanFactory {
 
     /**
      * 是否单例
+     *
      * @param beanName bean名称
+     * @since 1.0.0
      */
     @Override
     public boolean isSingleton(String beanName) {
@@ -66,8 +76,10 @@ public class DefaultBeanFactory implements BeanFactory {
 
     /**
      * 创建bean对象
+     *
      * @param beanDefinition bean定义
      * @return {@link FactoryBean}
+     * @since 1.0.2
      */
     public FactoryBean createBean(BeanDefinition beanDefinition) {
         if (null != beanDefinition.getFactoryBeanClass()) {
