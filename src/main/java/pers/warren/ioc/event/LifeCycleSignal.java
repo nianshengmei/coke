@@ -17,7 +17,7 @@ import pers.warren.ioc.inject.InjectField;
 @NoArgsConstructor
 @ToString
 @Accessors(chain = true)
-public class LifeCycleSignal implements Signal{
+public class LifeCycleSignal extends AbstractSignal {
 
     private String beanName;
 

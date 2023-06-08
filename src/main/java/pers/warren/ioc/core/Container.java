@@ -10,6 +10,7 @@ import pers.warren.ioc.event.*;
 import pers.warren.ioc.event.EventListener;
 import pers.warren.ioc.handler.CokePropertiesHandler;
 import pers.warren.ioc.loader.LoadPair;
+import pers.warren.ioc.util.StringUtil;
 
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -60,18 +61,37 @@ public class Container implements BeanDefinitionRegistry, Environment {
      * 该字段的左右是为了给@lazy标注的字段注入属性和配置
      */
     @Getter
-    private Map<String, Object> lazyBeanMap = new HashMap<>();
+    private final Map<String, Object> lazyBeanMap = new HashMap<>();
 
+    /**
+     * 是否存在这样的一个加载规则
+     *
+     * <p>用于解决循环依赖问题</p>
+     *
+     * @param pair 因为某个bean而加载bean的规则对
+     * @since 1.0.1
+     */
     public boolean containsPair(LoadPair pair) {
         return pairs.contains(pair);
     }
 
+    /**
+     * 查找预先让coke寻找的类的子类
+     *
+     * @param clz 类
+     * @since 1.0.1
+     */
+    @SuppressWarnings("unchecked")
     public <R> List<R> findClass(Class<?> clz) {
         return (List<R>) findClassMap.get(clz.getTypeName());
     }
 
-
-    private Map<String, List<Object>> listenerMap = new HashMap<>();
+    /**
+     * 事件监听器  key:事件类型 value:事件监听器实例（可能有多个,可能是容器中的bean）
+     *
+     * @since 1.0.2
+     */
+    private final Map<String, List<Object>> listenerMap = new HashMap<>();
 
     public void addFindClass(Class<?> clz, Class<?> c) {
         findClassMap.putIfAbsent(clz.getTypeName(), new ArrayList<>());
@@ -80,6 +100,8 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     /**
      * 获取特定配置属性
+     *
+     * @since 1.0.1
      */
     @Override
     public Object getProperty(String k) {
@@ -92,6 +114,8 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     /**
      * 判断是否存在特定配置属性
+     *
+     * @since 1.0.1
      */
     public boolean containsProperties(String k) {
         String env = System.getenv(k);
@@ -103,6 +127,8 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     /**
      * 添加单个属性
+     *
+     * @since 1.0.1
      */
     @Override
     public void addProperty(String k, Object v) {
@@ -111,6 +137,8 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     /**
      * 添加多个属性
+     *
+     * @since 1.0.1
      */
     @Override
     public void addProperties(Map<String, Object> source) {
@@ -119,18 +147,30 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     /**
      * 清空配置文件
+     *
+     * @since 1.0.1
      */
     @Override
     public void clearProperties() {
         this.propertiesMap = null;
     }
 
+    /**
+     * 重刷配置文件
+     *
+     * @since 1.0.1
+     */
     @Override
     public void refreshProperties() {
+        clearProperties();
         CokePropertiesHandler.read();
     }
 
-
+    /**
+     * 增加一个bean
+     *
+     * @since 1.0.1
+     */
     public void addComponent(String name, Object o) {
         BeanDefinition beanDefinition = beanDefinitionMap.get(StrUtil.lowerFirst(name));
         if (null == beanDefinition || beanDefinition.getStep() != 2) {
@@ -140,6 +180,13 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     }
 
+    /**
+     * 增加一个前置生成的bean
+     *
+     * @param name beanName
+     * @param o    bean
+     * @since 1.0.1
+     */
     public void addPreloadComponent(String name, Object o) {
         BeanDefinition beanDefinition = beanDefinitionMap.get(StrUtil.lowerFirst(name));
         if (null == beanDefinition || beanDefinition.getStep() != 0) {
@@ -148,6 +195,12 @@ public class Container implements BeanDefinitionRegistry, Environment {
         componentMap.put(StrUtil.lowerFirst(name), o);
     }
 
+    /**
+     * 是否有相同的bean
+     *
+     * @param clz bean的class
+     * @since 1.0.1
+     */
     public boolean hasEqualComponent(Class<?> clz) {
         Collection<Object> values = componentMap.values();
         for (Object value : values) {
@@ -158,14 +211,34 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return false;
     }
 
+    /**
+     * 容器本身
+     *
+     * @since 1.0.1
+     */
     private static Container container;
 
+    /**
+     * 配置文件流管理
+     *
+     * @since 1.0.1
+     */
     private final Map<String, List<InputStream>> propertiesIsMap = new HashMap<>();
 
+    /**
+     * 获取配置文件流管理map
+     *
+     * @since 1.0.1
+     */
     public Map<String, List<InputStream>> getPropertiesIsMap() {
         return propertiesIsMap;
     }
 
+    /**
+     * 添加配置文件流
+     *
+     * @since 1.0.1
+     */
     public void addPropertiesIs(String name, InputStream is) {
         if (!propertiesIsMap.containsKey(name)) {
             propertiesIsMap.put(name, new ArrayList<>());
@@ -173,6 +246,11 @@ public class Container implements BeanDefinitionRegistry, Environment {
         propertiesIsMap.get(name).add(is);
     }
 
+    /**
+     * 获取容器本身
+     *
+     * @since 1.0.1
+     */
     public static Container getContainer() {
         if (null == container) {
             container = new Container();
@@ -180,6 +258,11 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return container;
     }
 
+    /**
+     * 获取容器上下文
+     *
+     * @since 1.0.1
+     */
     public ApplicationContext applicationContext() {
         return this.getBean(ApplicationContext.class);
     }
@@ -192,16 +275,24 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return beanDefinitionMap.values().stream().filter(d -> beanType == d.getBeanType()).collect(Collectors.toList());
     }
 
+    /**
+     * 获取bean
+     *
+     * @since 1.0.1
+     */
 
+    @SuppressWarnings("unchecked")
     public <T> T getBean(String name) {
         if (lazyBeanMap.containsKey(name)) {
-            return (T) lazyBeanMap.get(StrUtil.lowerFirst(name));
+            return (T) lazyBeanMap.get(StringUtil.getOriginalName(name));
         }
-        return (T) componentMap.get(StrUtil.lowerFirst(name));
+        return (T) componentMap.get(StringUtil.getOriginalName(name));
     }
 
     /**
      * 判断当前运行时是否支持AOP
+     *
+     * @since 1.0.1
      */
     public boolean isAopEnvironment() {
         Object proxyApplicationContext = this.getBean("ProxyApplicationContext");
@@ -216,6 +307,8 @@ public class Container implements BeanDefinitionRegistry, Environment {
 
     /**
      * 判断当前运行时是否web环境
+     *
+     * @since 1.0.1
      */
     public boolean isWebEnvironment() {
         Object webApplicationContext = this.getBean("webApplicationContext");
@@ -228,13 +321,20 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return false;
     }
 
+    /**
+     * 获取bean的名称,代理的bean会返回原始名称
+     *
+     * @since 1.0.1
+     */
     public Object getSimpleBean(String name) {
-        if (name.endsWith("#proxy")) {
-            name = StrUtil.removeSuffix(name, "#proxy");
-        }
-        return getBean(name);
+        return componentMap.get(StringUtil.getOriginalName(name));
     }
 
+    /**
+     * 获取bean的包装类
+     *
+     * @since 1.0.1
+     */
     @Override
     public Collection<BeanWrapper> getBeanWrappers() {
         Collection<BeanWrapper> wrappers = new ArrayList<>();
@@ -251,6 +351,11 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return wrappers;
     }
 
+    /**
+     * 按类型获取bean
+     *
+     * @since 1.0.1
+     */
     public <T> T getBean(Class<T> clz) {
         List<BeanDefinition> beanDefinitions = getBeanDefinitions(clz);
         if (CollUtil.isNotEmpty(beanDefinitions)) {
@@ -259,6 +364,12 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return null;
     }
 
+    /**
+     * 获取指定类型的所有bean
+     *
+     * @since 1.0.1
+     */
+    @SuppressWarnings("unchecked")
     public <T> List<T> getBeans(Class<T> clz) {
         Collection<Object> values = componentMap.values();
         List<T> tList = new CopyOnWriteArrayList<>();
@@ -278,6 +389,11 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return tList;
     }
 
+    /**
+     * 将BeanDefinition注册到容器中
+     *
+     * @since 1.0.1
+     */
     @Override
     public void registerBeanDefinition(String name, BeanDefinition beanDefinition) {
         //排除指定bean
@@ -302,39 +418,76 @@ public class Container implements BeanDefinitionRegistry, Environment {
         }
     }
 
+    /**
+     * 移除容器中的BeanDefinition
+     *
+     * @since 1.0.1
+     */
     @Override
     public void removeBeanDefinition(String name) {
-        this.beanDefinitionMap.remove(StrUtil.lowerFirst(name));
+        this.beanDefinitionMap.remove(StringUtil.getOriginalName(name));
     }
 
+    /**
+     * 获取容器中的BeanDefinition
+     *
+     * @since 1.0.1
+     */
     @Override
     public BeanDefinition getBeanDefinition(String name) {
         return this.beanDefinitionMap.get(StrUtil.lowerFirst(name));
     }
 
+    /**
+     * 获取容器中的代理bean的BeanDefinition
+     *
+     * @since 1.0.1
+     */
     public BeanDefinition getProxyBeanDefinition(String name) {
-        if (name.endsWith("#proxy")) {
-            name = StrUtil.removeSuffix(name, "#proxy");
-        }
-        return this.beanDefinitionMap.get(getProxyBeanName(name));
+        return this.beanDefinitionMap.get(StringUtil.getProxyName(name));
     }
 
+    /**
+     * 获取bean的代理bean的名称
+     *
+     * @since 1.0.1
+     */
     private String getProxyBeanName(String name) {
-        return StrUtil.lowerFirst(name) + "#proxy";
+        return StringUtil.getProxyName(name);
     }
 
+    /**
+     * 是否是代理的bean的 BeanDefinition
+     *
+     * @since 1.0.1
+     */
     public boolean isProxyBeanDefinition(BeanDefinition beanDefinition) {
-        return beanDefinition.getName().endsWith("#proxy");
+        return StringUtil.isProxyName(beanDefinition.getName());
     }
 
+    /**
+     * 容器中是否存在该代理bean
+     *
+     * @since 1.0.1
+     */
     public boolean containsProxyBean(String name) {
         return this.componentMap.containsKey(getProxyBeanName(name));
     }
 
+    /**
+     * 容器中是否存在该代理bean的BeanDefinition
+     *
+     * @since 1.0.1
+     */
     public boolean containsProxyBeanDefinition(String name) {
         return this.beanDefinitionMap.containsKey(getProxyBeanName(name));
     }
 
+    /**
+     * 容器中是否存在该类型的代理bean
+     *
+     * @since 1.0.1
+     */
     public boolean containsProxyBean(Class<?> clz) {
         List<BeanDefinition> beanDefinitions = getBeanDefinitions(clz);
         for (BeanDefinition beanDefinition : beanDefinitions) {
@@ -345,15 +498,26 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return false;
     }
 
-
+    /**
+     * 获取指定类型的BeanDefinition
+     *
+     * @since 1.0.1
+     */
     public BeanDefinition getBeanDefinition(Class<?> clz) {
         return getBeanDefinition(clz, false);
     }
 
+    /**
+     * 获取指定类型的BeanDefinition
+     *
+     * @param clz   类型
+     * @param proxy 是否是代理bean
+     * @since 1.0.1
+     */
     public BeanDefinition getBeanDefinition(Class<?> clz, boolean proxy) {
         Collection<BeanDefinition> values = beanDefinitionMap.values();
         for (BeanDefinition value : values) {
-            if (value.getName().endsWith("#proxy") && !proxy) {
+            if (StringUtil.isProxyName(value.getName()) && !proxy) {
                 continue;
             }
             Class<?> aClass = value.getClz();
@@ -363,7 +527,11 @@ public class Container implements BeanDefinitionRegistry, Environment {
         }
         return null;
     }
-
+    /**
+     * 获取指定类型的所有BeanDefinition
+     *
+     * @since 1.0.1
+     */
     public List<BeanDefinition> getBeanDefinitions(Class<?> clz) {
         List<BeanDefinition> dfs = new ArrayList<>();
         Collection<BeanDefinition> values = beanDefinitionMap.values();
@@ -376,6 +544,11 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return dfs;
     }
 
+    /**
+     * 获取所有的BeanDefinition
+     *
+     * @since 1.0.1
+     */
     public Collection<BeanDefinition> getBeanDefinitions() {
         Collection<BeanDefinition> values = beanDefinitionMap.values();
         List<BeanDefinition> beanDefinitionCopyOnWriteArrayList = new ArrayList<>();
@@ -383,11 +556,21 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return beanDefinitionCopyOnWriteArrayList;
     }
 
+    /**
+     * 是否存在指定名称的BeanDefinition
+     *
+     * @since 1.0.1
+     */
     @Override
     public boolean containsBeanDefinition(String name) {
         return beanDefinitionMap.containsKey(StrUtil.lowerFirst(name));
     }
 
+    /**
+     * 是否存在指定类型的BeanDefinition
+     *
+     * @since 1.0.1
+     */
     @Override
     public boolean containsBeanDefinition(Class<?> clz) {
         Collection<BeanDefinition> values = beanDefinitionMap.values();
@@ -399,37 +582,73 @@ public class Container implements BeanDefinitionRegistry, Environment {
         return false;
     }
 
+    /**
+     * 获取所有的BeanDefinition的名称
+     *
+     * @since 1.0.1
+     */
     @Override
     public String[] getBeanDefinitionNames() {
         String[] strings = new String[beanDefinitionMap.size()];
         return beanDefinitionMap.keySet().toArray(strings);
     }
 
+    /**
+     * 获取指定类型bean的BeanDefinition的数量
+     *
+     * @since 1.0.1
+     */
     @Override
     public int getBeanDefinitionCount() {
         return beanDefinitionMap.size();
     }
 
+    /**
+     * 获取指定类型bean的数量
+     *
+     * @since 1.0.1
+     */
     @Override
     public int getBeanCount(Class<?> clz) {
         List<?> beans = getBeans(clz);
         return beans.size();
     }
 
+    /**
+     * bean名称是都已经被使用
+     *
+     * @since 1.0.1
+     */
     @Override
     public boolean isBeanNameInUse(String name) {
         return beanDefinitionMap.containsKey(StrUtil.lowerFirst(name)) || componentMap.containsKey(StrUtil.lowerFirst(name));
     }
 
+    /**
+     * 添加BeanDefinition
+     *
+     * @since 1.0.1
+     */
     public void addBeanDefinition(BeanDefinition beanDefinition) {
         beanDefinition.setName(StrUtil.lowerFirst(beanDefinition.getName()));
         beanDefinitionMap.put(beanDefinition.name, beanDefinition);
     }
 
+    /**
+     * 获取代理bean
+     *
+     * @since 1.0.1
+     */
+    @SuppressWarnings("unchecked")
     public <T> T getProxyBean(String name) {
         return (T) componentMap.get(getProxyBeanName(name));
     }
 
+    /**
+     * 获取代理bean
+     *
+     * @since 1.0.1
+     */
     public <T> T getProxyBean(Class<T> clz) {
         Collection<BeanDefinition> beanDefinitions = getBeanDefinitions();
         for (BeanDefinition beanDefinition : beanDefinitions) {
@@ -460,6 +679,11 @@ public class Container implements BeanDefinitionRegistry, Environment {
         }
     }
 
+    /**
+     * 保存事件监听器
+     *
+     * @since 1.0.2
+     */
     public void putListener(ISignalType signalType, Object o) {
         if (!listenerMap.containsKey(signalType.getValue())) {
             listenerMap.put(signalType.getValue(), new ArrayList<>());
@@ -467,6 +691,11 @@ public class Container implements BeanDefinitionRegistry, Environment {
         listenerMap.get(signalType.getValue()).add(o);
     }
 
+    /**
+     * 保存事件监听器
+     *
+     * @since 1.0.2
+     */
     public void putListener(String signalType, Object o) {
         if (!listenerMap.containsKey(signalType)) {
             listenerMap.put(signalType, new ArrayList<>());
@@ -474,11 +703,30 @@ public class Container implements BeanDefinitionRegistry, Environment {
         listenerMap.get(signalType).add(o);
     }
 
+    /**
+     * 获取事件监听器
+     */
     public List<EventListener> getListener(ISignalType signalType) {
         return listenerMap.get(signalType.getValue()).stream().map(a -> (EventListener) a).collect(Collectors.toList());
     }
 
     {
-        putListener(SignalType.LIFE_CYCLE,new LifeCycleEventListener());
+        putListener(SignalType.LIFE_CYCLE, new LifeCycleEventListener());   //保存事件监听器 @since 1.0.2
+    }
+
+    /**
+     * coke生命周期阶段
+     *
+     * @since 1.0.2
+     */
+    private CokeCoreLifeCycle cokeCoreLifeCycle = CokeCoreLifeCycle.INIT;
+
+    /**
+     * 获取coke核心生命周期
+     *
+     * @since 1.0.2
+     */
+    public CokeCoreLifeCycle getCokeCoreLifeCycle() {
+        return cokeCoreLifeCycle;
     }
 }

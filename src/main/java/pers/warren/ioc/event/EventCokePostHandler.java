@@ -10,6 +10,13 @@ import pers.warren.ioc.handler.CokePostHandler;
 import javax.annotation.Resource;
 import java.util.Arrays;
 
+/**
+ * 事件监听器后置处理器
+ *
+ * <p>该处理器负责将容器中所有的EventListener按照监听的事件类型归类</p>
+ *
+ * @since 1.0.2
+ */
 @Priority(priority = 9)     //置为高优先
 @Component
 public class EventCokePostHandler implements CokePostHandler {
@@ -20,7 +27,7 @@ public class EventCokePostHandler implements CokePostHandler {
     @Override
     public void run() throws Throwable {
         applicationContext.getBeans(EventListener.class).stream()
-                .filter(a -> !a.getClass().getTypeName().equals(LifeCycleEventListener.class))
+                .filter(a -> !a.getClass().getTypeName().equals(LifeCycleEventListener.class.getTypeName()))
                 .forEach(eventListener -> {
                     Class<? extends EventListener> aClass = eventListener.getClass();
                     Listen listen = aClass.getAnnotation(Listen.class);
