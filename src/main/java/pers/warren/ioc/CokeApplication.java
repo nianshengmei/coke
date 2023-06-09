@@ -321,7 +321,7 @@ public class CokeApplication {
     private static void mountCokeDestroyHook(){
         List<DestroyHandler> beans = Container.getContainer().getBeans(DestroyHandler.class);
         if(CollUtil.isNotEmpty(beans)){
-            beans.forEach(destroyHandler -> Runtime.getRuntime().addShutdownHook(new Thread(destroyHandler)));
+            beans.forEach(destroyHandler -> Runtime.getRuntime().addShutdownHook(destroyHandler));
         }
     }
 

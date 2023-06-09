@@ -16,8 +16,6 @@ public enum CokeCoreLifeCycle {
 
     RUNNING("running", "运行中"),
 
-    PRE_DESTROY("preDestroy", "销毁前"),
-
     DESTROY("destroy", "销毁");
 
     /**

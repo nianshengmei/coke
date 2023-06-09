@@ -1,6 +1,7 @@
 package pers.warren.ioc.core;
 
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.annotation.Autowired;
 import pers.warren.ioc.annotation.Bean;
@@ -22,7 +23,7 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
     @Override
     public void postProcessBeforeInitialization(BeanDefinition beanDefinition, BeanRegister register) {
         Class<?> clz = beanDefinition.getClz();
-        Field[] declaredFields = clz.getDeclaredFields();
+        Field[] declaredFields = ReflectUtil.getFields(clz);
         List<InjectField> autowiredFields = new ArrayList<>();
         List<InjectField> resourceFields = new ArrayList<>();
         List<InjectField> valueFields = new ArrayList<>();

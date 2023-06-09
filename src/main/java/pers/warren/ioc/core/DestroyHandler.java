@@ -1,12 +1,17 @@
 package pers.warren.ioc.core;
 
+import javax.annotation.Resource;
+
 /**
  * coke销毁处理器
  *
  * @author warren
  * @since 1.0.2
  */
-public abstract class DestroyHandler implements Runnable{
+public abstract class DestroyHandler extends Thread{
+
+    @Resource
+    protected ApplicationContext applicationContext;
 
     /**
      * 销毁
@@ -14,11 +19,12 @@ public abstract class DestroyHandler implements Runnable{
      *
      * @since 1.0.2
      */
-   public abstract void destroy();
+   public abstract void destroyRun();
 
 
     @Override
     public void run() {
-        destroy();
+        applicationContext.container().setCokeCoreLifeCycle(CokeCoreLifeCycle.DESTROY);
+        destroyRun();
     }
 }
