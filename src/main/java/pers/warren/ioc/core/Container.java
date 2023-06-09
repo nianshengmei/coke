@@ -729,4 +729,13 @@ public class Container implements BeanDefinitionRegistry, Environment {
     public CokeCoreLifeCycle getCokeCoreLifeCycle() {
         return cokeCoreLifeCycle;
     }
+
+    /**
+     * 设置coke核心生命周期
+     *
+     * @since 1.0.2
+     */
+    public void setCokeCoreLifeCycle(CokeCoreLifeCycle cokeCoreLifeCycle) {
+        this.cokeCoreLifeCycle = cokeCoreLifeCycle;
+    }
 }

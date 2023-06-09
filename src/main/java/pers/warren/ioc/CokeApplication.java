@@ -309,6 +309,20 @@ public class CokeApplication {
         postHandlerRun();
         log.info("coke start ok! cost = {} ms !", System.currentTimeMillis() - startTimeMills);
         postServiceRun();
+        mountCokeDestroyHook();
+
+    }
+
+    /**
+     * 挂载容器关闭钩子
+     *
+     * @since 1.0.2
+     */
+    private static void mountCokeDestroyHook(){
+        List<DestroyHandler> beans = Container.getContainer().getBeans(DestroyHandler.class);
+        if(CollUtil.isNotEmpty(beans)){
+            beans.forEach(destroyHandler -> Runtime.getRuntime().addShutdownHook(new Thread(destroyHandler)));
+        }
     }
 
     /**
@@ -350,6 +364,7 @@ public class CokeApplication {
                 }
             });
         }
+        container.setCokeCoreLifeCycle(CokeCoreLifeCycle.RUNNING);   //容器状态设置为运行中
     }
 
     /**
@@ -366,8 +381,12 @@ public class CokeApplication {
         }
     }
 
+    /**
+     * 容器启动后置处理器运行
+     */
     private static void postHandlerRun() {
         Container container = Container.getContainer();
+        container.setCokeCoreLifeCycle(CokeCoreLifeCycle.POST_RUN);
         List<BeanDefinition> beanDefinitions = container.getBeanDefinitions(CokePostHandler.class);
         List<CokePostHandler> postHandlers = beanDefinitions.stream().sorted(Comparator.comparingInt(BeanDefinition::getPriority))
                 .map(a -> (CokePostHandler)container.getBean(a.getName())).collect(Collectors.toList());
