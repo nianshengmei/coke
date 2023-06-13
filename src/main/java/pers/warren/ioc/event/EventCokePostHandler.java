@@ -1,5 +1,6 @@
 package pers.warren.ioc.event;
 
+import cn.hutool.core.util.StrUtil;
 import pers.warren.ioc.annotation.Component;
 import pers.warren.ioc.annotation.Listen;
 import pers.warren.ioc.annotation.Priority;
@@ -33,6 +34,9 @@ public class EventCokePostHandler implements CokePostHandler {
                     Listen listen = aClass.getAnnotation(Listen.class);
                     String[] value = listen.value();
                     Container container = applicationContext.container();
+                    if (StrUtil.isNotEmpty(listen.poolName())) {
+                        eventListener.setConsumeEventPoolName(listen.poolName());
+                    }
                     Arrays.stream(value).forEach(s -> container.putListener(s, eventListener));
                 });
     }

@@ -7,4 +7,9 @@ import java.lang.annotation.RetentionPolicy;
 public @interface Listen {
 
     String[] value();
+
+    /**
+     * 用哪个线程池处理
+     */
+    String poolName() default "";
 }

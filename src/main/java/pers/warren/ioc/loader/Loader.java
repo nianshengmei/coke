@@ -18,7 +18,6 @@ public interface Loader {
 
     /**
      * 预加载
-     *
      */
     static void preload(Set<Class<?>> clzSet) {
         ContextLoader contextLoader = new ContextLoader();
@@ -46,7 +45,7 @@ public interface Loader {
                 continue;
             }
 
-            if(beanDeduceLoader.load(clz)){
+            if (beanDeduceLoader.load(clz)) {
                 Loader.alreadyLoadClzNames.add(clz.getTypeName());
                 continue;
             }
@@ -58,6 +57,11 @@ public interface Loader {
         }
     }
 
+    /**
+     * 初始化配置文件环境
+     *
+     * @since 1.0.0
+     */
     static void loadConfigEnvironment() {
         new PropertiesLoader().load(null);   //读取配置文件
     }

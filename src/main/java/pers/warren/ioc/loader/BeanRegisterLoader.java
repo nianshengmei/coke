@@ -9,6 +9,12 @@ import pers.warren.ioc.enums.BeanType;
 
 import java.lang.reflect.Constructor;
 
+/**
+ * Bean注册器加载器，负责将BeanRegister的实现类注册倒容器中
+ *
+ * @author warren
+ * @since 1.0.0
+ */
 @Slf4j
 public class BeanRegisterLoader implements Loader{
 
