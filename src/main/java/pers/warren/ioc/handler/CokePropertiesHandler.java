@@ -10,6 +10,7 @@ import pers.warren.ioc.annotation.Configuration;
 import pers.warren.ioc.annotation.Scanner;
 import pers.warren.ioc.config.ConfigReaderFactory;
 import pers.warren.ioc.core.Container;
+import pers.warren.ioc.util.RuntimeUtil;
 import pers.warren.ioc.util.ScanUtil;
 
 import java.io.*;
@@ -55,8 +56,9 @@ public class CokePropertiesHandler {
 
     private static void beforeRead() {
         String property = System.getProperty("java.class.path");
+        final String splitPattern = RuntimeUtil.isWindows() ? ";" : ":";
         if (StrUtil.isNotEmpty(property)) {
-            String[] paths = property.split(";");
+            String[] paths = property.split(splitPattern);
             Arrays.stream(paths).forEach(p -> ConfigReaderFactory.newConfigReader(p).read());
         }
     }

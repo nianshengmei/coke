@@ -55,7 +55,7 @@
 
         -->
 
-        <RollingFile name="RollingFileInfo" fileName="/log/guitool_info.log"
+        <RollingFile name="RollingFileInfo" fileName="./log/coke.log"
 
                      filePattern="/log/%d{yyyy-MM-dd}/guitool_%d{yyyy-MM-dd}_%i.log">
 

@@ -76,10 +76,9 @@ public class SimpleFactoryBean implements FactoryBean {
                 }
                 params[i] = b;
             }
-
             return invokeFunction.invoke(sourceBean, params);
         } catch (Exception e) {
-            throw new RuntimeException("invoke method exception , bean name :" + beanDefinition.getName());
+            throw new RuntimeException("invoke method exception , bean name :" + beanDefinition.getName(),e);
         }
     }
 

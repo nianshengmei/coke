@@ -1,6 +1,8 @@
 package pers.warren.ioc.config;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConfigReaderFactory {
 
@@ -19,11 +21,17 @@ public class ConfigReaderFactory {
         return new File(path).isDirectory() ;
     }
 
+    private static final List<IConfigReader> readerList = new ArrayList<>();
+
     public static IConfigReader newConfigReader(String path){
         if(isJar(path)){
-            return new JarConfigReader(path);
+            JarConfigReader jarConfigReader = new JarConfigReader(path);
+            readerList.add(jarConfigReader);
+            return jarConfigReader;
         }else{
-            return new LocalModuleConfigReader(path);
+            LocalModuleConfigReader localModuleConfigReader = new LocalModuleConfigReader(path);
+            readerList.add(localModuleConfigReader);
+            return localModuleConfigReader;
         }
     }
 }

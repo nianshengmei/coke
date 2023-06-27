@@ -1,11 +1,11 @@
 package pers.warren.ioc.util;
 
-import cn.hutool.core.util.ClassUtil;
 import javassist.*;
 import javassist.bytecode.*;
 import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -166,5 +166,35 @@ public class ReflectUtil {
         }
         return null;
     }
+
+    /**
+     * 是否是实现类
+     *
+     * @auther warren
+     *
+     * @since  1.0.3
+     *
+     * */
+    public boolean isRealClass(Class<?> clz) {
+        if (clz.isInterface() || clz.isAnnotation() || clz.isEnum() || clz.isAnonymousClass() || clz.isLocalClass()) {
+            return false;
+        }
+        return true;
+    }
+
+
+    /**
+     * 反射设置属性
+     */
+    public void setFieldAttr(Class<?> clz , String fieldName , Object value){
+        try {
+            Field field = clz.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(clz, value);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }

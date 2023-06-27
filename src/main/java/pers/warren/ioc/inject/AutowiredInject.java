@@ -9,7 +9,6 @@ import pers.warren.ioc.core.BeanDefinition;
 import pers.warren.ioc.core.Container;
 import pers.warren.ioc.ec.NoMatchBeanException;
 import pers.warren.ioc.event.LifeCycleSignal;
-import pers.warren.ioc.event.Signal;
 
 import java.lang.reflect.Field;
 
@@ -35,7 +34,7 @@ public class AutowiredInject implements Inject {
             String name = field.getName();
             Autowired annotation = field.getAnnotation(Autowired.class);
             BeanDefinition b = null;
-            if (StrUtil.isNotEmpty(annotation.value())) {
+            if (null != annotation && StrUtil.isNotEmpty(annotation.value())) {
                 name = annotation.value();
                 b = container.getBeanDefinition(name);
                 if (null == b) {
