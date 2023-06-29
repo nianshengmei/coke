@@ -74,6 +74,8 @@ public class CokeApplication {
         addEliminator();
         startTimeMills = System.currentTimeMillis();
         printBanner();
+        Container.getContainer().setCelTemplate(ResourceUtil.readUtf8Str("cel.cf"));
+        Container.getContainer().setCelBeanTemplate(ResourceUtil.readUtf8Str("cel_bean.cf"));
     }
 
     /**

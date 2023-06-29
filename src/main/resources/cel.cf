@@ -1,0 +1,7 @@
+package pers.warren.ioc.cel.proxy;
+
+public class #CN# {
+    public Object runCode(){
+        return #CODE#;
+    }
+}

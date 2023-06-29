@@ -49,12 +49,18 @@
         <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
     </properties>
     <dependencies>
+
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>5.8.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.sun</groupId>
+            <artifactId>tools</artifactId>
+            <version>1.5.0</version>
+            <scope>system</scope>
+        </dependency>
         <dependency>
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
@@ -127,7 +133,6 @@
             <version>31.1-jre</version>
             <scope>compile</scope>
         </dependency>
-
 
     </dependencies>
 

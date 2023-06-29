@@ -1,0 +1,11 @@
+package pers.warren.ioc.cel.proxy;
+
+import pers.warren.ioc.core.Container;
+
+public class #CN# {
+
+
+    public Object runCode(){
+        return ((#BT#)Container.getContainer().getBean("#BN#")).#CODE#;
+    }
+}

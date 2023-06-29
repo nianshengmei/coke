@@ -3,6 +3,7 @@ package pers.warren.ioc.core;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
+import lombok.Setter;
 import pers.warren.ioc.ec.WarnEnum;
 import pers.warren.ioc.ec.WithoutNoParamConstructorException;
 import pers.warren.ioc.enums.BeanType;
@@ -92,6 +93,24 @@ public class Container implements BeanDefinitionRegistry, Environment {
      * @since 1.0.2
      */
     private final Map<String, List<Object>> listenerMap = new HashMap<>();
+
+    /**
+     * CEL表达式模板
+     *
+     * @since 1.0.3
+     */
+    @Getter
+    @Setter
+    private String celTemplate;
+
+    /**
+     * CEL bean表达式模板
+     *
+     * @since 1.0.3
+     */
+    @Getter
+    @Setter
+    private String celBeanTemplate;
 
     public void addFindClass(Class<?> clz, Class<?> c) {
         findClassMap.putIfAbsent(clz.getTypeName(), new ArrayList<>());
