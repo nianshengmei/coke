@@ -86,16 +86,18 @@ public class CELItem implements ExpressionItem {
                     try {
                         Object bean = Container.getContainer().getBean(beanName);
                         BeanDefinition beanDefinition = Container.getContainer().getBeanDefinition(beanName);
-                        Method method = beanDefinition.getClz().getMethod(methodName);
+                        Method method = ReflectUtil.getMethod(beanDefinition.getClz(),methodName);
                         method.setAccessible(true);
-                        return method.invoke(bean).toString();
+                        Object invoke = method.invoke(bean);
+                        return null != invoke?invoke.toString():null;
                     }catch (Throwable e){
                         throw new RuntimeException(String.format("bean:%s中没有找到方法:%s,或没有该bean",beanName,methodName),e);
                     }
 
             case BEAN_MODE_F:
                 Object bean = Container.getContainer().getBean(beanName);
-                return ReflectUtil.getFieldValue(bean,fieldName).toString();
+                Object fieldValue = ReflectUtil.getFieldValue(bean, fieldName);
+                return null!=fieldValue?fieldValue.toString():null;
             case ENV_MODE:
                 return (String) Container.getContainer().getProperty(envKey);
             case JAVA_MODE:
