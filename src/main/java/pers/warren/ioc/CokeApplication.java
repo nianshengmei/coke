@@ -209,7 +209,7 @@ public class CokeApplication {
                 continue;
             }
             createBean(bdf);  //创建bean并放入容器
-            bdf.setLoad(true);
+            bdf.setLoad(true);ewewqweqe
             if (2 == bdf.getStep()) {
                 for (BeanPostProcessor postProcessor : postProcessors) {
                     postProcessor.postProcessAfterInitialization(bdf, bdf.getRegister());   //执行后置处理器
