@@ -9,6 +9,11 @@ import pers.warren.ioc.enums.BeanType;
 
 import java.lang.reflect.Constructor;
 
+/**
+ * BeanPostProcessor加载器
+ *
+ * @since 1.0.3
+ */
 @Slf4j
 public class BeanPostProcessorLoader implements Loader {
 

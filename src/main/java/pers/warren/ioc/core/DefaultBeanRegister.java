@@ -1,6 +1,5 @@
 package pers.warren.ioc.core;
 
-import cn.hutool.core.util.ClassLoaderUtil;
 import pers.warren.ioc.annotation.Component;
 import pers.warren.ioc.annotation.Configuration;
 import pers.warren.ioc.enums.BeanType;
@@ -11,6 +10,11 @@ import pers.warren.ioc.enums.BeanType;
  */
 public class DefaultBeanRegister implements BeanRegister {
 
+    /**
+     * 获取名称
+     *
+     * @since 1.0.0
+     */
     @Override
     public String getName(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
         String beanName = null;

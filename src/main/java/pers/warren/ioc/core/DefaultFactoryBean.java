@@ -123,6 +123,9 @@ public class DefaultFactoryBean implements FactoryBean {
         return beanDefinition.getClz();
     }
 
+    /**
+     * 获取bean的名称
+     */
     @Override
     public String getName() {
         return beanDefinition.getName();

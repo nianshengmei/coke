@@ -6,6 +6,12 @@ import javax.tools.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 动态编译器
+ *
+ * @author warren
+ * @since 1.0.3
+ */
 public class DynamicCompiler {
     /**
      * 编译出类
@@ -43,6 +49,11 @@ public class DynamicCompiler {
         }
     }
 
+    /**
+     * 编译错误定位
+     *
+     * @since 1.0.3
+     */
     private String compileError(Diagnostic diagnostic) {
         StringBuilder res = new StringBuilder();
         res.append("LineNumber:[").append(diagnostic.getLineNumber()).append("]\n");

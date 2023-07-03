@@ -3,6 +3,9 @@ package pers.warren.ioc.core;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 排除器
+ */
 public class Eliminator {
 
 

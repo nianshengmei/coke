@@ -1,6 +1,12 @@
 package pers.warren.ioc.cel;
 
-public class CokeExpressionException extends RuntimeException{
+/**
+ * coke表达式异常
+ *
+ * @author warren
+ * @since 1.0.3
+ */
+public class CokeExpressionException extends RuntimeException {
 
     public CokeExpressionException(String message) {
         super(message);

@@ -19,16 +19,15 @@ public interface ExpressionParser {
      * <p>$(bean-f::user.name) 从容器中取名为user的bean的name字段的值</p>
      * <p>$(j:System.currentTimeMillis()) 获取当前时间戳</p>
      *
-     *
+     * @since  1.0.3 、 1.0.4
+     * <p>
      * >>箭头表达式支持 json,toString两种箭头输出
      * <p>$(bean-m::user.getUserName#p1:S001>>json)</p>   //支持以p的形式传参，p1:S001表示第一个参数为S001，>>json表示返回值转为json
      * $(bean-f::user.name>>json)  //字段值转为json
-     *
+     * <p>
      * <<箭头表达式支持 json,toString输入到bean中
-     *
+     * <p>
      * $(bean-m::user.save<<{"name":"abc"})
-     *
-     * @since 1.0.4
      */
     Expression parseExpression(String expressionString);
 }

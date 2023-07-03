@@ -19,6 +19,9 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+/**
+ * 容器
+ */
 public class Container implements BeanDefinitionRegistry, Environment {
 
     /**
@@ -401,7 +404,7 @@ public class Container implements BeanDefinitionRegistry, Environment {
                     tList.add((T) bean);
                 }
             } catch (Exception e) {
-                continue;
+                e.printStackTrace();
             }
 
         }

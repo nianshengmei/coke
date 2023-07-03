@@ -12,14 +12,30 @@ import pers.warren.ioc.condition.DefaultConditionContext;
 import pers.warren.ioc.enums.BeanType;
 import pers.warren.ioc.inject.InjectType;
 import pers.warren.ioc.kit.ConditionKit;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 默认的bean的后置处理器
+ *
+ * @author warren
+ * @since 1.0.3
+ */
 public class DefaultBeanPostProcessor implements BeanPostProcessor {
 
+    /**
+     * bean初始化前置处理
+     *
+     * <p>扫描bean需要被注入bean、或者配置的字段</p>
+     *
+     * @param beanDefinition bean定义
+     * @param register       bean注册器
+     * @since 1.0.3
+     */
     @Override
     public void postProcessBeforeInitialization(BeanDefinition beanDefinition, BeanRegister register) {
         Class<?> clz = beanDefinition.getClz();
@@ -67,7 +83,7 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
             if (method.getAnnotation(Bean.class) != null) {
                 int conditionModify = ConditionKit.hasCondition(method);
                 ConditionContext conditionContext = new DefaultConditionContext();
-                if(ConditionKit.conditionMatch(conditionModify,method,conditionContext)) {
+                if (ConditionKit.conditionMatch(conditionModify, method, conditionContext)) {
                     Bean beanAnnotation = method.getAnnotation(Bean.class);
                     String name = beanAnnotation.name();
                     if (StrUtil.isNotEmpty(name)) {
@@ -91,6 +107,15 @@ public class DefaultBeanPostProcessor implements BeanPostProcessor {
         }
     }
 
+    /**
+     * bean初始化后置处理
+     *
+     * <p>处理bean的@PostConstruct注解</p>
+     *
+     * @param beanDefinition bean定义
+     * @param register       bean注册器
+     * @since 1.0.3
+     */
     @Override
     public void postProcessAfterInitialization(BeanDefinition beanDefinition, BeanRegister register) {
         Class<?> clz = beanDefinition.getClz();

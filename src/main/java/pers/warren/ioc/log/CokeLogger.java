@@ -4,7 +4,8 @@ import pers.warren.ioc.ec.Error;
 import org.slf4j.Logger;
 
 /**
- * coke日志
+ * coke日志管理接口
+ *
  * @author warren
  */
 public interface CokeLogger {

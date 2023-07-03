@@ -1,14 +1,26 @@
 package pers.warren.ioc.cel;
 
-import cn.hutool.core.util.StrUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 表达式
+ *
+ * @author warren
+ * @since 1.0.3
+ */
 public class CokeExpression implements Expression {
 
+    /**
+     * 完整的表达式字符串
+     */
     private String expressionString;
 
+    /**
+     * 表达式项
+     *
+     * <p>表达式项是表达式的最小单位</p>
+     */
     private List<ExpressionItem> items;
 
     public CokeExpression(String expressionString) {
@@ -27,18 +39,6 @@ public class CokeExpression implements Expression {
             builder.append(item.getValue());
         }
         return (T)builder.toString();
-    }
-
-    private String contact(String[] strs,int startOffset,String contactStr){
-        StringBuilder sb = new StringBuilder();
-        for (int i = startOffset; i < strs.length; i++) {
-            if(StrUtil.isEmpty(strs[i])){
-                continue;
-            }
-            sb.append(contactStr);
-            sb.append(strs[i]);
-        }
-        return sb.toString();
     }
 
     /**

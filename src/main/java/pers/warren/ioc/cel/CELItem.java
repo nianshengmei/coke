@@ -10,8 +10,19 @@ import pers.warren.ioc.kit.JavaCompilerKit;
 
 import java.lang.reflect.Method;
 
+/**
+ * CEL表达式项
+ *
+ * @author warren
+ * @since 1.0.3
+ */
 public class CELItem implements ExpressionItem {
 
+    /**
+     * cel item的mode是啥
+     *
+     * @since 1.0.3
+     */
     @Getter
     private String mode;
 
@@ -49,18 +60,18 @@ public class CELItem implements ExpressionItem {
 
     public CELItem(String expressionString) {
         this.expressionString = expressionString;
-        if(expressionString.startsWith(STR_MODE)){
+        if (expressionString.startsWith(STR_MODE)) {
             mode = STR_MODE;
             javaExpression = expressionString.substring(STR_MODE.length(), expressionString.length() - 1);
             value = javaExpression;
-        } else if(expressionString.startsWith(INT_MODE)){
+        } else if (expressionString.startsWith(INT_MODE)) {
             mode = INT_MODE;
             javaExpression = expressionString.substring(INT_MODE.length(), expressionString.length() - 1);
             value = javaExpression;
         } else if (expressionString.startsWith(BEAN_MODE)) {
             mode = BEAN_MODE;
             handleBeanMode(expressionString);
-        } else if (expressionString.startsWith(ENV_MODE)){
+        } else if (expressionString.startsWith(ENV_MODE)) {
             mode = ENV_MODE;
             envKey = expressionString.substring(ENV_MODE.length(), expressionString.length() - 1);
         } else if (expressionString.startsWith(JAVA_MODE)) {
@@ -81,21 +92,21 @@ public class CELItem implements ExpressionItem {
             case INT_MODE:
                 return value;
             case BEAN_MODE_E:
-                return JavaCompilerKit.runBeanString(javaExpression,beanName).toString();
-                case BEAN_MODE_M:
-                    try {
-                        Object bean = Container.getContainer().getBean(beanName);
-                        BeanDefinition beanDefinition = Container.getContainer().getBeanDefinition(beanName);
-                        Method method = beanDefinition.getClz().getMethod(methodName);
-                        method.setAccessible(true);
-                        return method.invoke(bean).toString();
-                    }catch (Throwable e){
-                        throw new RuntimeException(String.format("bean:%s中没有找到方法:%s,或没有该bean",beanName,methodName),e);
-                    }
+                return JavaCompilerKit.runBeanString(javaExpression, beanName).toString();
+            case BEAN_MODE_M:
+                try {
+                    Object bean = Container.getContainer().getBean(beanName);
+                    BeanDefinition beanDefinition = Container.getContainer().getBeanDefinition(beanName);
+                    Method method = beanDefinition.getClz().getMethod(methodName);
+                    method.setAccessible(true);
+                    return method.invoke(bean).toString();
+                } catch (Throwable e) {
+                    throw new RuntimeException(String.format("bean:%s中没有找到方法:%s,或没有该bean", beanName, methodName), e);
+                }
 
             case BEAN_MODE_F:
                 Object bean = Container.getContainer().getBean(beanName);
-                return ReflectUtil.getFieldValue(bean,fieldName).toString();
+                return ReflectUtil.getFieldValue(bean, fieldName).toString();
             case ENV_MODE:
                 return (String) Container.getContainer().getProperty(envKey);
             case JAVA_MODE:
@@ -108,8 +119,8 @@ public class CELItem implements ExpressionItem {
     /**
      * 处理bean模式
      */
-    private void handleBeanMode(String expressionString){
-        if (StrUtil.count(expressionString, '.') <1) {
+    private void handleBeanMode(String expressionString) {
+        if (StrUtil.count(expressionString, '.') < 1) {
             throw new RuntimeException("不支持的表达式:" + expressionString);
         }
         if (expressionString.startsWith("$(bean-m::")) {
@@ -129,7 +140,7 @@ public class CELItem implements ExpressionItem {
         }
     }
 
-    private String beanModeMethod(){
+    private String beanModeMethod() {
         return null;
     }
 

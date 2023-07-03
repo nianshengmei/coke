@@ -9,8 +9,20 @@ import pers.warren.ioc.core.Container;
 
 import java.lang.reflect.Method;
 
+/**
+ * condition工具类
+ *
+ * @author warren
+ *
+ * @since 1.0.3
+ */
 public class ConditionKit {
 
+    /**
+     * 判断方法是不是有condition注解
+     *
+     * @since 1.0。3
+     */
     public static int hasCondition(Method method) {
         if (method.getAnnotation(ConditionalOnBean.class) != null) {
             return 1;
@@ -32,7 +44,9 @@ public class ConditionKit {
         return 0;
     }
 
-
+    /**
+     * 条件匹配
+     */
     public static boolean conditionMatch(int conditionModify, Method method, ConditionContext conditionContext) {
         switch (conditionModify) {
             case 1:
@@ -62,6 +76,11 @@ public class ConditionKit {
         }
     }
 
+    /**
+     * 处理bean小于指定数量的condition注解
+     *
+     * @since 1.0.1
+     */
     private static boolean handleConditionalOnBeanCountLessThan(ConditionalOnBeanCountLessThan annotation, ConditionContext conditionContext) {
         BeanDefinitionRegistry registry = conditionContext.getRegistry();
         Class<?>[] values = annotation.value();
@@ -72,6 +91,11 @@ public class ConditionKit {
         return beanCount < annotation.count();
     }
 
+    /**
+     * 处理bean大于指定数量的condition注解
+     *
+     * @since 1.0.1
+     */
     private static boolean handleConditionalOnBeanCountMoreThan(ConditionalOnBeanCountMoreThan annotation, ConditionContext conditionContext) {
         BeanDefinitionRegistry registry = conditionContext.getRegistry();
         Class<?>[] values = annotation.value();
@@ -81,15 +105,30 @@ public class ConditionKit {
         int beanCount = registry.getBeanCount(values[0]);
         return beanCount > annotation.count();
     }
-
+    
+    /**
+     * 处理非web环境的判断
+     * 
+     * @since 1.0.1
+     */
     private static boolean handleConditionalOnNotWebEnvironment(ConditionContext conditionContext) {
         return !handleConditionalOnWebEnvironment(conditionContext);
     }
-
+    
+    /**
+     * 处理web环境的判断
+     * 
+     * @since 1.0.1
+     */
     private static boolean handleConditionalOnWebEnvironment(ConditionContext conditionContext) {
         return Container.getContainer().isWebEnvironment();
     }
 
+    /**
+     * 处理存在指定配置文件的condition注解
+     *
+     * @since 1.0.1
+     */
     private static boolean handleConditionalOnMissingPropertiesAnnotation(ConditionalOnMissingProperties annotation, ConditionContext conditionContext) {
         ConditionalProperty[] conditionalProperties = annotation.value();
         for (ConditionalProperty property : conditionalProperties) {
@@ -111,7 +150,12 @@ public class ConditionKit {
         }
         return true;
     }
-
+    
+    /**
+     * 处理存在指定配置文件的condition注解
+     * 
+     * @since 1.0.1
+     */
     private static boolean handleConditionalOnPropertiesAnnotation(ConditionalOnProperties annotation, ConditionContext conditionContext) {
         ConditionalProperty[] conditionalProperties = annotation.value();
         for (ConditionalProperty property : conditionalProperties) {
@@ -134,6 +178,11 @@ public class ConditionKit {
         return true;
     }
 
+    /**
+     * 处理不存在指定bean的注解
+     *
+     * @since 1.0.1
+     */
     private static boolean handleConditionalOnMissingBeanAnnotation(ConditionalOnMissingBean annotation, ConditionContext conditionContext) {
         String[] typeNames = annotation.typeName();
         Class<?>[] types = annotation.value();
@@ -164,6 +213,11 @@ public class ConditionKit {
         return true;
     }
 
+    /**
+     * 处理存在指定bean的condition注解
+     * 
+     * @since 1.0.1
+     */
     private static boolean handleConditionalOnBeanAnnotation(ConditionalOnBean annotation, ConditionContext conditionContext) {
         String[] typeNames = annotation.typeName();
         Class<?>[] types = annotation.value();

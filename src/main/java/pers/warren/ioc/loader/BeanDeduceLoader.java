@@ -9,6 +9,11 @@ import pers.warren.ioc.enums.BeanType;
 
 import java.lang.reflect.Constructor;
 
+/**
+ * bean 推断的加载器
+ *
+ * @since 1.0.1
+ */
 @Slf4j
 public class BeanDeduceLoader implements Loader {
 

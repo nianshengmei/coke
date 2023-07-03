@@ -6,6 +6,7 @@ import net.sf.cglib.proxy.MethodProxy;
 import pers.warren.ioc.inject.Inject;
 import java.lang.reflect.Method;
 
+
 public class LazyFactoryBean implements FactoryBean{
 
     /**
