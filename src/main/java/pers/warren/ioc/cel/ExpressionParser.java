@@ -11,10 +11,10 @@ public interface ExpressionParser {
     /**
      * coke Expression Language
      *
-     * <p>$(str::abc)</p> 字符串abc
+     * <p>$(str::abc)</p> 字符串abc  $(str::)$(str::1+2+3+4+00H$)前面不输出输出后面
      * <p>$(int::1) 数字1</p>
      * <p>$(f::1.2) 小数1.2</p>精度有问题1.2+2.4=3.5999999999999996 不支持的表达式:$(f::1.2)
-     * <p>$(env::service.name)  从环境中取 key为service.name的值</p>
+     * <p>$(env::service.name)  从环境中取 key为service.name的值</p>  $(env::)service.name)输出nullnull
      * <p>$(bean-m::user.getUserName)   从容器中取名为user的bean的getUserName()方法的返回值</p>
      * <p>$(bean-f::user.name) 从容器中取名为user的bean的name字段的值</p>
      * <p>$(j:System.currentTimeMillis()) 获取当前时间戳</p>
