@@ -104,21 +104,8 @@ public class CELItem implements ExpressionItem {
                     }catch (Throwable e){
                         throw new RuntimeException(String.format("bean:%s中没有找到方法:%s,或没有该bean",beanName,methodName),e);
                     }
-                return JavaCompilerKit.runBeanString(javaExpression, beanName).toString();
-            case BEAN_MODE_M:
-                try {
-                    Object bean = Container.getContainer().getBean(beanName);
-                    BeanDefinition beanDefinition = Container.getContainer().getBeanDefinition(beanName);
-                    Method method = beanDefinition.getClz().getMethod(methodName);
-                    method.setAccessible(true);
-                    return method.invoke(bean).toString();
-                } catch (Throwable e) {
-                    throw new RuntimeException(String.format("bean:%s中没有找到方法:%s,或没有该bean", beanName, methodName), e);
-                }
-
             case BEAN_MODE_F:
                 Object bean = Container.getContainer().getBean(beanName);
-                return ReflectUtil.getFieldValue(bean, fieldName).toString();
                 Object fieldValue = ReflectUtil.getFieldValue(bean, fieldName);
                 return null!=fieldValue?fieldValue.toString():null;
             case ENV_MODE:
@@ -152,10 +139,6 @@ public class CELItem implements ExpressionItem {
         } else {
             throw new RuntimeException("不支持的表达式:" + expressionString);
         }
-    }
-
-    private String beanModeMethod() {
-        return null;
     }
 
 }
